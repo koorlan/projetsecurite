@@ -1,3 +1,3 @@
 # projetsecurite
 
-## Composittion de l'équipe
+## Composition de l'équipe
