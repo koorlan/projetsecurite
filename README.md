@@ -13,9 +13,12 @@ Many parts are missing but if you want lulz...
 .getName user [enter]
 .setAssignement user...ect
 
+FORGE WILL NOT WORK ANYMORE
+In cause: PacketManager now check GET/POST and then integrity of the object after (RequestModel for GET) so.. forge with jsut string is impossible. See below
 .forge packet {POST or GET} hello [enter]  //maybe recheck the model of a packet but think globally packetModel.Content is a byte array so we can serialize other object on it ;). More Precisely we maybe need to tag this packet .. or note , just the gate(frontale..je sais pas trop comment l'appeller en english) need to do that.
-
 .send packet 123123(port your server choose previously) [enter]
+
+Update Testing server >> .group request INSA <port> [enter]
 
 Explication:
 packetManager is used to build and process in/out packet.
