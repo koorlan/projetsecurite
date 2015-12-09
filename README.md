@@ -1,7 +1,7 @@
 # projetsecurite
 
 ##Achivements
-Syntax of commands \[ManagerMethod] [Manager] \[Arg1] .. [ArgN] Only support 2 ATM and need tothnik more cleverly of parsing especially for non string args
+Syntax of commands \[ManagerMethod] [Manager] \[Arg1] .. [ArgN] Only support 2 AtM and need to think more cleverly of parsing especially for non string args
 
 Note: Manager methods are directly Mapped to terminal assuming you initialize manager parsing in Core.initCommands() ..it's testing code at least we need to find better way to store online's managers
 
@@ -27,17 +27,17 @@ forge() obviously return the packet he builded so we can forge on the fly
 
 .send take the last packetModel packet saved and send (on the fly socket) it to the specified port. (at least here get user frontal). Don't wait answer .. maybe need to change that after .. or create a poolpacket waiting..
 
-Note: EOF boolean in packet is needed to tell the reciever thread to close the stream and the socket. (maybe antoher method?)
+<DEPRECIED> Note: EOF boolean in packet is needed to tell the reciever thread to close the stream and the socket. (maybe antoher method?)
 
 quit the program : .stop terminal
-TODO close cleanly all manager and dependecies.
+TODO close cleanly all manager and dependecies. (Partially handled)
 
 ##Todo
 See some todos on the source file..many missings
 
 list of thinking but no time atm
 
-* At management of module if they are not here (=null) cause others try to load method from a null pointer is we have not instantiate and liked it to the core ( Ex: .getLogManager.log(this,"chabada" ... if getLogManager return null !?? )
+* At management of module if they are not here (=null) cause others try to load method from a null pointer is we have not instantiate and liked it to the core ( Ex: .getLogManager.log(this,"chabada" ... if getLogManager() return null !?? )
 
 ##Tips
 Dirty management of closing thread methods.. often javaw dosen't kill itself. If you need to kill all deamons running.
@@ -48,7 +48,13 @@ Dirty management of closing thread methods.. often javaw dosen't kill itself. If
 ##Ideas
 
 * Encapsulate packet into a Securepacket. only Secured packet are on the network.
-if ok >> move forge ? process ? send ? and use packetManager a Deserializer and ressource ochester ? ?
+if ok >> move forge ? process ? send ? and use packetManager a Deserializer and ressource ochester ? ?  (Partially done)
 
-*Use apache serialization utils tool.
+*Use apache serialization utils tool. (Done lib on /lib)
+
+* thread clientHandler on recieve. Tag packet (ex 1928), put un poolRequest.
+	create Thread RequestHandler. work to compute pool it mean extract query and pass it to reply manager
+	On same time clientHandler monitor his tagged packet , after 30s if stauts (GET->POST) or signal.. change , reply directly to this socket !
+	This implementation of pool might be useful for Frontal.
 ##Other stuff
+

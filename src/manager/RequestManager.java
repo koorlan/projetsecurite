@@ -28,7 +28,7 @@ public class RequestManager {
 		
 		System.out.println(request.getUser().toString());
 		
-		//prepare response for the Answer manager TODO(he is not implemented... maybe think about a standar to communicate)
+		//prepare response for the Answer manager TODO(he is not implemented... maybe think about a standard to communicate)
 		//For the moment just concat GSA
 		String query = "";
 		//Analyze.
@@ -38,14 +38,15 @@ public class RequestManager {
 			query += "g";
 		if(!request.getUser().getAssignement().equals(""))
 			query += "a";
+		
 		System.out.println("Query Interpreted : \'" + query +"\'");
-		System.out.println("Mini - Interpreter");
+		System.out.println("Mini - Interpreter - w/out check policy");
 		if(query.contains("n"))
-			System.out.println("Name :" + request.getUser().getName());
+			System.out.println("Name :" + request.getUser().getName() + "Response :" + this.core.getUserManager().getName() );
 		if(query.contains("g"))
-			System.out.println("Group :" + request.getUser().getGroup());
+			System.out.println("Group :" + request.getUser().getGroup()+ "Response :" + this.core.getUserManager().getGroup());
 		if(query.contains("a"))
-			System.out.println("Assignement :" + request.getUser().getAssignement());
+			System.out.println("Assignement :" + request.getUser().getAssignement()+ "Response :" + this.core.getUserManager().getAssignement());
 	}
 	
 	
