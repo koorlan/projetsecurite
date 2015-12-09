@@ -9,13 +9,14 @@ Many parts are missing but if you want lulz...
 
 .start server [enter]   //Randomized port.
 
-.setName Gilles [enter]
-.getName [enter]
-.setAssignement ...ect
+.setName user Gilles [enter]
+.getName user [enter]
+.setAssignement user...ect
 
 .forge request {POST or GET} hello [enter]  //maybe recheck the model of a request but think globally RequestModel.Content is a byte array so we can serialize other object on it ;). More Precisely we maybe need to tag this packet .. or note , just the gate(frontale..je sais pas trop comment l'appeller en english) need to do that.
 
 .send request 123123(port your server choose previously) [enter]
+
 Explication: 
 RequestManager is used to build and process in/out packet.
 .forge save automatically the request he has succefully builded to RequestModel as temp
