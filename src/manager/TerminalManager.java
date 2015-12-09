@@ -6,9 +6,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 
-
+import org.apache.commons.lang3.SerializationUtils;
 
 import model.RequestModel;
+import model.SecurityModel;
 import model.TerminalModel;
 
 public class TerminalManager {
@@ -72,13 +73,10 @@ public class TerminalManager {
 				while(true){
 					this.core.getRequestManager().sendRequest(request, cmd[2]);
 					System.out.println("Sended...");
-					Thread.sleep(1000);
+					Thread.sleep(2000);
 					if(false)
 						break;
 				}
-				
-				
-				return;
 			}
 			
 			this.core.process(str);

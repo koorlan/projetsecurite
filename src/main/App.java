@@ -34,9 +34,10 @@ public class App {
 		 Core.setRequest(Request);
 		 RequestM.setManager(Request);
 		 
-		 SecurityManager Security = new SecurityManager(Core);
+		 SecurityModel SecurityM = new SecurityModel();
+		 SecurityManager Security = new SecurityManager(SecurityM, Core);
 		 Core.setSecurity(Security);
-		 
+		 SecurityM.setManager(Security);
 		 
 		 Core.start();
 	 }

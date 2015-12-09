@@ -23,21 +23,22 @@ public class RequestManager {
 		this.model = model;
 	}
 	
-	public void process(RequestModel req){	
+	public void process(byte[] req){	
 		this.core.getLogManager().log(this,"New Request arrived..processing");
 		//maybe check integrity maybe after decoding...
 		
 		//Dirty way but for debug
-		System.out.println("Request Type :" + req.getType().toString());
-		System.out.println("Stringed content: " + new String(req.getContent()));
-		System.out.println("EOF flag: " + req.isEof());	
+		System.out.println("PlainPacket");
+		System.out.println(new String(req));
 		
 		System.out.println("DECRYPTING.....");
-		req = this.core.getSecurityManager().decryptRequest(req);
+		
+		RequestModel request = new RequestModel();
+		request = (RequestModel)SerializationUtils.deserialize(this.core.getSecurityManager().decryptRequest(req));
 		if(req != null){
-			System.out.println("Request Type :" + req.getType().toString());
-			System.out.println("Stringed content: " + new String(req.getContent()));
-			System.out.println("EOF flag: " + req.isEof());	
+			System.out.println("Request Type :" + request.getType().toString());
+			System.out.println("Stringed content: " + new String(request.getContent()));
+			System.out.println("EOF flag: " + request.isEof());	
 		}else{
 			this.core.getLogManager().warn(this,"There was an error on the packet" );
 		}
@@ -67,7 +68,7 @@ public class RequestManager {
 		//grab temp request
 		RequestModel req = this.model.getRequest();
 		//Security
-		req = this.core.getSecurityManager().encryptRequest(req);
+		byte[] sreq = this.core.getSecurityManager().encryptRequest(SerializationUtils.serialize(req));
 		
 		
 		//construct socket on the fly.
@@ -76,7 +77,7 @@ public class RequestManager {
 		Socket socket;
 		try {
 			socket = new Socket(InetAddress.getByName("127.0.0.1"), Integer.parseInt(port));		
-			socket.getOutputStream().write(SerializationUtils.serialize(req));
+			socket.getOutputStream().write(sreq);
 			socket.close();
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();

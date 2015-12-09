@@ -42,7 +42,7 @@ public class ClientHandler  implements Runnable{
 		                break;
 		            }
 		        }
-			this.server.getCore().getRequestManager().process((RequestModel)SerializationUtils.deserialize(packet));		
+			this.server.getCore().getRequestManager().process(packet);		
 			this.socket.close();
 		
 		
