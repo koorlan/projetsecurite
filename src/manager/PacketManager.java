@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 
 
@@ -30,25 +31,33 @@ public class PacketManager {
 		this.core.getLogManager().log(this,"New Packet arrived..processing");
 		//maybe check integrity maybe after decoding...
 		
-		//Dirty way but for debug
-		System.out.println("PlainPacket");
-		System.out.println(new String(bPacket));
+		//Dirty but for debug
+		//System.out.println("PlainPacket");
+		//System.out.println(new String(bPacket));
 		
-		System.out.println("DECRYPTING.....");
+		this.core.getLogManager().log(this,"Decrypting.....");
 		
 		PacketModel packet = new PacketModel();
 		packet = (PacketModel)SerializationUtils.deserialize(this.core.getSecurityManager().decryptPacket(bPacket));
 		if(packet != null){
 			switch(packet.getType()){
 			case GET:
-				this.core.getRequestManager().process((RequestModel)SerializationUtils.deserialize(packet.getContent()));
+				try{
+					this.core.getLogManager().log(this,"Pass to RequestManager");
+					this.core.getRequestManager().process((RequestModel)SerializationUtils.deserialize(packet.getContent()));
+				} catch (SerializationException e){
+					this.core.getLogManager().err(this,"Not a SerializedRequestModel type.");
+				}
+				
 				break;
 			case POST:
+				this.core.getLogManager().log(this,"Pass to UnamedManager ;)");
 				break;
 			default:
-				System.out.println("Packet Type :" + packet.getType().toString());
-				System.out.println("Stringed content: " + new String(packet.getContent()));
-				System.out.println("EOF flag: " + packet.isEof());	
+				this.core.getLogManager().log(this,"Don't know this command abort..");
+				//System.out.println("Packet Type :" + packet.getType().toString());
+				//System.out.println("Stringed content: " + new String(packet.getContent()));
+				//System.out.println("EOF flag: " + packet.isEof());	
 				break;	
 			}
 		}else{
