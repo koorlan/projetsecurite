@@ -9,7 +9,34 @@ public class LogManager {
 		this.core = core;
 	}
 	
-	public void log(String str){
-		System.out.println("(Log) >>\'" + str + "\'");
+	private String clean(String str){
+		str = str.replace("java.", "");
+		str = str.replace("lang.", "");
+		str = str.replace("manager.", "");
+		str = str.replace("model.", "");
+		str = str.replace("main.", "");
+		return str;		
+	}
+	
+	public void log(Object o,String str){
+		str = this.clean(str);
+		if(o == null)
+			System.out.println("(Log)> UNKOWN \'"+ str + "\'");
+		else
+			System.out.println("(Log)>\'" + o.getClass().getName().replaceFirst(".+?\\.", "")+" "+ str + "\'");
+	}
+	public void warn(Object o,String str){
+		str = this.clean(str);
+		if(o == null)
+			System.out.println("(Log)> UNKOWN \'"+ str + "\'");
+		else
+			System.out.println("(Warning)>" + o.getClass().getName().replaceFirst(".+?\\.", "")+"\' "+ str + "\'");
+	}
+	public void err(Object o,String str){
+		str = this.clean(str);
+		if(o == null)
+			System.out.println("(Log)> UNKOWN \'"+ str + "\'");
+		else
+			System.out.println("(Error)>" + o.getClass().getName().replaceFirst(".+?\\.", "")+"\' "+ str + "\'");
 	}
 }

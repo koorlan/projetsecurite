@@ -12,16 +12,41 @@ public class UserManager {
 		this.core = core;
 	}
 	
-	public String getNom(){
-		return this.model.getNom();
+	public String getName(){
+		return this.model.getName();
 	}
 	
-	public void setNom(String str){
-		this.model.setNom(str);
+	public void setName(String str){
+		this.model.setName(str);
+	}
+	
+	public String getAssignement() {
+		return this.model.getAssignement(); 
+	}
+
+	public void setAssignement(String assignement) {
+		this.model.setAssignement(assignement);
+	}
+
+	public String getGroup() {
+		return this.model.getGroup();
+	}
+
+	public void setGroup(String group) {
+		this.model.setGroup(group);
+	}
+	
+	public void debug(){
+		this.core.getLogManager().log(this,"debug user \'" + this.model.toString() + "\'");
 	}
 	
 	public void update(String str){
-		if(str.equals("nom"))
-			this.core.getLogManager().log("(USER) Changed username to \'" + this.model.getNom() + "\'");
+		if(str.equals("name"))
+			this.core.getLogManager().log(this,"Changed username to \'" + this.model.getName() + "\'");
+		if(str.equals("assignement"))
+			this.core.getLogManager().log(this,"Changed assignement to \'" + this.model.getAssignement() + "\'");
+		if(str.equals("group"))
+			this.core.getLogManager().log(this,"Changed group to \'" + this.model.getGroup() + "\'");
 	}
+
 }

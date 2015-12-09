@@ -2,11 +2,14 @@ package main;
 
 import java.io.IOException;
 
+
 import manager.*;
+import manager.SecurityManager;
 import model.*;
 
 public class App {
-	 public static void main(String[] args)  {
+	 public static void main(String[] args) throws Exception  {
+		 
 		 CoreModel CoreM = new CoreModel();
 		 CoreManager Core = new CoreManager(CoreM);
 		 CoreM.setManager(Core);
@@ -28,6 +31,15 @@ public class App {
 		 ServerManager Server = new ServerManager(ServerM, Core);
 		 Core.setServer(Server);
 		 ServerM.setManager(Server);
+		 
+		 RequestModel RequestM = new RequestModel();
+		 RequestManager Request = new RequestManager(RequestM, Core);
+		 Core.setRequest(Request);
+		 RequestM.setManager(Request);
+		 
+		 SecurityManager Security = new SecurityManager(Core);
+		 Core.setSecurity(Security);
+		 
 		 
 		 Core.start();
 	 }

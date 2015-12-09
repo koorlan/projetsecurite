@@ -10,5 +10,4 @@ public class CoreModel {
 		this.manager = manager;
 	}
 	
-	
 }

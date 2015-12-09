@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 public class TerminalInput implements Runnable{
 
 	private  TerminalManager manager = null;
+	private boolean running = true;
 	private BufferedReader consoleIn   = null;
 	
 	public TerminalInput(TerminalManager manager) {
@@ -16,19 +17,30 @@ public class TerminalInput implements Runnable{
 	}
 
 	@Override
-	public void run()  {
+	public void run() {
 		String line = "";
-		while(this.manager.isThreadRunning()){
-				try {
-					line = consoleIn.readLine();
-					this.manager.process(line);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+		while(this.running){
+			try {
+				line = consoleIn.readLine();
+				this.manager.process(line);
+			} 
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				//Thread.currentThread().interrupt();
+				break;
+			}
 		}
-		System.out.println("Goodbye");
+		this.manager.getCore().getLogManager().log(this,"stopped");
+		this.running = false;
+		return;
 	}
-
+	
+	public void stop() throws IOException{
+		this.running = false;
+		this.consoleIn.close();	
+	}
+	
 	public void test(String str){
 		this.manager.write(str);
 	}
