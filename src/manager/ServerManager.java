@@ -25,6 +25,7 @@ public class ServerManager {
 		this.serverThread.start();
 		return;
 	}
+
 	
 	public void stop() throws InterruptedException, IOException{
 		this.core.getLogManager().log(this,"Stopping..");

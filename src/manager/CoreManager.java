@@ -19,6 +19,7 @@ public class CoreManager{
 	private ServerManager server = null;
 	private PacketManager packet = null;
 	private SecurityManager security = null;
+	private RequestManager request = null;
 	//private ClientManager client = null;
 	
 	public CoreManager(CoreModel core) {
@@ -55,6 +56,10 @@ public class CoreManager{
 	public void setSecurity(SecurityManager security) {
 		this.security = security;
 	}
+	
+	public void setRequest(RequestManager request){
+		this.request = request;
+	}
 
 
 	public void start() throws Exception{
@@ -64,7 +69,6 @@ public class CoreManager{
 		this.log.log(this, "Core started.");
 		terminal.start();
 		
-		System.out.println("Monitor start");
 		//wait closing
 		this.loop();
 	}
@@ -77,11 +81,20 @@ public class CoreManager{
 				Thread.sleep(1000);
 			}
 		}
+		this.terminal = null;
 		this.close();
 	}
 	
 	public void close(){
 		this.log.log(this, "Closing app.");
+		//close openManager
+		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
+		 while (it.hasNext()) {
+		        Map.Entry<String, Object> objMap = (Map.Entry<String, Object>)it.next();
+		        if((objMap.getValue()!= null) && commands.containsKey(objMap.getKey()+"-close") ){
+		        	System.out.println("Closing  " + objMap.getKey());
+		        }
+		}
 		return;
 	}
 	
@@ -114,6 +127,12 @@ public class CoreManager{
         instanceName = instanceName.replace("Manager", "");
         instanceName = instanceName.toLowerCase();
 		instance.put(instanceName, this.packet);
+		
+		instanceName = this.request.getClass().getName();
+        instanceName = instanceName.replace("manager.", "");
+        instanceName = instanceName.replace("Manager", "");
+        instanceName = instanceName.toLowerCase();
+		instance.put(instanceName, this.request);
 		
 		
 		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
@@ -175,6 +194,7 @@ public class CoreManager{
 	}
 	
 	//Redirect to right module
+	//maybe execution policy ????
 	public TerminalManager getTerminalManager(){
 		return this.terminal;
 	}
@@ -190,6 +210,10 @@ public class CoreManager{
 	
 	public SecurityManager getSecurityManager(){
 		return this.security;
+	}
+	
+	public RequestManager getRequestManager(){
+		return this.request;
 	}
 	
 }

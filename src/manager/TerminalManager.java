@@ -35,7 +35,7 @@ public class TerminalManager {
 		return;
 	}
 	
-	public void stop() throws Exception{
+	public void close() throws Exception{
 		this.core.getLogManager().log(this,"Stopping....");
 		this.inputRunnable.stop();
 		this.inputThread.interrupt();

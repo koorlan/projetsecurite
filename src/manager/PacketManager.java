@@ -1,10 +1,12 @@
 package manager;
 
 import model.PacketModel.*;
+import model.RequestModel;
 import model.PacketModel;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -37,9 +39,18 @@ public class PacketManager {
 		PacketModel packet = new PacketModel();
 		packet = (PacketModel)SerializationUtils.deserialize(this.core.getSecurityManager().decryptPacket(bPacket));
 		if(packet != null){
-			System.out.println("Packet Type :" + packet.getType().toString());
-			System.out.println("Stringed content: " + new String(packet.getContent()));
-			System.out.println("EOF flag: " + packet.isEof());	
+			switch(packet.getType()){
+			case GET:
+				this.core.getRequestManager().process((RequestModel)SerializationUtils.deserialize(packet.getContent()));
+				break;
+			case POST:
+				break;
+			default:
+				System.out.println("Packet Type :" + packet.getType().toString());
+				System.out.println("Stringed content: " + new String(packet.getContent()));
+				System.out.println("EOF flag: " + packet.isEof());	
+				break;	
+			}
 		}else{
 			this.core.getLogManager().warn(this,"There was an error on the packet" );
 		}
@@ -53,7 +64,7 @@ public class PacketManager {
 			if( content instanceof String)
 				packet.setContent(((String) content).getBytes());
 			else //assuming bytes..
-				packet.setContent((byte[]) content);
+				packet.setContent(SerializationUtils.serialize((Serializable) content));
 
 			//post current to packet model in order to send ... Support 1 packet in temp.
 			//normally not need when automation but usefull when forge the send.

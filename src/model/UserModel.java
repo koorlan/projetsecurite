@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -8,7 +9,8 @@ import java.security.PublicKey;
 
 import manager.UserManager;
 
-public class UserModel {
+//TODO check if a better way than we can serialize user...
+public class UserModel implements Serializable{
 	private UserManager manager = null;
 	
 	private String name = new String();
@@ -30,7 +32,7 @@ public class UserModel {
 
 	public void setName(String name) {
 		this.name = name;
-		this.manager.update("name");
+		this.update("name");
 	}
 
 
@@ -43,7 +45,7 @@ public class UserModel {
 
 	public void setAssignement(String assignement) {
 		this.assignement = assignement;
-		this.manager.update("assignement");
+		this.update("assignement");
 	}
 
 
@@ -56,7 +58,8 @@ public class UserModel {
 
 	public void setGroup(String group) {
 		this.group = group;
-		this.manager.update("group");		
+		
+		this.update("group");		
 	}
 
 
@@ -71,6 +74,13 @@ public class UserModel {
 	}
 	public PrivateKey getPrivateKey(){
 		return this.key.getPrivate();
+	}
+	
+	public void update(String str) {
+		if(this.manager != null)
+			this.manager.update(str);
+		else 
+			return;
 	}
 
 	@Override

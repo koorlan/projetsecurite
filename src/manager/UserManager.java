@@ -39,8 +39,8 @@ public class UserManager {
 		this.model.setGroup(group);
 	}
 	
-	public void debug(){
-		this.core.getLogManager().log(this,"debug user \'" + this.model.toString() + "\'");
+	public String debug(){
+		return this.model.toString();
 	}
 	
 	public PublicKey getPublicKey(){

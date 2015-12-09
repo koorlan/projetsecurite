@@ -39,4 +39,8 @@ public class LogManager {
 		else
 			System.out.println("(Error)>" + o.getClass().getName().replaceFirst(".+?\\.", "")+"\' "+ str + "\'");
 	}
+	
+	public void close(){
+		System.out.println("(ByeBye)> I'm closing. See you soon.");
+	}
 }
