@@ -9,7 +9,7 @@ import java.net.Socket;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
-import model.RequestModel;
+import model.PacketModel;
 
 
 
@@ -27,7 +27,6 @@ public class ClientHandler  implements Runnable{
 	@Override
 	public void run() {
 		try {
-			//RequestModel request;
 			
 			 InputStream inputStream = socket.getInputStream();
 		        int count;
@@ -42,7 +41,7 @@ public class ClientHandler  implements Runnable{
 		                break;
 		            }
 		        }
-			this.server.getCore().getRequestManager().process(packet);		
+			this.server.getCore().getPacketManager().process(packet);		
 			this.socket.close();
 		
 		

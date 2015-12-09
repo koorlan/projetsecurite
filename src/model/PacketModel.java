@@ -3,15 +3,15 @@ package model;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import manager.RequestManager;
+import manager.PacketManager;
 
-public class RequestModel implements Serializable {
+public class PacketModel implements Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private RequestManager manager;
+	private PacketManager manager;
 	
 	public enum Type { GET, POST};
 	
@@ -19,7 +19,7 @@ public class RequestModel implements Serializable {
 	private byte[] content;
 	private boolean eof;
 	
-	private RequestModel temp;
+	private PacketModel temp;
 	
 	public boolean isEof() {
 		return eof;
@@ -46,26 +46,28 @@ public class RequestModel implements Serializable {
 
 
 
-	public void setManager(RequestManager manager) {
+	public void setManager(PacketManager manager) {
 		this.manager = manager;
 	}
 	
-	public void save(RequestModel req){
+	public void save(PacketModel packet){
 		//clean previous TODO ... maybe dealocate.
 		this.temp = null;
-		this.temp = req;
+		this.temp = packet;
 	}
 	
-	public RequestModel getRequest(){
+	public PacketModel getPacket(){
 		return this.temp;
 	}
 
 	@Override
 	public String toString() {
-		return "RequestModel [manager=" + manager + ", type=" + type + ", content=" + Arrays.toString(content)
-				+ ", eof=" + eof + ", isEof()=" + isEof() + ", getType()=" + getType() + ", getContent()="
-				+ Arrays.toString(getContent()) + "]";
+		return "PacketModel [manager=" + manager + ", type=" + type + ", content=" + Arrays.toString(content) + ", eof="
+				+ eof + ", temp=" + temp + ", isEof()=" + isEof() + ", getType()=" + getType() + ", getContent()="
+				+ Arrays.toString(getContent()) + ", getPacket()=" + getPacket() + "]";
 	}
+
+
 
 	
 }

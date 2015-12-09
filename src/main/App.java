@@ -29,10 +29,10 @@ public class App {
 		 Core.setServer(Server);
 		 ServerM.setManager(Server);
 		 
-		 RequestModel RequestM = new RequestModel();
-		 RequestManager Request = new RequestManager(RequestM, Core);
-		 Core.setRequest(Request);
-		 RequestM.setManager(Request);
+		 PacketModel PacketM = new PacketModel();
+		 PacketManager Packet = new PacketManager(PacketM, Core);
+		 Core.setPacket(Packet);
+		 PacketM.setManager(Packet);
 		 
 		 SecurityModel SecurityM = new SecurityModel();
 		 SecurityManager Security = new SecurityManager(SecurityM, Core);

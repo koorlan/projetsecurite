@@ -12,7 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import model.RequestModel;
+import model.PacketModel;
 import model.SecurityModel;
 
 public class SecurityManager {
@@ -29,7 +29,7 @@ public class SecurityManager {
 		this.model = model;
 	}
 	
-	public byte[] encryptRequest(byte[] request){
+	public byte[] encryptPacket(byte[] bPacket){
 
 		
 		//TestingPart
@@ -49,7 +49,7 @@ public class SecurityManager {
 			cipher.init(Cipher.ENCRYPT_MODE, key);
 			
 			packet.setKey(bKey);
-			packet.setData(cipher.doFinal(request));
+			packet.setData(cipher.doFinal(bPacket));
 			return SerializationUtils.serialize(packet);
 			
 		} catch (Exception e) {
@@ -58,14 +58,14 @@ public class SecurityManager {
 		return null;
 	}
 	
-	public byte[] decryptRequest(byte[] request){
+	public byte[] decryptPacket(byte[] bPacket){
 
 		
 	    try {
 			byte[] decryptedContent = null;	
 			
 			SecurityModel packet = new SecurityModel();
-			packet = (SecurityModel)SerializationUtils.deserialize(request);
+			packet = (SecurityModel)SerializationUtils.deserialize(bPacket);
 			
 			SecretKey key = decryptAESKey(packet.getKey());
 			

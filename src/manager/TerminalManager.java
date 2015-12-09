@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import model.RequestModel;
+import model.PacketModel;
 import model.SecurityModel;
 import model.TerminalModel;
 
@@ -68,10 +68,10 @@ public class TerminalManager {
 				int port = Integer.parseInt(cmd[2]);
 				
 				
-				RequestModel request = new RequestModel();
-				request = this.core.getRequestManager().forge("POST", "FLOOD");
+				PacketModel packet = new PacketModel();
+				packet = this.core.getPacketManager().forge("POST", "FLOOD");
 				while(true){
-					this.core.getRequestManager().sendRequest(request, cmd[2]);
+					this.core.getPacketManager().sendPacket(packet, cmd[2]);
 					System.out.println("Sended...");
 					Thread.sleep(2000);
 					if(false)

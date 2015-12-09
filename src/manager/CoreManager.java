@@ -17,7 +17,7 @@ public class CoreManager{
 	private LogManager log = null;
 	private UserManager user = null;
 	private ServerManager server = null;
-	private RequestManager request = null;
+	private PacketManager packet = null;
 	private SecurityManager security = null;
 	//private ClientManager client = null;
 	
@@ -48,8 +48,8 @@ public class CoreManager{
 	}
 	
 	
-	public void setRequest(RequestManager request) {
-		this.request = request;
+	public void setPacket(PacketManager packet) {
+		this.packet = packet;
 	}
 	
 	public void setSecurity(SecurityManager security) {
@@ -109,11 +109,11 @@ public class CoreManager{
         instanceName = instanceName.toLowerCase();
 		instance.put(instanceName, this.server);
 		
-		instanceName = this.request.getClass().getName();
+		instanceName = this.packet.getClass().getName();
         instanceName = instanceName.replace("manager.", "");
         instanceName = instanceName.replace("Manager", "");
         instanceName = instanceName.toLowerCase();
-		instance.put(instanceName, this.request);
+		instance.put(instanceName, this.packet);
 		
 		
 		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
@@ -184,8 +184,8 @@ public class CoreManager{
 	public UserManager getUserManager(){
 		return this.user;
 	}
-	public RequestManager getRequestManager(){
-		return this.request;
+	public PacketManager getPacketManager(){
+		return this.packet;
 	}
 	
 	public SecurityManager getSecurityManager(){
