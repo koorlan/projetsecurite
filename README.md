@@ -1,9 +1,9 @@
 # projetsecurite
 
 ##Achivements
-Syntax of commands [ManagerMethod] [Manager] [Arg1] .. [ArgN] Only support 2 ATM and need tothnik more cleverly of parsing especially for non string args
+Syntax of commands \[ManagerMethod] [Manager] \[Arg1] .. [ArgN] Only support 2 ATM and need tothnik more cleverly of parsing especially for non string args
 
-Note: Manager methods are directly Mapped to terminal assuming you initialize manager parsing in Core.initCommands() ..it's testing code at least we need to find better way to store manager on
+Note: Manager methods are directly Mapped to terminal assuming you initialize manager parsing in Core.initCommands() ..it's testing code at least we need to find better way to store online's managers
 
 Many parts are missing but if you want lulz...
 
@@ -40,5 +40,10 @@ Dirty management of closing thread methods.. often javaw dosen't kill itself. If
 
 * Windows >> taskkill /F /IM javaw.exe
 * Linux >> pkill recursive...
+
+##Ideas
+
+* Encapsulate Request into a SecureRequest. only Secured request are on the network.
+if ok >> move forge ? process ? send ? and use RequestManager a Deserializer and ressource ochester ? ?
 
 ##Other stuff

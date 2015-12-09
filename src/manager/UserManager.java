@@ -1,5 +1,7 @@
 package manager;
 
+import java.security.PublicKey;
+
 import model.UserModel;
 
 public class UserManager {
@@ -38,6 +40,10 @@ public class UserManager {
 	
 	public void debug(){
 		this.core.getLogManager().log(this,"debug user \'" + this.model.toString() + "\'");
+	}
+	
+	public PublicKey getPublicKey(){
+		return this.model.getPublicKey();
 	}
 	
 	public void update(String str){

@@ -1,10 +1,11 @@
 package manager;
 
-import java.beans.IntrospectionException;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import model.CoreModel;
 
@@ -115,9 +116,9 @@ public class CoreManager{
 		instance.put(instanceName, this.request);
 		
 		
-		 Iterator it = instance.entrySet().iterator();
+		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
 		    while (it.hasNext()) {
-		        Map.Entry objMap = (Map.Entry)it.next();
+		        Map.Entry<String, Object> objMap = (Map.Entry<String, Object>)it.next();
 		        //do stuff
 		        Method[] m = objMap.getValue().getClass().getDeclaredMethods();	
 		        //System.out.println("Using \'" + objMap.getKey() + "\'");

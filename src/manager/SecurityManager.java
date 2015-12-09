@@ -1,5 +1,7 @@
 package manager;
 
+import javax.crypto.Cipher;
+
 import model.RequestModel;
 
 public class SecurityManager {
@@ -13,10 +15,25 @@ public class SecurityManager {
 	
 	public RequestModel encryptRequest(RequestModel req){
 		byte[] secureContent = req.getContent();
-		String secureContentString = new String(secureContent);
-		secureContentString = "<SECURITY>" + secureContentString + "/<SECURITY>";
-		secureContent = secureContentString.getBytes();
+		
+		//TestingPart
+		byte[] cipherText = null;
+		try {
+			// get an RSA cipher object and print the provider
+			final Cipher cipher = Cipher.getInstance("RSA");
+			// encrypt the plain text using the public key
+			cipher.init(Cipher.ENCRYPT_MODE, this.core.getUserManager().getPublicKey());
+			cipherText = cipher.doFinal(secureContent);
+			secureContent = cipherText;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		req.setContent(secureContent);
 		return req;
+	}
+	
+	public RequestModel decryptRequest(RequestModel req){
+		return null;
 	}
 }

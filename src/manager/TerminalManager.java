@@ -1,15 +1,9 @@
 package manager;
 
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.*;
 
 import model.RequestModel;
 import model.TerminalModel;
