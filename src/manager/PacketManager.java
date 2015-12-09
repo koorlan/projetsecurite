@@ -5,6 +5,7 @@ import model.PacketModel;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
@@ -79,9 +80,12 @@ public class PacketManager {
 			socket = new Socket(InetAddress.getByName("127.0.0.1"), Integer.parseInt(port));		
 			socket.getOutputStream().write(bPacket);
 			socket.close();
-		} catch (NumberFormatException | IOException e) {
-			e.printStackTrace();
+		}catch( ConnectException e) {
+			this.core.getLogManager().err(this, "Connection refused");
 		}
+		catch (NumberFormatException | IOException e ) {
+			e.printStackTrace();
+		} 
 	}
 	
 	public void sendPacket(PacketModel req, String port){
