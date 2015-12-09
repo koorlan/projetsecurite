@@ -1,5 +1,6 @@
 package manager;
 
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import model.UserModel;
@@ -44,6 +45,9 @@ public class UserManager {
 	
 	public PublicKey getPublicKey(){
 		return this.model.getPublicKey();
+	}
+	public PrivateKey getPrivateKey(){
+		return this.model.getPrivateKey();
 	}
 	
 	public void update(String str){

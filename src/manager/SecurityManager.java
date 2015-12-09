@@ -34,6 +34,19 @@ public class SecurityManager {
 	}
 	
 	public RequestModel decryptRequest(RequestModel req){
-		return null;
+		byte[] decryptedContent = null;		
+	    try {
+	      // get an RSA cipher object and print the provider
+	      final Cipher cipher = Cipher.getInstance("RSA");
+
+	      // decrypt the text using the private key
+	      cipher.init(Cipher.DECRYPT_MODE, this.core.getUserManager().getPrivateKey());
+	      decryptedContent = cipher.doFinal(req.getContent());
+
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	    }
+	    req.setContent(decryptedContent);	
+		return req;
 	}
 }

@@ -3,6 +3,7 @@ package model;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import manager.UserManager;
@@ -68,7 +69,9 @@ public class UserModel {
 	public PublicKey getPublicKey(){
 		return this.key.getPublic();
 	}
-
+	public PrivateKey getPrivateKey(){
+		return this.key.getPrivate();
+	}
 
 	@Override
 	public String toString() {

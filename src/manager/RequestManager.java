@@ -27,6 +27,12 @@ public class RequestManager {
 		System.out.println("Request Type :" + req.getType().toString());
 		System.out.println("Stringed content: " + new String(req.getContent()));
 		System.out.println("EOF flag: " + req.isEof());	
+		
+		req = this.core.getSecurityManager().decryptRequest(req);
+		System.out.println("DECRYPTING.....");
+		System.out.println("Request Type :" + req.getType().toString());
+		System.out.println("Stringed content: " + new String(req.getContent()));
+		System.out.println("EOF flag: " + req.isEof());	
 		return;
 	}	
 	
