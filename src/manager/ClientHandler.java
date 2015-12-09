@@ -2,10 +2,16 @@ package manager;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SerializationUtils;
+
 import model.RequestModel;
+
+
 
 public class ClientHandler  implements Runnable{
 	private ServerHandler server;
@@ -22,22 +28,25 @@ public class ClientHandler  implements Runnable{
 	public void run() {
 		try {
 			//RequestModel request;
-			this.reader = new ObjectInputStream(this.socket.getInputStream());
-			while (true) {
-				Object data = this.reader.readObject();
-				if(data instanceof RequestModel){
-					this.server.getCore().getRequestManager().process((RequestModel)data);
-					if (((RequestModel) data).isEof())
-						break;
-				}
-				else
-					break;
-			}
-			this.reader.close();
+			
+			 InputStream inputStream = socket.getInputStream();
+		        int count;
+		        byte[] packet = new byte[0];
+		        byte[] buffer = new byte[64];
+
+		        //TODO: rewrite
+		        while (true) {
+		            count = inputStream.read(buffer);
+		            packet = ArrayUtils.addAll(packet, buffer);
+		            if (count != buffer.length) {
+		                break;
+		            }
+		        }
+			this.server.getCore().getRequestManager().process((RequestModel)SerializationUtils.deserialize(packet));		
 			this.socket.close();
 		
 		
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

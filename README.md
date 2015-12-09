@@ -47,4 +47,5 @@ Dirty management of closing thread methods.. often javaw dosen't kill itself. If
 * Encapsulate Request into a SecureRequest. only Secured request are on the network.
 if ok >> move forge ? process ? send ? and use RequestManager a Deserializer and ressource ochester ? ?
 
+*Use apache serialization utils tool.
 ##Other stuff

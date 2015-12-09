@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.SerializationUtils;
+
 
 
 public class RequestManager {
@@ -21,18 +23,24 @@ public class RequestManager {
 		this.model = model;
 	}
 	
-	public void process(RequestModel req){
+	public void process(RequestModel req){	
 		this.core.getLogManager().log(this,"New Request arrived..processing");
+		//maybe check integrity maybe after decoding...
+		
 		//Dirty way but for debug
 		System.out.println("Request Type :" + req.getType().toString());
 		System.out.println("Stringed content: " + new String(req.getContent()));
 		System.out.println("EOF flag: " + req.isEof());	
 		
-		req = this.core.getSecurityManager().decryptRequest(req);
 		System.out.println("DECRYPTING.....");
-		System.out.println("Request Type :" + req.getType().toString());
-		System.out.println("Stringed content: " + new String(req.getContent()));
-		System.out.println("EOF flag: " + req.isEof());	
+		req = this.core.getSecurityManager().decryptRequest(req);
+		if(req != null){
+			System.out.println("Request Type :" + req.getType().toString());
+			System.out.println("Stringed content: " + new String(req.getContent()));
+			System.out.println("EOF flag: " + req.isEof());	
+		}else{
+			this.core.getLogManager().warn(this,"There was an error on the packet" );
+		}
 		return;
 	}	
 	
@@ -67,20 +75,17 @@ public class RequestManager {
 		
 		Socket socket;
 		try {
-			socket = new Socket(InetAddress.getByName("127.0.0.1"), Integer.parseInt(port));
-			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-			System.out.println("write object");
-			oos.writeObject(req);
-			oos.flush();
-			oos.close();
+			socket = new Socket(InetAddress.getByName("127.0.0.1"), Integer.parseInt(port));		
+			socket.getOutputStream().write(SerializationUtils.serialize(req));
 			socket.close();
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void sendRequest(RequestModel req){
-		System.out.println("TARACE");
+	public void sendRequest(RequestModel req, String port){
+		this.model.save(req);
+		this.send(port);
 	}
 
 }

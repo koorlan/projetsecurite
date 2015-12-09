@@ -13,7 +13,10 @@ public class SecurityManager {
 		this.core = core;
 	}
 	
-	public RequestModel encryptRequest(RequestModel req){
+	public RequestModel encryptRequest(RequestModel request){
+		RequestModel req = new RequestModel();
+		req.setType(request.getType());
+		req.setContent(request.getContent());
 		byte[] secureContent = req.getContent();
 		
 		//TestingPart
@@ -25,15 +28,18 @@ public class SecurityManager {
 			cipher.init(Cipher.ENCRYPT_MODE, this.core.getUserManager().getPublicKey());
 			cipherText = cipher.doFinal(secureContent);
 			secureContent = cipherText;
+			req.setContent(secureContent);
+			return req;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		req.setContent(secureContent);
-		return req;
+		return null;
 	}
 	
-	public RequestModel decryptRequest(RequestModel req){
+	public RequestModel decryptRequest(RequestModel request){
+		RequestModel req = new RequestModel();
+		req.setType(request.getType());
+		req.setContent(request.getContent());
 		byte[] decryptedContent = null;		
 	    try {
 	      // get an RSA cipher object and print the provider
@@ -42,11 +48,11 @@ public class SecurityManager {
 	      // decrypt the text using the private key
 	      cipher.init(Cipher.DECRYPT_MODE, this.core.getUserManager().getPrivateKey());
 	      decryptedContent = cipher.doFinal(req.getContent());
-
+	      req.setContent(decryptedContent);	
+	      return req;
 	    } catch (Exception ex) {
-	      ex.printStackTrace();
+	     	this.core.getLogManager().err(this,"Error in decryption" );
 	    }
-	    req.setContent(decryptedContent);	
-		return req;
+	  return null;  
 	}
 }

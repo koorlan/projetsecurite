@@ -4,6 +4,9 @@ package manager;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
+
+
 
 import model.RequestModel;
 import model.TerminalModel;
@@ -63,15 +66,18 @@ public class TerminalManager {
 				String ip = cmd[1];
 				int port = Integer.parseInt(cmd[2]);
 				
-				Socket socket1 = new Socket(InetAddress.getByName(ip), port);
-				ObjectOutputStream oos = new ObjectOutputStream(socket1.getOutputStream());
+				
 				RequestModel request = new RequestModel();
-				System.out.println("write object");
-				oos.writeObject(request);
-				oos.writeObject(null);
-				oos.flush();
-				oos.close();
-				socket1.close();
+				request = this.core.getRequestManager().forge("POST", "FLOOD");
+				while(true){
+					this.core.getRequestManager().sendRequest(request, cmd[2]);
+					System.out.println("Sended...");
+					Thread.sleep(1000);
+					if(false)
+						break;
+				}
+				
+				
 				return;
 			}
 			
