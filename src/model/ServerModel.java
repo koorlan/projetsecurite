@@ -5,7 +5,7 @@ import manager.ServerManager;
 public class ServerModel {
 	private ServerManager manager = null;
 	
-    private String ipDest = null;
+    private String ipDest = "127.0.0.1";
     private int port = 0;
     private int maxConnexion = 0;
 	

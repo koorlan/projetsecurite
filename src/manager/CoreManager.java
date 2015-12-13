@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import generalizer.GeneralizerManager;
 import model.CoreModel;
 
 public class CoreManager{
@@ -20,6 +21,7 @@ public class CoreManager{
 	private PacketManager packet = null;
 	private SecurityManager security = null;
 	private RequestManager request = null;
+	private GeneralizerManager generalizer = null;
 	//private ClientManager client = null;
 	
 	public CoreManager(CoreModel core) {
@@ -61,6 +63,9 @@ public class CoreManager{
 		this.request = request;
 	}
 
+	public void setGeneralizer(GeneralizerManager generalizer){
+		this.generalizer = generalizer;
+	}
 
 	public void start() throws Exception{
 		//Start all part of application including thread
@@ -134,7 +139,6 @@ public class CoreManager{
         instanceName = instanceName.toLowerCase();
 		instance.put(instanceName, this.request);
 		
-		
 		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
 		    while (it.hasNext()) {
 		        Map.Entry<String, Object> objMap = (Map.Entry<String, Object>)it.next();
@@ -154,7 +158,7 @@ public class CoreManager{
 		String[] cmd = str.split(" ");
 		//TODO Display Help when 1 args ?
 		if (cmd.length < 2){
-			this.log.err(this,"Minimum of 2 instruction to run a command see help.");
+			this.log.err(this,"Minimum of 2 instruction to run a command. Syntax : .<method> <manager> <parameter>");
 			return;
 		}
 		String command = cmd[0];
@@ -216,4 +220,7 @@ public class CoreManager{
 		return this.request;
 	}
 	
+	public GeneralizerManager getGeneralizerManager(){
+		return this.generalizer;
+	}
 }

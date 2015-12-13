@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.SerializationException;
@@ -27,7 +28,7 @@ public class PacketManager {
 		this.model = model;
 	}
 	
-	public void process(byte[] bPacket){	
+	public void process(byte[] bPacket) throws ClassNotFoundException, SQLException{	
 		this.core.getLogManager().log(this,"New Packet arrived..processing");
 		//maybe check integrity maybe after decoding...
 		
