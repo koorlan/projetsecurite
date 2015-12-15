@@ -1,6 +1,7 @@
 package main;
 
 import manager.CoreManager;
+import manager.DialogQueryManager;
 import manager.LogManager;
 import manager.PacketManager;
 import manager.RequestManager;
@@ -62,6 +63,9 @@ public class User {
 		 Core.setRequest(Request);
 		 RequestM.setManager(Request);
 		
+		 DialogQueryManager dialog = new DialogQueryManager(Core);
+		 Core.setDialog(dialog);
+		 
 		 this.core = Core;
 		return;
 	}

@@ -22,6 +22,7 @@ public class CoreManager{
 	private SecurityManager security = null;
 	private RequestManager request = null;
 	private GeneralizerManager generalizer = null;
+	private DialogQueryManager dialog = null; 
 	//private ClientManager client = null;
 	
 	public CoreManager(CoreModel core) {
@@ -66,6 +67,11 @@ public class CoreManager{
 	public void setGeneralizer(GeneralizerManager generalizer){
 		this.generalizer = generalizer;
 	}
+
+	public void setDialog(DialogQueryManager dialog) {
+		this.dialog = dialog;
+	}
+
 
 	public void start() throws Exception{
 		//Start all part of application including thread
@@ -138,6 +144,12 @@ public class CoreManager{
         instanceName = instanceName.replace("Manager", "");
         instanceName = instanceName.toLowerCase();
 		instance.put(instanceName, this.request);
+		
+		instanceName = this.dialog.getClass().getName();
+        instanceName = instanceName.replace("manager.", "");
+        instanceName = instanceName.replace("Manager", "");
+        instanceName = instanceName.toLowerCase();
+		instance.put(instanceName, this.dialog);
 		
 		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
 		    while (it.hasNext()) {
@@ -222,5 +234,9 @@ public class CoreManager{
 	
 	public GeneralizerManager getGeneralizerManager(){
 		return this.generalizer;
+	}
+
+	public DialogQueryManager getDialog() {
+		return dialog;
 	}
 }
