@@ -1,6 +1,10 @@
 package manager;
 
 import javax.swing.*;
+
+import com.mysql.jdbc.Statement;
+import java.sql.*;
+
 import java.awt.event.*;
 import java.awt.GridLayout;
 
@@ -103,8 +107,7 @@ public class DialogQueryManager extends JFrame {
 		
 		bouton.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent e) { 
-				int poids =  
-						type.getSelectedIndex() + 
+				int poids = type.getSelectedIndex() + 
 						affectation.getSelectedIndex() +
 						statut.getSelectedIndex() +
 						groupe.getSelectedIndex();
