@@ -63,7 +63,7 @@ public class DialogQueryManager extends JFrame {
 		Statement stmt = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:datas/Alice.sqlite");
+			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
 		} catch ( Exception e ) {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
@@ -93,28 +93,99 @@ public class DialogQueryManager extends JFrame {
 		
 		affectation = new JComboBox<String>();
 		
+		Connection c = null;
+		Statement stmt = null;
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+		System.out.println("Opened database successfully");
+		
+		stmt = c.createStatement();
+		String sql = "SELECT Affectation FROM Affectations;";
+		
+		ResultSet rs = stmt.executeQuery( sql );
+		
+		affectation.addItem("---");
+		while (rs.next()) {
+			String champ = rs.getString("Affectation");
+			affectation.addItem(champ);
+		}
+		
+		rs.close();
+		stmt.close();
+		c.close();
+		
 		this.getContentPane().add(affectation);
 	}
 	
-	public void formStatut(){
+	public void formStatut() throws SQLException{
 		this.getContentPane().add(new JLabel("Statut :"));
 		
 		statut = new JComboBox<String>();
+		Connection c = null;
+		Statement stmt = null;
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+		System.out.println("Opened database successfully");
+		
+		stmt = c.createStatement();
+		String sql = "SELECT Statut FROM Statuts;";
+		
+		ResultSet rs = stmt.executeQuery( sql );
+		
 		statut.addItem("---");
-		statut.addItem("Étudiant");
-		statut.addItem("Professeur");
-		statut.addItem("Administratif");
+		while (rs.next()) {
+			String champ = rs.getString("Statut");
+			statut.addItem(champ);
+		}
+		
+		rs.close();
+		stmt.close();
+		c.close();
+		
 		this.getContentPane().add(statut);
 	}
 	
-	public void formGroupe(){
+	public void formGroupe() throws SQLException{
 		this.getContentPane().add(new JLabel("Groupe :"));
 		
 		groupe = new JComboBox<String>();
+		
+		Connection c = null;
+		Statement stmt = null;
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+		System.out.println("Opened database successfully");
+		
+		stmt = c.createStatement();
+		String sql = "SELECT Groupe FROM Groupes;";
+		
+		ResultSet rs = stmt.executeQuery( sql );
+		
 		groupe.addItem("---");
-		groupe.addItem("Étudiant");
-		groupe.addItem("Professeur");
-		groupe.addItem("Administratif");
+		while (rs.next()) {
+			String champ = rs.getString("Groupe");
+			groupe.addItem(champ);
+		}
+		
+		rs.close();
+		stmt.close();
+		c.close();
+		
 		this.getContentPane().add(groupe);
 	}
 	
