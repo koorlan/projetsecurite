@@ -1,10 +1,7 @@
 package manager;
 
 import javax.swing.*;
-
-import com.mysql.jdbc.Statement;
 import java.sql.*;
-
 import java.awt.event.*;
 import java.awt.GridLayout;
 
@@ -26,7 +23,7 @@ public class DialogQueryManager extends JFrame {
 	}
 	
 
-	public void start() {
+	public void start() throws SQLException {
 		l = new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
 				//System.exit(0);
@@ -57,25 +54,45 @@ public class DialogQueryManager extends JFrame {
 	
 	
 	
-	public void formType(){
+	public void formType() throws SQLException{
 		this.getContentPane().add(new JLabel("Type :"));
 		
 		type = new JComboBox<String>();
+		
+		Connection c = null;
+		Statement stmt = null;
+		try {
+			Class.forName("org.sqlite.JDBC");
+			c = DriverManager.getConnection("jdbc:sqlite:datas/Alice.sqlite");
+		} catch ( Exception e ) {
+			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+			System.exit(0);
+		}
+		System.out.println("Opened database successfully");
+		
+		stmt = c.createStatement();
+		String sql = "SELECT * FROM Types;";
+		
+		ResultSet rs = stmt.executeQuery( sql );
+		
 		type.addItem("---");
-		type.addItem("Étudiant");
-		type.addItem("Professeur");
-		type.addItem("Administratif");
+		while (rs.next()) {
+			String champ = rs.getString("Type");
+			type.addItem(champ);
+		}
+		
+		rs.close();
+		stmt.close();
+		c.close();
+		
 		this.getContentPane().add(type);
 	}
 	
-	public void formAffectation(){
+	public void formAffectation() throws SQLException{
 		this.getContentPane().add(new JLabel("Affectation : "));
 		
 		affectation = new JComboBox<String>();
-		affectation.addItem("---");
-		affectation.addItem("Étudiant");
-		affectation.addItem("Professeur");
-		affectation.addItem("Administratif");
+		
 		this.getContentPane().add(affectation);
 	}
 	
