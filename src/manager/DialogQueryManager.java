@@ -103,21 +103,18 @@ public class DialogQueryManager extends JFrame {
 		
 		bouton.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent e) { 
-				System.out.println("--> ENVOIE D'UNE REQUÊTE <--");
-				System.out.println("Nom: " + nom.getText());
-				System.out.println("Type: " + type.getSelectedIndex());
-				System.out.println("Affectation: " + affectation.getSelectedIndex());
-				System.out.println("Statut: " + statut.getSelectedIndex());
-				System.out.println("Groupe: " + groupe.getSelectedIndex());
-				
 				int poids =  
-						(int) type.getSelectedIndex() + 
-						(int) affectation.getSelectedIndex() +
-						(int) statut.getSelectedIndex() +
-						(int) groupe.getSelectedIndex();
+						type.getSelectedIndex() + 
+						affectation.getSelectedIndex() +
+						statut.getSelectedIndex() +
+						groupe.getSelectedIndex();
 				
-				if(poids >= 4){
-					
+				if(poids < 4){
+					System.out.println("QueryError : "
+							+ "Merci de remplir l'ensemble des champs.");
+				}
+				else {
+					// send a new query on the network
 				}
 			} 
 		});
