@@ -39,7 +39,7 @@ public class GeneralizerManager {
 		}
 		else 
 		{
-			this.core.getLogManager().err(this, "Unknown tree name");
+			this.core.getLog().err(this, "Unknown tree name");
 			return null; 
 		}		
 		
