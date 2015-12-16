@@ -23,6 +23,7 @@ public class CoreManager{
 	private RequestManager request = null;
 	private GeneralizerManager generalizer = null;
 	private DialogQueryManager dialog = null; 
+	private BroadcastManager broadcast = null;
 	//private ClientManager client = null;
 	
 	public CoreManager(CoreModel core) {
@@ -70,6 +71,10 @@ public class CoreManager{
 
 	public void setDialog(DialogQueryManager dialog) {
 		this.dialog = dialog;
+	}
+
+	public void setBroadcast(BroadcastManager broadcast) {
+		this.broadcast = broadcast;
 	}
 
 
@@ -239,4 +244,10 @@ public class CoreManager{
 	public DialogQueryManager getDialog() {
 		return dialog;
 	}
+
+	public BroadcastManager getBroadcast() {
+		return broadcast;
+	}
+	
+	
 }

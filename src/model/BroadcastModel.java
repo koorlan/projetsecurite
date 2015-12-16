@@ -2,7 +2,7 @@ package model;
 
 import java.util.ArrayList;
 
-import manager.BroadCastManager;
+import manager.BroadcastManager;
 
 final class Front{
 	private String name;
@@ -29,14 +29,14 @@ final class Front{
 	
 }
 
-public class BroadCastModel {
-	private BroadCastManager manager;
+public class BroadcastModel {
+	private BroadcastManager manager;
 	private ArrayList<Front> fronts;
 	
 	//TODO Maybe Change for a list of FrontalModel
 	
 	
-	public void setManager(BroadCastManager manager){
+	public void setManager(BroadcastManager manager){
 		this.manager = manager;
 	}
 }

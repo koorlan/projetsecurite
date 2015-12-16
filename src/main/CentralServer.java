@@ -25,10 +25,10 @@ public class CentralServer {
 		ServerM.setManager(Server);
 		Core.setServer(Server);
 		
-		BroadCastModel BcastM = new BroadCastModel();
-		BroadCastManager Bcast = new RouterManager(BcastM, Core);
+		BroadcastModel BcastM = new BroadcastModel();
+		BroadcastManager Bcast = new BroadcastManager(BcastM, Core);
 		BcastM.setManager(Bcast);
-		Core.setBroadCaster(Bcast);
+		Core.setBroadcast(Bcast);
 		
 		this.core = Core;
 		return;
