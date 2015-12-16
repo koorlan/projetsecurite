@@ -69,8 +69,8 @@ public class User {
 		 this.core = Core;
 		return;
 	}
-	
 	public CoreManager getCore(){
 		return this.core;
 	}
+
 }
