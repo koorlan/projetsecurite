@@ -18,7 +18,7 @@ public class ServerManager {
 	}
 	
 	public void start(){
-		this.core.getLogManager().log(this,"Starting server handler");
+		this.core.getLog().log(this,"Starting server handler");
 		this.serverRunnable = new ServerHandler(this);
 		Thread tThread = new Thread(this.serverRunnable);
 		this.serverThread = tThread;
@@ -28,7 +28,7 @@ public class ServerManager {
 
 	
 	public void stop() throws InterruptedException, IOException{
-		this.core.getLogManager().log(this,"Stopping..");
+		this.core.getLog().log(this,"Stopping..");
 		this.serverRunnable.stop();
 		this.serverThread.join();
 		this.serverThread = null;		

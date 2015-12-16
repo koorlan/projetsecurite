@@ -29,7 +29,7 @@ public class RequestManager {
 	public void process(RequestModel request) throws ClassNotFoundException, SQLException
 	{
 		if( !(request instanceof RequestModel)){
-			this.core.getLogManager().err(this,"Not a RequestModel format exiting.");
+			this.core.getLog().err(this,"Not a RequestModel format exiting.");
 		}
 		DBManager dbm = new DBManager();
 		ArrayList<String> results = new ArrayList<String>();
@@ -41,7 +41,7 @@ public class RequestManager {
 		}
 		
 		else
-			this.core.getLogManager().err(this, "Not a DataUtil format.");
+			this.core.getLog().err(this, "Not a DataUtil format.");
 	}
 	
 	/*
@@ -88,7 +88,7 @@ public class RequestManager {
 	}
 	
 	private void send(RequestModel request, String port){
-		this.core.getPacketManager().sendPacket(this.core.getPacketManager().forge("GET",request),port);
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),port);
 	}
 	
 

@@ -52,11 +52,11 @@ public class UserManager {
 	
 	public void update(String str){
 		if(str.equals("name"))
-			this.core.getLogManager().log(this,"Changed username to \'" + this.model.getName() + "\'");
+			this.core.getLog().log(this,"Changed username to \'" + this.model.getName() + "\'");
 		if(str.equals("assignement"))
-			this.core.getLogManager().log(this,"Changed assignement to \'" + this.model.getAssignement() + "\'");
+			this.core.getLog().log(this,"Changed assignement to \'" + this.model.getAssignement() + "\'");
 		if(str.equals("group"))
-			this.core.getLogManager().log(this,"Changed group to \'" + this.model.getGroup() + "\'");
+			this.core.getLog().log(this,"Changed group to \'" + this.model.getGroup() + "\'");
 	}
 
 }

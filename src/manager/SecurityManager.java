@@ -77,7 +77,7 @@ public class SecurityManager {
 	      	byte[] newBytes = cipher.doFinal(packet.getData());
 	      	return newBytes;
 	    } catch (Exception ex) {
-	     	this.core.getLogManager().err(this,"Error in decryption" );
+	     	this.core.getLog().err(this,"Error in decryption" );
 	    }
 	  return null;  
 	}
@@ -91,7 +91,7 @@ public class SecurityManager {
 	    {
 	        // initialize the cipher with the user's public key
 	        cipher = Cipher.getInstance("RSA");
-	        cipher.init(Cipher.ENCRYPT_MODE, this.core.getUserManager().getPublicKey() );
+	        cipher.init(Cipher.ENCRYPT_MODE, this.core.getUser().getPublicKey() );
 	        key = cipher.doFinal(skey.getEncoded());
 	    }
 	    catch(Exception e )
@@ -111,7 +111,7 @@ public class SecurityManager {
         try
         {
             // this is OUR private key
-            privKey = this.core.getUserManager().getPrivateKey();
+            privKey = this.core.getUser().getPrivateKey();
 
             // initialize the cipher...
             cipher = Cipher.getInstance("RSA");

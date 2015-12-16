@@ -1,5 +1,13 @@
 # projetsecurite
 
+##UPDATE_Modules_Management
+rewrite modules managment. Not 100% finished att all try to think at an easly method to getManager...
+so to get manager 
+OLD : core.getLogManager() -> NOW : core.getLog() ... ect
+OLD : core.setTerminal(terminalManagerInstance) -> NOW: core.set(terminalManagerInstance..Log..ect) considered as object.
+
+No need to populate instanceList in init commands. all modules set are analysed to get cmd..
+
 ##Achivements
 Syntax of commands \[ManagerMethod] [Manager] \[Arg1] .. [ArgN] Only support 2 AtM and need to think more cleverly of parsing especially for non string args
 

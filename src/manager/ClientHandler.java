@@ -42,7 +42,17 @@ public class ClientHandler  implements Runnable{
 		                break;
 		            }
 		        }
-			this.server.getCore().getPacketManager().process(packet);		
+		     
+		     switch (this.server.getCore().getService()){
+			     case "user":
+					this.server.getCore().getPacket().process(packet);	
+			    	break;
+			     case "central":
+			    	 this.server.getCore().getBroadcast().broadcast(packet);
+			     	break;
+			     default:
+			    	 break;     
+		     }	
 			this.socket.close();
 		
 		

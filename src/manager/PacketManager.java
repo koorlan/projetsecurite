@@ -29,40 +29,40 @@ public class PacketManager {
 	}
 	
 	public void process(byte[] bPacket) throws ClassNotFoundException, SQLException{	
-		this.core.getLogManager().log(this,"New Packet arrived..processing");
+		this.core.getLog().log(this,"New Packet arrived..processing");
 		//maybe check integrity maybe after decoding...
 		
 		//Dirty but for debug
 		//System.out.println("PlainPacket");
 		//System.out.println(new String(bPacket));
 		
-		this.core.getLogManager().log(this,"Decrypting.....");
+		this.core.getLog().log(this,"Decrypting.....");
 		
 		PacketModel packet = new PacketModel();
-		packet = (PacketModel)SerializationUtils.deserialize(this.core.getSecurityManager().decryptPacket(bPacket));
+		packet = (PacketModel)SerializationUtils.deserialize(this.core.getSecurity().decryptPacket(bPacket));
 		if(packet != null){
 			switch(packet.getType()){
 			case GET:
 				try{
-					this.core.getLogManager().log(this,"Pass to RequestManager");
-					this.core.getRequestManager().process((RequestModel)SerializationUtils.deserialize(packet.getContent()));
+					this.core.getLog().log(this,"Pass to RequestManager");
+					this.core.getRequest().process((RequestModel)SerializationUtils.deserialize(packet.getContent()));
 				} catch (SerializationException e){
-					this.core.getLogManager().err(this,"Not a SerializedRequestModel type.");
+					this.core.getLog().err(this,"Not a SerializedRequestModel type.");
 				}
 				
 				break;
 			case POST:
-				this.core.getLogManager().log(this,"Pass to UnamedManager ;)");
+				this.core.getLog().log(this,"Pass to UnamedManager ;)");
 				break;
 			default:
-				this.core.getLogManager().log(this,"Don't know this command abort..");
+				this.core.getLog().log(this,"Don't know this command abort..");
 				//System.out.println("Packet Type :" + packet.getType().toString());
 				//System.out.println("Stringed content: " + new String(packet.getContent()));
 				//System.out.println("EOF flag: " + packet.isEof());	
 				break;	
 			}
 		}else{
-			this.core.getLogManager().warn(this,"There was an error on the packet" );
+			this.core.getLog().warn(this,"There was an error on the packet" );
 		}
 		return;
 	}	
@@ -81,7 +81,7 @@ public class PacketManager {
 			this.model.save(packet);
 			return packet;
 		}catch(IllegalArgumentException e){
-			this.core.getLogManager().err(this,"args <"+ type.getClass().getName().toString() +" {"+ Arrays.toString(Type.values()) +"},"+content.getClass().getName().toString()+ ">");
+			this.core.getLog().err(this,"args <"+ type.getClass().getName().toString() +" {"+ Arrays.toString(Type.values()) +"},"+content.getClass().getName().toString()+ ">");
 		}
 		return null;
 	}
@@ -90,7 +90,7 @@ public class PacketManager {
 		//grab temp packet
 		PacketModel packet = this.model.getPacket();
 		//Security
-		byte[] bPacket = this.core.getSecurityManager().encryptPacket(SerializationUtils.serialize(packet));
+		byte[] bPacket = this.core.getSecurity().encryptPacket(SerializationUtils.serialize(packet));
 		
 		
 		//construct socket on the fly.
@@ -102,7 +102,7 @@ public class PacketManager {
 			socket.getOutputStream().write(bPacket);
 			socket.close();
 		}catch( ConnectException e) {
-			this.core.getLogManager().err(this, "Connection refused");
+			this.core.getLog().err(this, "Connection refused");
 		}
 		catch (NumberFormatException | IOException e ) {
 			e.printStackTrace();

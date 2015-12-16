@@ -27,7 +27,7 @@ public class TerminalManager {
 	}
 	
 	public void start() throws Exception{		
-		this.core.getLogManager().log(this,"Starting input handler");
+		this.core.getLog().log(this,"Starting input handler");
 		this.inputRunnable = new TerminalInput(this);
 		this.inputThread  = new Thread(this.inputRunnable);
 		this.inputThread.start();
@@ -36,7 +36,7 @@ public class TerminalManager {
 	}
 	
 	public void close() throws Exception{
-		this.core.getLogManager().log(this,"Stopping....");
+		this.core.getLog().log(this,"Stopping....");
 		this.inputRunnable.stop();
 		this.inputThread.interrupt();
 		
@@ -57,7 +57,7 @@ public class TerminalManager {
 			if(str.startsWith(".")) str = str.replaceFirst(".",""); else return;
 				
 			if(str.equalsIgnoreCase("bye")){
-				this.core.getLogManager().log(this,"closing input handler");
+				this.core.getLog().log(this,"closing input handler");
 				this.inputThread = null;
 				return;
 			}
@@ -69,9 +69,9 @@ public class TerminalManager {
 				
 				
 				PacketModel packet = new PacketModel();
-				packet = this.core.getPacketManager().forge("POST", "FLOOD");
+				packet = this.core.getPacket().forge("POST", "FLOOD");
 				while(true){
-					this.core.getPacketManager().sendPacket(packet, cmd[2]);
+					this.core.getPacket().sendPacket(packet, cmd[2]);
 					System.out.println("Sended...");
 					Thread.sleep(2000);
 					if(false)

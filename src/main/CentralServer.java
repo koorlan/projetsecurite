@@ -10,11 +10,19 @@ public class CentralServer {
 	public CentralServer(){
 		super();
 		this.initialize();
+		
+		//populate with fronts
+		this.core.getBroadcast().addFront("frontal1","127.0.0.1","5555");
+		this.core.getBroadcast().addFront("frontal2","127.0.0.1","5556");
+		this.core.getBroadcast().addFront("frontal3","127.0.0.1","5557");
+		this.core.getBroadcast().addFront("frontal4","127.0.0.1","5558");
+		this.core.getBroadcast().addFront("frontal5","127.0.0.1","5559");
+		
 	}
 	
 	public void initialize(){
 		CoreModel CoreM = new CoreModel();
-		CoreManager Core = new CoreManager(CoreM);
+		CoreManager Core = new CoreManager(CoreM, "central");
 		CoreM.setManager(Core);
 		
 		LogManager Log = new LogManager(Core);
@@ -29,6 +37,11 @@ public class CentralServer {
 		BroadcastManager Bcast = new BroadcastManager(BcastM, Core);
 		BcastM.setManager(Bcast);
 		Core.setBroadcast(Bcast);
+		
+		TerminalModel TerminalM = new TerminalModel();
+		TerminalManager Terminal = new TerminalManager(TerminalM, Core);
+		Core.setTerminal(Terminal);
+		TerminalM.setManager(Terminal);
 		
 		this.core = Core;
 		return;

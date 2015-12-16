@@ -25,7 +25,8 @@ public class ServerHandler implements Runnable{
 		String ip = (this.manager.getModel().getIpDest() != null) ? this.manager.getModel().getIpDest() : "127.0.0.1" ;
 		try {
 			this.socket = new ServerSocket(this.manager.getModel().getPort(),max, InetAddress.getByName(ip));
-			this.manager.getCore().getLogManager().log(this,"started on " + socket.getInetAddress() + ":" +socket.getLocalPort() +" max: " + max);
+			this.socket.setReuseAddress(true);
+			this.manager.getCore().getLog().log(this,"started on " + socket.getInetAddress() + ":" +socket.getLocalPort() +" max: " + max);
 			while(this.running){
 					try{
 					Socket sclient = this.socket.accept();
@@ -33,11 +34,11 @@ public class ServerHandler implements Runnable{
 					Thread tclient = new Thread(client);
 					tclient.start();
 					} catch(SocketException e){
-						this.manager.getCore().getLogManager().warn(this,"socket closed");				
+						this.manager.getCore().getLog().warn(this,"socket closed");				
 						continue;
 					}
 			}
-			this.manager.getCore().getLogManager().log(this,"stopped");
+			this.manager.getCore().getLog().log(this,"stopped");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}		

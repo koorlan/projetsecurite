@@ -4,31 +4,6 @@ import java.util.ArrayList;
 
 import manager.BroadcastManager;
 
-final class Front{
-	private String name;
-	private String ip;
-	private int port;
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getIp() {
-		return ip;
-	}
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
-	public int getPort() {
-		return port;
-	}
-	public void setPort(int port) {
-		this.port = port;
-	}
-	
-}
-
 public class BroadcastModel {
 	private BroadcastManager manager;
 	private ArrayList<Front> fronts;
@@ -38,5 +13,15 @@ public class BroadcastModel {
 	
 	public void setManager(BroadcastManager manager){
 		this.manager = manager;
+	}
+	public ArrayList<Front> getFronts() {
+		return fronts;
+	}
+	public void setFronts(ArrayList<Front> fronts) {
+		this.fronts = fronts;
+	}
+	
+	public void addFronts(Front front){
+		this.fronts.add(front);
 	}
 }

@@ -27,44 +27,44 @@ public class User {
 	
 	public void initialize() throws Exception{
 		 CoreModel CoreM = new CoreModel();
-		 CoreManager Core = new CoreManager(CoreM);
+		 CoreManager Core = new CoreManager(CoreM, "user");
 		 CoreM.setManager(Core);
 		 
 		 TerminalModel TerminalM = new TerminalModel();
 		 TerminalManager Terminal = new TerminalManager(TerminalM, Core);
-		 Core.setTerminal(Terminal);
+		 Core.set(Terminal);
 		 TerminalM.setManager(Terminal);
 		 
 		 LogManager Log = new LogManager(Core);
-		 Core.setLog(Log);
+		 Core.set(Log);
 		 
 		 UserModel UserM = new UserModel();
 		 UserManager User = new UserManager(UserM, Core);
-		 Core.setUser(User);
+		 Core.set(User);
 		 UserM.setManager(User);
 		 
 		 ServerModel ServerM = new ServerModel();
 		 ServerManager Server = new ServerManager(ServerM, Core);
-		 Core.setServer(Server);
+		 Core.set(Server);
 		 ServerM.setManager(Server);
 		 
 		 PacketModel PacketM = new PacketModel();
 		 PacketManager Packet = new PacketManager(PacketM, Core);
-		 Core.setPacket(Packet);
+		 Core.set(Packet);
 		 PacketM.setManager(Packet);
 		 
 		 SecurityModel SecurityM = new SecurityModel();
 		 SecurityManager Security = new SecurityManager(SecurityM, Core);
-		 Core.setSecurity(Security);
+		 Core.set(Security);
 		 SecurityM.setManager(Security);
 		 
 		 RequestModel RequestM = new RequestModel();
 		 RequestManager Request = new RequestManager(RequestM,Core);
-		 Core.setRequest(Request);
+		 Core.set(Request);
 		 RequestM.setManager(Request);
 		
 		 DialogQueryManager dialog = new DialogQueryManager(Core);
-		 Core.setDialog(dialog);
+		 Core.set(dialog);
 		 
 		 this.core = Core;
 		return;

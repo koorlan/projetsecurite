@@ -6,11 +6,11 @@ import model.*;
 
 public class App {
 	 public static void main(String[] args) throws Exception  {	 
-		 User user1 = new User();
-		 user1.getCore().start();
+		User user1 = new User();
+		user1.getCore().start();
 		 
-		 CentralServer server = new CentralServer();
-		 server.getCore().start();
+		// CentralServer server = new CentralServer();
+		// server.getCore().start();
 		 
 	 }
 }

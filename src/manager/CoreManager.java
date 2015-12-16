@@ -2,88 +2,52 @@ package manager;
 
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import generalizer.GeneralizerManager;
 import model.CoreModel;
 
+
 public class CoreManager{
+	Function<String, String> StandardizationModule = instanceName -> {
+		instanceName = instanceName.replace("manager.", "");
+        instanceName = instanceName.replace("Manager", "");
+        instanceName = instanceName.toLowerCase();
+        return instanceName;
+	};
+	
+	
 	private CoreModel model = null;
 	
-	//Modules
-	private TerminalManager terminal = null;
-	private LogManager log = null;
-	private UserManager user = null;
-	private ServerManager server = null;
-	private PacketManager packet = null;
-	private SecurityManager security = null;
-	private RequestManager request = null;
-	private GeneralizerManager generalizer = null;
-	private DialogQueryManager dialog = null; 
-	private BroadcastManager broadcast = null;
-	//private ClientManager client = null;
 	
-	public CoreManager(CoreModel core) {
+	private String service;
+	
+	//Modules
+	private ArrayList<Object> modules = new ArrayList<Object>();
+	
+	
+	public CoreManager(CoreModel core, String service) {
 		super();
 		this.model = core;
+		this.service = service;
 	}
 
 	
-	public void setTerminal(TerminalManager terminal){
-		this.terminal = terminal;
-		return;
+	public void set(Object o){
+		modules.add(o);
 	}
-	
-	public void setLog(LogManager log){
-		this.log = log;
-		return;
-	}
-	
-	public void setUser(UserManager user){
-		this.user = user;
-		return;
-	}
-	
-	public void setServer(ServerManager server){
-		this.server = server;
-		return;
-	}
-	
-	
-	public void setPacket(PacketManager packet) {
-		this.packet = packet;
-	}
-	
-	public void setSecurity(SecurityManager security) {
-		this.security = security;
-	}
-	
-	public void setRequest(RequestManager request){
-		this.request = request;
-	}
-
-	public void setGeneralizer(GeneralizerManager generalizer){
-		this.generalizer = generalizer;
-	}
-
-	public void setDialog(DialogQueryManager dialog) {
-		this.dialog = dialog;
-	}
-
-	public void setBroadcast(BroadcastManager broadcast) {
-		this.broadcast = broadcast;
-	}
-
 
 	public void start() throws Exception{
 		//Start all part of application including thread
 		this.initCommands();
 		//do smthg
-		this.log.log(this, "Core started.");
-		terminal.start();
+		this.getLog().log(this, "Core started.");
+		this.getTerminal().start();
 		
 		//wait closing
 		this.loop();
@@ -91,18 +55,17 @@ public class CoreManager{
 	
 	public void loop() throws InterruptedException{
 		while(true){
-			if(!this.terminal.isRunning()){
+			if(!this.getTerminal().isRunning()){
 				break;
 			}else{
 				Thread.sleep(1000);
 			}
 		}
-		this.terminal = null;
 		this.close();
 	}
 	
 	public void close(){
-		this.log.log(this, "Closing app.");
+		this.getLog().log(this, "Closing app.");
 		//close openManager
 		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
 		 while (it.hasNext()) {
@@ -120,42 +83,12 @@ public class CoreManager{
 	
 	public void initCommands()throws Exception{
 		//populate Object in the hashMap Instance
-		String instanceName = this.terminal.getClass().getName();
-        instanceName = instanceName.replace("manager.", "");
-        instanceName = instanceName.replace("Manager", "");
-        instanceName = instanceName.toLowerCase();
-		instance.put(instanceName, this.terminal);
 		
-		instanceName = this.user.getClass().getName();
-        instanceName = instanceName.replace("manager.", "");
-        instanceName = instanceName.replace("Manager", "");
-        instanceName = instanceName.toLowerCase();
-		instance.put(instanceName, this.user);
 		
-		instanceName = this.server.getClass().getName();
-        instanceName = instanceName.replace("manager.", "");
-        instanceName = instanceName.replace("Manager", "");
-        instanceName = instanceName.toLowerCase();
-		instance.put(instanceName, this.server);
-		
-		instanceName = this.packet.getClass().getName();
-        instanceName = instanceName.replace("manager.", "");
-        instanceName = instanceName.replace("Manager", "");
-        instanceName = instanceName.toLowerCase();
-		instance.put(instanceName, this.packet);
-		
-		instanceName = this.request.getClass().getName();
-        instanceName = instanceName.replace("manager.", "");
-        instanceName = instanceName.replace("Manager", "");
-        instanceName = instanceName.toLowerCase();
-		instance.put(instanceName, this.request);
-		
-		instanceName = this.dialog.getClass().getName();
-        instanceName = instanceName.replace("manager.", "");
-        instanceName = instanceName.replace("Manager", "");
-        instanceName = instanceName.toLowerCase();
-		instance.put(instanceName, this.dialog);
-		
+		for(Object module: this.modules){
+			if(module != null) instance.put(StandardizationModule.apply(module.getClass().getName()), module);
+		}
+			
 		 Iterator<Entry<String, Object>> it = instance.entrySet().iterator();
 		    while (it.hasNext()) {
 		        Map.Entry<String, Object> objMap = (Map.Entry<String, Object>)it.next();
@@ -175,18 +108,18 @@ public class CoreManager{
 		String[] cmd = str.split(" ");
 		//TODO Display Help when 1 args ?
 		if (cmd.length < 2){
-			this.log.err(this,"Minimum of 2 instruction to run a command. Syntax : .<method> <manager> <parameter>");
+			this.getLog().err(this,"Minimum of 2 instruction to run a command. Syntax : .<method> <manager> <parameter>");
 			return;
 		}
 		String command = cmd[0];
 		String manager = cmd[1];
 		int nbArgs = cmd.length - 2 ; //remove command and instance 
 		if(!this.instance.containsKey(manager) || !this.commands.containsKey(manager+"-"+command)){
-			this.log.err(this,command + " not found or " + manager + " not exist/loaded" );
+			this.getLog().err(this,command + " not found or " + manager + " not exist/loaded" );
 			return;
 		}
 		if(nbArgs < this.commands.get(manager+"-"+command).getParameterTypes().length ){
-			this.log.err(this,"Number of arg expected : " +  this.commands.get(manager+"-"+command).getParameterTypes().length);
+			this.getLog().err(this,"Number of arg expected : " +  this.commands.get(manager+"-"+command).getParameterTypes().length);
 			return;
 		}
 		
@@ -194,17 +127,17 @@ public class CoreManager{
 		switch (this.commands.get(manager+"-"+command).getParameterTypes().length){
 		case 0:
 			if ( (obj = this.commands.get(manager+"-"+command).invoke(this.instance.get(manager))) != null){
-				this.log.log(this,obj.toString());
+				this.getLog().log(this,obj.toString());
 			}
 			break;
 		case 1:
 			if ( (obj = this.commands.get(manager+"-"+command).invoke(this.instance.get(manager), cmd[2])) != null){
-				this.log.log(this,obj.toString());
+				this.getLog().log(this,obj.toString());
 			}
 			break;
 		case 2:
 			if ( (obj = this.commands.get(manager+"-"+command).invoke(this.instance.get(manager), cmd[2], cmd[3])) != null){
-				this.log.log(this,obj.toString());
+				this.getLog().log(this,obj.toString());
 			}
 		default:
 			
@@ -214,39 +147,88 @@ public class CoreManager{
 		return;
 	}
 	
+	
+	public String getService() {
+		return service;
+	}
 	//Redirect to right module
 	//maybe execution policy ????
-	public TerminalManager getTerminalManager(){
-		return this.terminal;
+	public TerminalManager getTerminal(){
+		for(Object o: this.modules){
+			if(o instanceof TerminalManager){
+				return (TerminalManager)o;
+			}		
+		}
+		return null;
 	}
-	public LogManager getLogManager(){
-		return this.log;
+	public LogManager getLog(){
+		for(Object o: this.modules){
+			if(o instanceof LogManager){
+				return (LogManager)o;
+			}		
+		}
+		return null;
 	}
-	public UserManager getUserManager(){
-		return this.user;
+	public UserManager getUser(){
+		for(Object o: this.modules){
+			if(o instanceof UserManager){
+				return (UserManager)o;
+			}		
+		}
+		return null;
 	}
-	public PacketManager getPacketManager(){
-		return this.packet;
+	public PacketManager getPacket(){
+		for(Object o: this.modules){
+			if(o instanceof PacketManager){
+				return (PacketManager)o;
+			}		
+		}
+		return null;
 	}
 	
-	public SecurityManager getSecurityManager(){
-		return this.security;
+	public SecurityManager getSecurity(){
+		for(Object o: this.modules){
+			if(o instanceof SecurityManager){
+				return (SecurityManager)o;
+			}		
+		}
+		return null;
 	}
 	
-	public RequestManager getRequestManager(){
-		return this.request;
+	public RequestManager getRequest(){
+		for(Object o: this.modules){
+			if(o instanceof RequestManager){
+				return (RequestManager)o;
+			}		
+		}
+		return null;
 	}
 	
-	public GeneralizerManager getGeneralizerManager(){
-		return this.generalizer;
+	public GeneralizerManager getGeneralizer(){
+		for(Object o: this.modules){
+			if(o instanceof GeneralizerManager){
+				return (GeneralizerManager)o;
+			}		
+		}
+		return null;
 	}
 
 	public DialogQueryManager getDialog() {
-		return dialog;
+		for(Object o: this.modules){
+			if(o instanceof DialogQueryManager){
+				return (DialogQueryManager)o;
+			}		
+		}
+		return null;
 	}
 
 	public BroadcastManager getBroadcast() {
-		return broadcast;
+		for(Object o: this.modules){
+			if(o instanceof BroadcastManager){
+				return (BroadcastManager)o;
+			}		
+		}
+		return null;
 	}
 	
 	

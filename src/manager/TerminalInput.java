@@ -31,7 +31,7 @@ public class TerminalInput implements Runnable{
 				break;
 			}
 		}
-		this.manager.getCore().getLogManager().log(this,"stopped");
+		this.manager.getCore().getLog().log(this,"stopped");
 		this.running = false;
 		return;
 	}

@@ -6,7 +6,7 @@ public class ServerModel {
 	private ServerManager manager = null;
 	
     private String ipDest = "127.0.0.1";
-    private int port = 0;
+    private int port = 5555;
     private int maxConnexion = 0;
 	
 	public void setManager(ServerManager manager){
