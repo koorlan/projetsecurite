@@ -4,6 +4,7 @@ import manager.*;
 import model.*;
 
 public class CentralServer {
+	//Don't worry of erros.. need to push in order to work from anywhere <3
 	private CoreManager core = null;
 	
 	public CentralServer(){
