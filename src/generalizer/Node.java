@@ -42,9 +42,19 @@ public abstract class Node {
 	    	return key == i;
 	    }
 
+	    public boolean containsData (String i)
+	    {
+	    	return data == i;
+	    }
+	    
 	    public Node getNode(String value)
 	    {
 	    	return key == value ? this : null;
+	    }
+	    
+	    public Node getNodeData(String value)
+	    {
+	    	return data == value ? this : null;
 	    }
 	    
 	    public void ordonize(ArrayList<String> generalizedResearch)

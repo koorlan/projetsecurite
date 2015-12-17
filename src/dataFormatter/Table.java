@@ -3,9 +3,9 @@ package dataFormatter;
 public enum Table {
 	
 	//share policy table 
-	SP_TABLE("0", "sp_table"),
+	SP_TABLE("0", "Cles_Types AS ct, Donnees_Chiffrees AS dc, Liens as l"),
 	//
-	DATA_TABLE("1", "data_table");
+	DATA_TABLE("1", "donnees_chiffrees");
 	
 	private String key = "";
 	private String value = "";

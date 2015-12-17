@@ -3,12 +3,12 @@ package dataFormatter;
 public enum Type {
 	
 	ALL("0", "*"),
-	NAME("1", "name"), 
-	PICTURE("2", "img"),
-	ADDRESS("3", "addr"),
-	GROUP("4", "group"),
-	STATUS("5", "status"),
-	ASSIGNEMENT("6", "assignement");
+	NAME("1", "Nom"), 
+	ASSIGNEMENT("2", "Affectation"),
+	STATUS("3", "Statut"),
+	MAIL("4", "AdresseMail"),
+	TEL("5", "Tel"),
+	PICTURE("6", "Photo");
 
 	private String value = "";
 	private String key = ""; 
@@ -34,6 +34,4 @@ public enum Type {
 		return "key :"+ key + " value :" + value;
 	}
 	
-	
-
 }

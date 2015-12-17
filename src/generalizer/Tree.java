@@ -30,6 +30,11 @@ public class Tree {
 		return root.contains(i);
 	}
 	 
+	public boolean containsData(String i) 
+	{
+		return root.containsData(i);
+	}
+	
 	public boolean equals(Object o) 
 	{
 		return root.equals(o);
@@ -38,6 +43,11 @@ public class Tree {
 	public Node getNode(String value)
 	{
 		return root.getNode(value);
+	}
+	
+	public Node getNodeData(String value)
+	{
+		return root.getNodeData(value);
 	}
 	
 	public ArrayList<String> generalize(String currentResearch)
@@ -51,28 +61,8 @@ public class Tree {
 		{		
 			variation = this.getNode(currentResearch).getHeight() - 66;
 		}
-		
-		/*
-		 * For debugging 		 * 
-		 * char newHeight = (char)(currentResearch.codePointAt(0) - variation);
-		 * String newWidth = currentResearch.substring(1, currentResearch.length() - variation);
-		 * System.out.println("new height " + newHeight);
-		 * System.out.println("new width " + newWidth);
-		 * 
-		 */
-		
 		String newData = new StringBuffer().append((char)(currentResearch.codePointAt(0) - variation)).append(currentResearch.substring(1, currentResearch.length() - variation)).toString().intern();		
-		/*
-		 * For debugging 
-		 * 
-		System.out.println("current data " + this.getNode(currentResearch));
-		System.out.println("variation " + variation);
-		System.out.println("new data " + newData);
-		System.out.println("to put in the list " + this.getNode(newData));
-		*
-		*/
 		this.getNode(newData).ordonize(ret);
-		//System.out.println(ret);
 		return ret;
 	}
 	

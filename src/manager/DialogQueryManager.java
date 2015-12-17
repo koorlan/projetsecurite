@@ -1,11 +1,13 @@
 package manager;
 
+
 import javax.swing.*;
 import java.sql.*;
 import java.awt.event.*;
 import java.awt.GridLayout;
 
 public class DialogQueryManager extends JFrame {
+	
 	WindowListener l;
 	
 	private CoreManager core; 
@@ -16,14 +18,17 @@ public class DialogQueryManager extends JFrame {
 	JComboBox<String> groupe;
 	JButton bouton;
 	
+	String port; 
+	
 	public DialogQueryManager(CoreManager core){
 		// We give a name for the interface
-		super("Envoyer une requête");		
+		super("Envoyer une requete");		
 		this.core = core;
 	}
 	
 
-	public void start() throws SQLException {
+	public void start(String port) throws SQLException {
+		this.port = port;
 		l = new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
 				//System.exit(0);
@@ -63,7 +68,7 @@ public class DialogQueryManager extends JFrame {
 		Statement stmt = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
+			c = DriverManager.getConnection("jdbc:sqlite:Initialisation/datas/InitDB.sqlite");
 		} catch ( Exception e ) {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
@@ -97,7 +102,7 @@ public class DialogQueryManager extends JFrame {
 		Statement stmt = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
+			c = DriverManager.getConnection("jdbc:sqlite:Initialisation/datas/InitDB.sqlite");
 		} catch ( Exception e ) {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
@@ -130,7 +135,7 @@ public class DialogQueryManager extends JFrame {
 		Statement stmt = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
+			c = DriverManager.getConnection("jdbc:sqlite:Initialisation/datas/InitDB.sqlite");
 		} catch ( Exception e ) {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
@@ -164,7 +169,7 @@ public class DialogQueryManager extends JFrame {
 		Statement stmt = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:datas/InitDB.sqlite");
+			c = DriverManager.getConnection("jdbc:sqlite:Initialisation/datas/InitDB.sqlite");
 		} catch ( Exception e ) {
 			System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 			System.exit(0);
@@ -205,9 +210,16 @@ public class DialogQueryManager extends JFrame {
 							+ "Merci de remplir l'ensemble des champs.");
 				}
 				else {
-					// send a new query on the network
+				
+					System.out.println(type.getSelectedItem());
+					System.out.println(affectation.getSelectedItem());
+					System.out.println(groupe.getSelectedItem());
+					System.out.println(statut.getSelectedItem());
+					
+					core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem(), port);
 				}
 			} 
 		});
 	}
 }
+

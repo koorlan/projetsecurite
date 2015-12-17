@@ -2,7 +2,7 @@ package dataFormatter;
 
 public enum Action {
 	
-	SELECT("0", "SELECT type, ref, encipher_skey, owner_grp, owner_stat, owner_aff"), 
+	SELECT("0", "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, dc.Metadonnees, dc.Valeur"), 
 	CREATE("1", "CREATE");
 
 	private String key = "";

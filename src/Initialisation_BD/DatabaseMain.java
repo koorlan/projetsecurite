@@ -10,41 +10,41 @@ public class DatabaseMain {
 	{
 		try
 		{
-			System.out.println("Mise en place des répertoires");
+			System.out.println("Mise en place des repertoires");
 			Runtime.getRuntime().exec("rm -r " + PREFIX);
 			Runtime.getRuntime().exec("mkdir " + PREFIX);		
 			Runtime.getRuntime().exec("cp " + PREFIX + "/../" + INIT_NAME + " " + PREFIX);		
 
-			// On commence par compléter la BD originale (avec les clés)
+			// On commence par completer la BD originale (avec les cles)
 			Statement stmt1=DBManager.OpenCreateDB(INIT_FILE);
 			RunQuery(stmt1, QUERIES[0]); //Supprime la table Cles
 			RunQuery(stmt1, QUERIES[1]); //Cree la table Cles avec Kpub et Kpriv
 			RunQuery(stmt1, QUERIES[2]); //Rempli Cles (ID de Groupes/Statuts/Affectations)
-			RunQuery(stmt1, QUERIES[36]); //On crée la colonne Liste_groupes dans la table Utilisateurs
-			RunQuery(stmt1, QUERIES[51]); //On rajoute une colonne refBD à Données
-			RunQuery(stmt1, QUERIES[52]); //On rajoute une refBD aléatoire à Données
+			RunQuery(stmt1, QUERIES[36]); //On cree la colonne Liste_groupes dans la table Utilisateurs
+			RunQuery(stmt1, QUERIES[51]); //On rajoute une colonne refBD à Donnees
+			RunQuery(stmt1, QUERIES[52]); //On rajoute une refBD aleatoire à Donnees
 			RunQuery(stmt1, QUERIES[53]); //On rajoute un colonne ID_Cred à Cred_Autorise
-			RunQuery(stmt1, QUERIES[54]); //On rajoute un ID_Cred aléatoire à Cred_Autorise
+			RunQuery(stmt1, QUERIES[54]); //On rajoute un ID_Cred aleatoire à Cred_Autorise
 
 
 			// On copie les tables contenant les noeuds, users et frontales dans une BD TEMP
 			// Pour pouvoir la parcourir (et en même temps attacher la BD originale) car sinon
-			// on a des problèmes de verrouillage de la BD pendant le parcours
+			// on a des problemes de verrouillage de la BD pendant le parcours
 			Statement stmt4=DBManager.OpenCreateDB(PREFIX + "/TEMP.sqlite");
 			RunQuery(stmt4, QUERIES[5]); //attache initDB
 			RunQuery(stmt4, QUERIES[6]); //Copie de la table utilisateurs
 			RunQuery(stmt4, QUERIES[7]); //Copie de la table frontales
 			RunQuery(stmt4, QUERIES[19]); //Copie de la table des NoeudsTOR
 			RunQuery(stmt4, QUERIES[23]); //Copie de la table des Types_Utilisateurs
-			RunQuery(stmt4, QUERIES[9]); //Copie de la table des clés
+			RunQuery(stmt4, QUERIES[9]); //Copie de la table des cles
 			RunQuery(stmt4, QUERIES[8]); //Detache initDB
 
-			ResultSet rs3 = stmt4.executeQuery(QUERIES[4]); //On récupère les Logins 
+			ResultSet rs3 = stmt4.executeQuery(QUERIES[4]); //On recupere les Logins 
 			String login2 =null;
 			while (rs3.next()==true ) {
 				login2 = rs3.getString("Login");
 				System.out.println("On traite " + login2);
-				ResultSet rs4 = stmt1.executeQuery(QUERIES[37] + login2 + "'"); //On récupère les groupes
+				ResultSet rs4 = stmt1.executeQuery(QUERIES[37] + login2 + "'"); //On recupere les groupes
 				String ListG = "";
 				while (rs4.next() == true){
 					ListG = ListG + "//" + rs4.getString("Groupe");
@@ -56,57 +56,57 @@ public class DatabaseMain {
 
 
 			// TODO INSERER ICI LE CALCUL DES CLES PUB/PRIV
-			// Il faut itérer sur cles (comme on itere sur les logins)
+			// Il faut iterer sur cles (comme on itere sur les logins)
 
 			RunQuery(stmt1, QUERIES[3]); //Rajoute le champ Ksec à la table Types_Utili
 			RunQuery(stmt1, QUERIES[38]); //Rajoute le champ Ksec à la table Types_Utili
 
 			// TODO INSERER ICI LE CALCUL DES CLES SECRETES DE TYPE
-			// Il faut itérer sur Types_utili (comme on itere sur les logins)
-			/*ResultSet rs3 = stmt4.executeQuery(QUERIES[35]); // Récupère les types utilisateur
+			// Il faut iterer sur Types_utili (comme on itere sur les logins)
+			/*ResultSet rs3 = stmt4.executeQuery(QUERIES[35]); // Recupere les types utilisateur
 			String Ksec =null;
 			while (rs3.next()==true ) {
 				Ksec = rs3.getString("Ksec");
 			 */
 			// TODO INSERER ICI LE CALCUL DU HASH DU PASSWORD (remplacer la valeur par son hash)
 
-			// On crée les BD des utilisateurs
-			ResultSet rs = stmt4.executeQuery(QUERIES[4]); // Récupère les logins
+			// On cree les BD des utilisateurs
+			ResultSet rs = stmt4.executeQuery(QUERIES[4]); // Recupere les logins
 			String login =null;
 			System.out.println("On y est");
 			while (rs.next()==true ) {
 				login = rs.getString("Login");
-				// On crée la BD "Sécurisée". Normalement cette BD devrait être déportée dans un token sécurisé
-				// Car elle contient les données en clair et les clés secrètes et privées....
+				// On cree la BD "Securisee". Normalement cette BD devrait être deportee dans un token securise
+				// Car elle contient les donnees en clair et les cles secretes et privees....
 				Statement stmt2=DBManager.OpenCreateDB(PREFIX + "/" + login + "_SEC.sqlite");
 				RunQuery(stmt2, QUERIES[5]); //attache initDB
 				RunQuery(stmt2, QUERIES[9]); //Copie de la tables des cles
-				RunQuery(stmt2, QUERIES[20] + login +"' " + QUERIES[21] + login +"' " + QUERIES[22] + login +"') "); //Suppression des clés privées qui ne sont pas associées à l'utilisateur
+				RunQuery(stmt2, QUERIES[20] + login +"' " + QUERIES[21] + login +"' " + QUERIES[22] + login +"') "); //Suppression des cles privees qui ne sont pas associees à l'utilisateur
 				RunQuery(stmt2, QUERIES[10]); //Copie de la tables des groupes
 				RunQuery(stmt2, QUERIES[11]); //Copie de la tables des statuts
 				RunQuery(stmt2, QUERIES[12]); //Copie de la tables des affectations
-				RunQuery(stmt2, QUERIES[13] + login +"'"); //Copie des données de l'utilisateur
+				RunQuery(stmt2, QUERIES[13] + login +"'"); //Copie des donnees de l'utilisateur
 				RunQuery(stmt2, QUERIES[14] + login +"'"); //Copie des politiques de l'utilisateur
-				RunQuery(stmt2, QUERIES[15] + login +"'"); //Copie des types et clés, politiques de l'utilisateur
-				RunQuery(stmt2, QUERIES[16] + login +"'"); //Copie des credentials autorisés de l'utilisateur
+				RunQuery(stmt2, QUERIES[15] + login +"'"); //Copie des types et cles, politiques de l'utilisateur
+				RunQuery(stmt2, QUERIES[16] + login +"'"); //Copie des credentials autorises de l'utilisateur
 				RunQuery(stmt2, QUERIES[17] + login +"'"); //Copie du login/passwd de l'utilisateur
 				RunQuery(stmt2, QUERIES[18] + login +"'"); //Copie de la frontale de l'utilisateur
 				RunQuery(stmt2, QUERIES[19]); //Copie de la tables des NoeudsTOR
 
-				// Création de la BD non sécurisée pour l'utilisateur
+				// Creation de la BD non securisee pour l'utilisateur
 				Statement stmt3=DBManager.OpenCreateDB(PREFIX + "/" + login+ ".sqlite");
 				RunQuery(stmt3, QUERIES[5]); //attache initDB
 				RunQuery(stmt3, QUERIES[24] + login +"'"); // Types
-				RunQuery(stmt3, QUERIES[25] + login +"'"); //Données
-				RunQuery(stmt3, QUERIES[26]); //Chiffrement données (en faux pour l'instant)
+				RunQuery(stmt3, QUERIES[25] + login +"'"); //Donnees
+				RunQuery(stmt3, QUERIES[26]); //Chiffrement donnees (en faux pour l'instant)
 				RunQuery(stmt3, QUERIES[27] + login +"'"); //U_Cles_Types
-				RunQuery(stmt3, QUERIES[28]); //Création colonne chiffrement crédendials
-				RunQuery(stmt3, QUERIES[29]); //Chiffrement crédentials (en faux pour l'instant)
+				RunQuery(stmt3, QUERIES[28]); //Creation colonne chiffrement credendials
+				RunQuery(stmt3, QUERIES[29]); //Chiffrement credentials (en faux pour l'instant)
 			}
 			rs.close();
 
-			// On crée maintenant les Frontales des clusters
-			ResultSet rs2 = stmt4.executeQuery(QUERIES[30]); // Récupère les Frontales
+			// On cree maintenant les Frontales des clusters
+			ResultSet rs2 = stmt4.executeQuery(QUERIES[30]); // Recupere les Frontales
 			String frontale =null;
 			while (rs2.next()==true){
 				frontale = rs2.getString("Frontale");
@@ -114,32 +114,32 @@ public class DatabaseMain {
 				Statement stmt5=DBManager.OpenCreateDB(PREFIX + "/" + frontale + ".sqlite");
 				RunQuery(stmt5, QUERIES[5]); //attache initDB
 				RunQuery(stmt5, QUERIES[31]); //server
-				RunQuery(stmt5, QUERIES[32] + frontale +"'"); //table utilisateurs (Statut, Affectation généralisés ? Ou desanonymisation ?)
-				RunQuery(stmt5, QUERIES[33] + frontale +"'"); //Données de base pour Donnees_Chiffrees, Liens et Cles_Types--> provisoire
-				RunQuery(stmt5, QUERIES[41]); //Création colonne Metadonnées
-				RunQuery(stmt5, QUERIES[42]); //Remplissage colonne Metadonnées
-				RunQuery(stmt5, QUERIES[43]+ frontale +"'"); //Creation Réelle table Données_Chiffrees
+				RunQuery(stmt5, QUERIES[32] + frontale +"'"); //table utilisateurs (Statut, Affectation generalises ? Ou desanonymisation ?)
+				RunQuery(stmt5, QUERIES[33] + frontale +"'"); //Donnees de base pour Donnees_Chiffrees, Liens et Cles_Types--> provisoire
+				RunQuery(stmt5, QUERIES[41]); //Creation colonne Metadonnees
+				RunQuery(stmt5, QUERIES[42]); //Remplissage colonne Metadonnees
+				RunQuery(stmt5, QUERIES[43]+ frontale +"'"); //Creation Reelle table Donnees_Chiffrees
 				RunQuery(stmt5, QUERIES[46] + frontale +"'"); //Table Cles_Types
 				RunQuery(stmt5, QUERIES[55]+ frontale +"'"); //Creation table Liens
 				RunQuery(stmt5, QUERIES[44]); //Supression table provisoire
-				RunQuery(stmt5, QUERIES[26]); //Chiffrement données (en faux pour l'instant)
-				RunQuery(stmt5, QUERIES[45]); //Chiffrement Metadonnées (en faux pour l'instant)
+				RunQuery(stmt5, QUERIES[26]); //Chiffrement donnees (en faux pour l'instant)
+				RunQuery(stmt5, QUERIES[45]); //Chiffrement Metadonnees (en faux pour l'instant)
 				RunQuery(stmt5, QUERIES[48]); //Remplissage E_Cred_Ksec
 				RunQuery(stmt5, QUERIES[49]); //Table Logcom
 				RunQuery(stmt5, QUERIES[50]); //Table Routage
 			}
 			rs2.close();
 
-			// On crée maintenant le Serveur Central
+			// On cree maintenant le Serveur Central
 			Statement stmt6 = DBManager.OpenCreateDB(PREFIX + "/Server.sqlite");
 			RunQuery(stmt6, QUERIES[5]); //attache initDB
 			RunQuery(stmt6, QUERIES[35]); //Copie de la tables des Frontales
 			RunQuery(stmt6, QUERIES[49]); //Table LogCOM
 
-			// On crée maintenant les BD Noeud TOR
+			// On cree maintenant les BD Noeud TOR
 			// TODO il faut en faire n (ou n est le nombre de lignes dans la table NoeudsTOR
 			// TODO il faut aussi ajouter un nom aux noeuds.... (pour que chacun sache qui il est)
-			ResultSet rs4 = stmt4.executeQuery(QUERIES[56]); // Récupère les noeuds TOR
+			ResultSet rs4 = stmt4.executeQuery(QUERIES[56]); // Recupere les noeuds TOR
 			String NoeudTOR =null;
 			while (rs4.next()==true){
 				NoeudTOR = rs4.getString("NoeudTOR");

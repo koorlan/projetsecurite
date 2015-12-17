@@ -27,9 +27,19 @@ public class Leaf extends Node{
 		return super.contains(i);
 	}
 	
+	public boolean containsData(String i)
+	{
+		return super.containsData(i);
+	}
+	
 	public Node getNode(String value)
     {
 		return super.getNode(value);
+    }
+	
+	public Node getNodeData(String value)
+    {
+		return super.getNodeData(value);
     }
 	
 	public void ordonize(ArrayList<String> generalizedResearch)
@@ -54,5 +64,6 @@ public class Leaf extends Node{
 		return getKey() == l.getKey();
 	}
 }
+
 
 

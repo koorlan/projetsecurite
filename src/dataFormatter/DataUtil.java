@@ -28,32 +28,32 @@ public class DataUtil implements Serializable {
 		
 		data += "::";
 	}
-	
+
 	public void setType(String type)
 	{
-		if(type.compareTo("name") == 0)
+		if(type.compareTo("Nom") == 0)
 		{	
 			data += Type.NAME.getKey();
 		}
-		else if(type.compareTo("img") == 0)
+		else if(type.compareTo("Affectation") == 0)
 		{	
-			data += Type.PICTURE.getKey();
+			data += Type.ASSIGNEMENT.getKey();
 		}	
-		else if(type.compareTo("addr") == 0)
+		else if(type.compareTo("Statut") == 0)
 		{	
-			data += Type.ADDRESS.getKey();
-		}
-		else if(type.compareTo("group") == 0)
-		{
-			data += Type.GROUP.getKey();
-		}
-		else if(type.compareTo("status") == 0)
-		{
 			data += Type.STATUS.getKey();
 		}
-		else if(type.compareTo("assignement") == 0)
+		else if(type.compareTo("AdresseMail") == 0)
 		{
-			data += Type.ASSIGNEMENT.getKey();
+			data += Type.MAIL.getKey();
+		}
+		else if(type.compareTo("Tel") == 0)
+		{
+			data += Type.TEL.getKey();
+		}
+		else if(type.compareTo("Photo") == 0)
+		{
+			data += Type.PICTURE.getKey();
 		}	
 		data += "::";
 	}

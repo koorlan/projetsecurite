@@ -8,28 +8,38 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.mysql.jdbc.Connection;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+
+//import com.mysql.jdbc.Connection;
 
 import dataFormatter.*;
+import generalizer.GeneralizerManager;
+import generalizer.GeneralizerModel;
+import generalizer.GsaList;
 
 public class DBManager {
 
+	private CoreManager core;
+	
 	private static String sql;
 	private static boolean isFormatted; 
 	private static long id;
 
-	private final String DB_NAME = "testjava";
+	private final String PLUGIN = "org.sqlite.JDBC";
 	
-	private final String LOGIN = "root";
-	private final String PASSWD = "operator";
+	private final String DB_PATH = "jdbc:sqlite:Initialisation/datas/";
+	private final String DB_NAME = "F1.sqlite";
 
-	public DBManager()
+	public DBManager(CoreManager core)
 	{
+		this.core = core;
 		sql = "";
 		setFormatted(false); 
 		id = 0; 
 	}
 	
+	// no need group here 
 	public void build(DataUtil du)
 	{
 		Pattern p = Pattern.compile("(/BEG/{1})([0-1]{1})::([0-3]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
@@ -63,7 +73,7 @@ public class DBManager {
 			boolean flag = false;
 			
 			/* Data (enum) */
-			sql += "WHERE ( ";
+			sql += "WHERE ( l.RefBD = dc.RefBD AND l.ID_Cred = ct.ID_Cred AND ";
 			
 			while (tm.find()) 	
 			{	
@@ -73,7 +83,7 @@ public class DBManager {
 				{
 					if(tm.group().compareTo(type.getKey()) == 0)
 					{
-							sql += "type = '" + type.getValue() + "' ";
+							sql += "dc.Type = '" + type.getValue() + "' ";
 							flag = true; 
 					}
 					
@@ -87,6 +97,10 @@ public class DBManager {
 			ArrayList<String> assignementList = new ArrayList<String>();
 			System.out.println(m.group());
 		
+		//	GeneralizerModel genModel = new GeneralizerModel();
+			//GeneralizerManager genManager = new GeneralizerManager(genModel, this.core);	
+			
+			//new GsaList(gm.find(), (new GeneralizerModel()).getGroupTree());
 			/* group list matcher */
 			if(m.start(5) != -1) // check if the 5th group exists
 			{
@@ -94,9 +108,11 @@ public class DBManager {
 				Matcher gm = p.matcher(m.group(5));
 				while(gm.find())
 				{
-					grpList.add(gm.group());
+					grpList.add( 
+									(new GsaList
+											(gm.group(), GeneralizerModel.getGroupTree())
+									).getValue());
 				}
-				
 			}
 			/* status list matcher */
 			if(m.start(6) != -1)
@@ -104,19 +120,23 @@ public class DBManager {
 				Matcher sm = p.matcher(m.group(6));
 				while(sm.find())
 				{
-					statList.add(sm.group());
+					statList.add(
+									(new GsaList
+											(sm.group(), GeneralizerModel.getStatusTree())
+									).getValue());
 				}
-				
 			}
 			/* assignement list matcher */
 			if(m.start(7) != -1)
 			{	
-				Matcher am = p.matcher(m.group(6));
+				Matcher am = p.matcher(m.group(7));
 				while(am.find())
 				{
-					assignementList.add(am.group());
+					assignementList.add(
+											(new GsaList
+													(am.group(), GeneralizerModel.getAssignementTree())
+											).getValue());
 				}
-				
 			}
 			/* format GSA list into sql request */
 			build(grpList, statList, assignementList);
@@ -131,24 +151,25 @@ public class DBManager {
 		
 		if(groupList.size() > 0)
 		{	
-			sql += "( owner_grp = " + "'" + groupList.get(0) +"'";
-			for (i = 1 ; i < groupList.size() ; i++) 
+			sql += "( dc.Affect_Gen = " + "'" + assignementList.get(0) +"'";
+			for (i = 1 ; i < assignementList.size() ; i++) 
 			{
-				sql += " OR owner_grp = " + "'" + groupList.get(i) + "'";	
+				sql += " OR dc.Affect_Gen = " + "'" + assignementList.get(i) + "'";	
 			}
 			sql += ")"; 
 		}
 		if(statusList.size() > 0)
 		{
-			sql += " AND ( owner_stat = " + "'" + statusList.get(0) + "'";
+			sql += " AND ( dc.Statut_Gen = " + "'" + statusList.get(0) + "'";
 			for (i = 1 ; i < statusList.size
 					() ; i++) 
 			{
-				sql += " OR owner_stat = " + "'"+ statusList.get(i) +"'";	
+				sql += " OR dc.Statut_Gen = " + "'"+ statusList.get(i) +"'";	
 			}
-			
 			sql += ")"; 
-		}
+		} 
+		
+		/*
 		if(assignementList.size() > 0)
 		{
 			sql += " AND ( owner_aff = " + "'" + assignementList.get(0) + "'";
@@ -156,9 +177,8 @@ public class DBManager {
 			{
 				sql += " OR owner_aff = " + "'"+ assignementList.get(i) +"'";	
 			}
-			
 			sql += ")"; 
-		}
+		}*/
 		
 	}
 	
@@ -172,57 +192,40 @@ public class DBManager {
 		return id;
 	}
 
-	public ArrayList<String> search() throws ClassNotFoundException
+	public ArrayList<String> search() throws ClassNotFoundException, SQLException
 	{
-		String url = "jdbc:mysql://localhost/" + DB_NAME;
 		
-		Connection cn = null;
+		//////
+		String url = "jdbc:sqlite:datas/frontale.sqlite";
+		
 		Statement st = null;
 		ArrayList<String> results = new ArrayList<String>();
-		try 
-		{	
-			// load driver
-			Class.forName("com.mysql.jdbc.Driver");
-			
-			// get connection
-			cn = (Connection) DriverManager.getConnection(url, LOGIN, PASSWD);
-			
-			// create statement 
-			st = cn.createStatement();
-			
-			// execute "select" request
-			ResultSet rs = st.executeQuery(sql);
-			
-			// saving some interesting fields
-			while(rs.next())
-			{
-				results.add(rs.getString(1));	// ref
-				results.add(rs.getString(2));	// encipher_skey
-				results.add(rs.getString(3));	// owner_grp
-				results.add(rs.getString(4));	// owner_status
-				results.add(rs.getString(5));	// owner_aff
-			}
-			
+
+		// load driver
+		Class.forName(PLUGIN);
+		
+		// get connection
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH+DB_NAME);
+		
+		// create statement 
+		st = cn.createStatement();
+		
+		// execute "select" request
+		System.out.println(sql+";");
+		ResultSet rs = st.executeQuery(sql);
+		
+		// saving some interesting fields
+		while(rs.next())
+		{
+			results.add(rs.getString(1));	// E_Cred_Ksec
+			results.add(rs.getString(2));	// Cred_Auto_Ref
+			results.add(rs.getString(3));	// Meta_Chiffree
+			results.add(rs.getString(4));	// Valeur_Chiffree
 		}
 		
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-		}
-		
-		finally
-		{
-			try
-			{
-				cn.close();
-				st.close();
-			}
-			catch(SQLException e)
-			{
-				e.printStackTrace();
-			}
-			
-		}
+		cn.close();
+		st.close();
+	
 		return results;
 	}
 
