@@ -1,8 +1,30 @@
-
 package Initialisation_BD;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.io.*;
+import java.math.*;
+import javax.crypto.*;
+import java.security.*;
+import java.security.spec.*;
+import java.security.interfaces.*;
+
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.io.*;
+import java.math.*;
+import javax.crypto.*;
+import java.security.*;
+import java.security.spec.*;
+import java.security.interfaces.*;
+
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 
 public class DatabaseMain {
 
@@ -13,7 +35,7 @@ public class DatabaseMain {
 			System.out.println("Mise en place des repertoires");
 			Runtime.getRuntime().exec("rm -r " + PREFIX);
 			Runtime.getRuntime().exec("mkdir " + PREFIX);		
-			Runtime.getRuntime().exec("cp " + PREFIX + "/../" + INIT_NAME + " " + PREFIX);		
+			Runtime.getRuntime().exec("cp " + PREFIX + "/../" + INIT_NAME + " " + PREFIX); 
 
 			// On commence par completer la BD originale (avec les cles)
 			Statement stmt1=DBManager.OpenCreateDB(INIT_FILE);
@@ -25,7 +47,7 @@ public class DatabaseMain {
 			RunQuery(stmt1, QUERIES[52]); //On rajoute une refBD aleatoire à Donnees
 			RunQuery(stmt1, QUERIES[53]); //On rajoute un colonne ID_Cred à Cred_Autorise
 			RunQuery(stmt1, QUERIES[54]); //On rajoute un ID_Cred aleatoire à Cred_Autorise
-
+			RunQuery(stmt1, QUERIES[3]); //Rajoute le champ Ksec à la table Types_Utili
 
 			// On copie les tables contenant les noeuds, users et frontales dans une BD TEMP
 			// Pour pouvoir la parcourir (et en même temps attacher la BD originale) car sinon
@@ -38,7 +60,10 @@ public class DatabaseMain {
 			RunQuery(stmt4, QUERIES[23]); //Copie de la table des Types_Utilisateurs
 			RunQuery(stmt4, QUERIES[9]); //Copie de la table des cles
 			RunQuery(stmt4, QUERIES[8]); //Detache initDB
-
+			
+			
+			
+			
 			ResultSet rs3 = stmt4.executeQuery(QUERIES[4]); //On recupere les Logins 
 			String login2 =null;
 			while (rs3.next()==true ) {
@@ -57,17 +82,41 @@ public class DatabaseMain {
 
 			// TODO INSERER ICI LE CALCUL DES CLES PUB/PRIV
 			// Il faut iterer sur cles (comme on itere sur les logins)
-
-			RunQuery(stmt1, QUERIES[3]); //Rajoute le champ Ksec à la table Types_Utili
-			RunQuery(stmt1, QUERIES[38]); //Rajoute le champ Ksec à la table Types_Utili
+			
+			
+			ResultSet rss = stmt4.executeQuery(QUERIES[57]);
+			String ID_Cle2=null;
+			while (rss.next()==true ) {
+				ID_Cle2 = rss.getString("ID_Cle");
+				System.out.println("On traite " + ID_Cle2);
+				MyRSA rsa = new MyRSA();
+				rsa.generateKeyPair();
+				byte[] publicKey = rsa.getPublicKeyInBytes();
+				byte[] privateKey = rsa.getPrivateKeyInBytes();
+				RunQuery(stmt1, QUERIES[58] + publicKey + QUERIES[59] + ID_Cle2 + "'"); 
+				RunQuery(stmt1, QUERIES[60] + privateKey + QUERIES[59] + ID_Cle2 + "'");
+			} 
+			rss.close();
+			
+			
 
 			// TODO INSERER ICI LE CALCUL DES CLES SECRETES DE TYPE
 			// Il faut iterer sur Types_utili (comme on itere sur les logins)
-			/*ResultSet rs3 = stmt4.executeQuery(QUERIES[35]); // Recupere les types utilisateur
-			String Ksec =null;
-			while (rs3.next()==true ) {
-				Ksec = rs3.getString("Ksec");
-			 */
+			
+			
+			ResultSet rss2 = stmt4.executeQuery(QUERIES[61]); //On recupere les rowid 
+			String ID =null;
+			while (rss2.next()==true){
+				ID = rss2.getString("rowid");
+				KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+				keyGen.init(256); // for example
+				SecretKey secretKey = keyGen.generateKey();
+				byte[] secretKeyInBytes = secretKey.getEncoded();
+				RunQuery(stmt1, QUERIES[63] + secretKeyInBytes + QUERIES[62] + ID + "'");
+			}
+			rss2.close();
+			
+			
 			// TODO INSERER ICI LE CALCUL DU HASH DU PASSWORD (remplacer la valeur par son hash)
 
 			// On cree les BD des utilisateurs
@@ -98,7 +147,12 @@ public class DatabaseMain {
 				RunQuery(stmt3, QUERIES[5]); //attache initDB
 				RunQuery(stmt3, QUERIES[24] + login +"'"); // Types
 				RunQuery(stmt3, QUERIES[25] + login +"'"); //Donnees
-				RunQuery(stmt3, QUERIES[26]); //Chiffrement donnees (en faux pour l'instant)
+			
+				//Chiffrement donnees 
+				
+				
+				
+				/*RunQuery(stmt3, QUERIES[26]); //Chiffrement donnees (en faux pour l'instant)*/
 				RunQuery(stmt3, QUERIES[27] + login +"'"); //U_Cles_Types
 				RunQuery(stmt3, QUERIES[28]); //Creation colonne chiffrement credendials
 				RunQuery(stmt3, QUERIES[29]); //Chiffrement credentials (en faux pour l'instant)
@@ -122,7 +176,11 @@ public class DatabaseMain {
 				RunQuery(stmt5, QUERIES[46] + frontale +"'"); //Table Cles_Types
 				RunQuery(stmt5, QUERIES[55]+ frontale +"'"); //Creation table Liens
 				RunQuery(stmt5, QUERIES[44]); //Supression table provisoire
-				RunQuery(stmt5, QUERIES[26]); //Chiffrement donnees (en faux pour l'instant)
+				 RunQuery(stmt5, QUERIES[26]); //Chiffrement donnees (en faux pour l'instant)
+				//Chiffrement donnees
+
+				
+				
 				RunQuery(stmt5, QUERIES[45]); //Chiffrement Metadonnees (en faux pour l'instant)
 				RunQuery(stmt5, QUERIES[48]); //Remplissage E_Cred_Ksec
 				RunQuery(stmt5, QUERIES[49]); //Table Logcom
@@ -172,7 +230,7 @@ public class DatabaseMain {
 			ex.printStackTrace();
 			System.exit(1);
 
-		}
+		}   
 
 	}
 
@@ -181,9 +239,9 @@ public class DatabaseMain {
 	public final static String INIT_FILE = PREFIX + "/" + INIT_NAME;
 	public static final String[] QUERIES = {
 			"DROP TABLE Cles",
-			"CREATE TABLE Cles (ID_Cle INTEGER PRIMARY KEY  NOT NULL, Kpub TEXT(500),Kpriv TEXT(500))",
+			"CREATE TABLE Cles (ID_Cle TEXT(500) PRIMARY KEY  NOT NULL, Kpub BLOB,Kpriv BLOB)",
 			"insert into Cles Select ID_Cle, 'Kpub' ||ID_Cle, 'Kpriv' ||ID_Cle from Statuts UNION Select ID_Cle,'Kpub' ||ID_Cle, 'Kpriv' ||ID_Cle  from Groupes UNION Select ID_Cle, 'Kpub' ||ID_Cle, 'Kpriv' ||ID_Cle  from Affectations",
-			"ALTER TABLE Types_Utili ADD COLUMN Ksec TEXT(500)",
+			"ALTER TABLE Types_Utili ADD COLUMN Ksec BLOB",
 			"SELECT Login from Utilisateurs",
 			/*5*/
 			"ATTACH '"+ INIT_FILE + "' as 'BASE'",
@@ -248,7 +306,17 @@ public class DatabaseMain {
 			/*55*/
 			"CREATE TABLE Liens as select distinct RefBD, ID_Cred from Provisoire where Frontale = '",
 			"SELECT NoeudTOR from NoeudsTOR",
-			
+			"SELECT ID_Cle from Cles",/*57*/
+			"UPDATE Cles set Kpub = '",/*58*/
+			"' WHERE ID_Cle = '",/*59*/
+			/*60*/
+			"UPDATE Cles set Kpriv = '",
+			"SELECT rowid from Types_Utili",/*61*/
+			"' WHERE rowid = '",/*62*/
+			"UPDATE Types_Utili set Ksec = '",/*63*/
+			"",/*64*/
+			/*65*/
+			"",
 	""};
 
 }
