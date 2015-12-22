@@ -14,31 +14,39 @@ public class GsaList{
 	private ArrayList<String> initialDataList;
 	private ArrayList<String> mainDataList;
 	
+	private String value;
+
 	/* Request id value (0 : uninitialized) */ 
 	private long id = 0;
 
+	public GsaList(String nodeStr, Tree currentTree)
+	{
+		if(currentTree.contains(nodeStr.toString().intern()))
+		{
+			this.setValue(this.matchKeyToData(nodeStr.toString().intern(), currentTree));	
+		}
+	}
+	
 	public GsaList(ArrayList<String> inList, Tree currentTree)
 	{	
 		initialKeyList= new ArrayList<String>();
+		initialDataList= new ArrayList<String>();
 		for(String str : inList)
 		{	
-			if(currentTree.contains(str.toString().intern()))
-				initialKeyList.add(str.toString().intern());
+			if(currentTree.containsData(str.toString().intern()))
+				initialDataList.add(str.toString().intern());
 		}
 		
-		/* keep request's goal in initial* lists */ 
-		initialDataList = matchList(initialKeyList, currentTree);
+		initialKeyList = matchDataToKey(initialDataList, currentTree);
 		
-		/* generalize request and put results in main* lists */
 		mainKeyList = new ArrayList<String>();
 		for (String s : initialKeyList) 
 		{
 			mergeList(s, currentTree);
 		}
-		mainDataList = matchList(mainKeyList, currentTree);
-		
+		mainDataList = matchKeyToData(mainKeyList, currentTree);
 	}
-
+	
 	public ArrayList<String> getInitialKeyList()
 	{
 		return initialKeyList; 
@@ -62,19 +70,40 @@ public class GsaList{
 	
 	private void mergeList(String s, Tree tree)
 	{
-		/* Merge all generalized contents, remove duplicates and sort result */  
+		/* Find all generalized contents, merge them, remove duplicates and sort result */  
 		ArrayList<String> tmp = tree.generalize(s);
 		mainKeyList.removeAll(tmp);
-		mainKeyList.addAll(tmp);
+		for(String str : tmp)
+		{
+			if(str.charAt(0) == 'B')
+				mainKeyList.add(str);
+		}
+		//mainKeyList.addAll(tmp);
 		Collections.sort(mainKeyList);
 	}
 	
-	private ArrayList<String> matchList(ArrayList<String> keyList, Tree tree)
+	public String matchKeyToData(String str, Tree tree)
+	{
+		return tree.getNode(str).getData();
+	}
+	
+	public ArrayList<String> matchKeyToData(ArrayList<String> keyList, Tree tree)
 	{
 		ArrayList<String> tmp = new ArrayList<String>();
 		for (String s : keyList) 
 		{
 			tmp.add(tree.getNode(s).getData());
+	
+		}
+		return tmp;
+	}
+	
+	private ArrayList<String> matchDataToKey(ArrayList<String> keyList, Tree tree)
+	{
+		ArrayList<String> tmp = new ArrayList<String>();
+		for (String s : keyList) 
+		{
+			tmp.add(tree.getNodeData(s).getKey());
 	
 		}
 		return tmp;
@@ -93,5 +122,13 @@ public class GsaList{
 	public long getId()
 	{
 		return this.id;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 }

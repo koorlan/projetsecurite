@@ -13,15 +13,8 @@ public class RequestModel  implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
 	private RequestManager manager = null;
-	
 	private UserModel user;
-
-	private GsaList groupList = null; 
-	private GsaList statusList = null; 
-	private GsaList assignementList = null; 
-	
 	private DataUtil du = null; 
 	
 	public UserModel getUser() {
@@ -36,32 +29,8 @@ public class RequestModel  implements Serializable {
 		this.manager = manager;
 	}
 
-	public void setGroupList(GsaList groupList) {
-		this.groupList = groupList;
-	}
-	
-	public void setStatusList(GsaList statusList) {
-		this.statusList = statusList;
-	}
-	
-	public void setAssignementList(GsaList assignementList) {
-		this.assignementList = assignementList;
-	}
-	
-	public GsaList getGroupList() {
-		return this.groupList;
-	}
-	
-	public GsaList getStatusList() {
-		return this.statusList;
-	}
-	
-	public GsaList getAssignementList() {
-		return this.assignementList;
-	}
-
 	public DataUtil getDu() {
-		return du;
+		return this.du;
 	}
 
 	public void setDu(DataUtil du) {

@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import dataFormatter.DataUtil;
+import filter.Filter;
+import filter.FilterModel;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 import model.RequestModel;
@@ -28,10 +30,7 @@ public class RequestManager {
 	
 	public void process(RequestModel request) throws ClassNotFoundException, SQLException
 	{
-		if( !(request instanceof RequestModel)){
-			this.core.getLog().err(this,"Not a RequestModel format exiting.");
-		}
-		DBManager dbm = new DBManager();
+		DBManager dbm = new DBManager(this.core);
 		ArrayList<String> results = new ArrayList<String>();
 		dbm.build(request.getDu());
 		if(dbm.isFormatted())
@@ -39,11 +38,9 @@ public class RequestManager {
 			results = dbm.search();
 			System.out.println(results);
 		}
-		
 		else
-			this.core.getLog().err(this, "Not a DataUtil format.");
-	}
-	
+			this.core.getLog().err(this, "Non formatted content");
+	}	
 	/*
 	public void process(RequestModel request){
 		//Just user here but free feel to add attribute in RequestModel (Note: don't forget Serializable)
@@ -93,73 +90,48 @@ public class RequestManager {
 	
 
 
-	public void forge(String req, String port){
-
-		//construct 3 GSA LIST		<<OK>> 
-		//generate data utils		<<OK>>
-		//store request				<<OK>>
-		//send data utils                                                                                               
+	public void forge(Object type, Object group, Object status, Object assignement, String port)
+	{
+		if(!(type instanceof String && group instanceof String && status instanceof String && assignement instanceof String))
+		{
+			this.core.getLog().err(this, "Wrong fields");
+		}
+		FilterModel filterM = new FilterModel();
+		Filter filter = new Filter(filterM, this.core);
 		
-	
-		RequestModel request = new RequestModel();
-
-		String[] split = req.split(":");
+		GeneralizerModel genM = new GeneralizerModel();
+		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);	
 		
-		/* saving required data type */
-		String type = split[0];
-				
-		/* building group list */		
-		String[] groupSplit = split[1].split(",");
 		ArrayList<String> groupList = new ArrayList<String>();
-		for(String str: groupSplit)
-		{
-			groupList.add(str);
-		}
-		GeneralizerModel genModel = new GeneralizerModel();
-		GeneralizerManager genManager = new GeneralizerManager(genModel, this.core);		
-		request.setGroupList(genManager.generalize(groupList,"group"));
-		request.getGroupList().printGsaList();
-		
-		/* building status list */
-		String[] statusSplit = split[2].split(",");
 		ArrayList<String> statusList = new ArrayList<String>();
-		for(String str: statusSplit)
-		{
-			statusList.add(str);
-		}
-		request.setStatusList(genManager.generalize(statusList,"status"));
-		request.getStatusList().printGsaList();
-	
-		/* building assignement list */
-		String[] assignementSplit = split[3].split(",");
 		ArrayList<String> assignementList = new ArrayList<String>();
-		for(String str: assignementSplit)
-		{
-			assignementList.add(str);
-		}
-		request.setAssignementList(genManager.generalize(assignementList,"assignement"));
-		request.getAssignementList().printGsaList();
+		
+		groupList.add((String) group);
+		statusList.add((String) status);
+		assignementList.add((String) assignement);	
+	
+		filterM.setGroupList(genManager.generalize(groupList,"group"));
+		filterM.getGroupList().printGsaList();
+		filterM.setStatusList(genManager.generalize(statusList,"status"));
+		filterM.getStatusList().printGsaList();
+		filterM.setAssignementList(genManager.generalize(assignementList,"assignement"));
+		filterM.getAssignementList().printGsaList();
 		
 		/* building formatted string */
-		DataUtil du = new DataUtil();
-		
+		DataUtil du = new DataUtil();		
 		/* Set Action */
-		du.setAction("SELECT");
-		
+		du.setAction("SELECT");		
 		/* Set Type */ 
-		du.setType(type);
-		
+		du.setType((String)type);		
 		/* Set Table */ 
-		du.setTable("SP_TABLE");
-		
+		du.setTable("SP_TABLE");		
 		/* Set GSA stuff */
-		du.setGSA(request.getGroupList().getMainKeyList());
-		du.setGSA(request.getStatusList().getMainKeyList());
-		du.setGSA(request.getAssignementList().getMainKeyList());
-
+		du.setGSA(filterM.getGroupList().getMainKeyList());
+		du.setGSA(filterM.getStatusList().getMainKeyList());
+		du.setGSA(filterM.getAssignementList().getMainKeyList());
+		/* close formatted string */
 		du.close();
-	
-		/* Print du */
+		/* Print data util */
 		System.out.println(du);
 		
 		RequestModel tosend = new RequestModel();

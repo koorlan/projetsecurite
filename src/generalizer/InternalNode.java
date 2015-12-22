@@ -47,6 +47,21 @@ public class InternalNode extends Node{
 		return ret;
 	}
 	
+	public boolean containsData(String i)
+	{
+		if(getData() == i)
+			return true;
+	 
+		boolean ret = false;
+		int j = 0;
+	 
+		while(!ret && j < children.size())
+		{
+			ret = children.get(j++).containsData(i);
+		}
+		return ret;
+	}
+	
 	public Node getNode(String value)
     {
 		if(getKey() == value)
@@ -58,6 +73,21 @@ public class InternalNode extends Node{
 		while(ret == null && j < children.size())
 		{
 			ret = children.get(j++).getNode(value);
+		}
+		return ret; 
+    }
+	
+	public Node getNodeData(String value)
+    {
+		if(getData() == value)
+			return this;
+	 
+		Node ret = null;
+		int j = 0;
+	 
+		while(ret == null && j < children.size())
+		{
+			ret = children.get(j++).getNodeData(value);
 		}
 		return ret; 
     }
