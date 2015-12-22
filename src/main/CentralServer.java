@@ -26,21 +26,21 @@ public class CentralServer {
 		CoreM.setManager(Core);
 		
 		LogManager Log = new LogManager(Core);
-		Core.setLog(Log);
+		Core.set(Log);
 		
 		ServerModel ServerM = new ServerModel();
 		ServerManager Server = new ServerManager(ServerM, Core);
 		ServerM.setManager(Server);
-		Core.setServer(Server);
+		Core.set(Server);
 		
 		BroadcastModel BcastM = new BroadcastModel();
 		BroadcastManager Bcast = new BroadcastManager(BcastM, Core);
 		BcastM.setManager(Bcast);
-		Core.setBroadcast(Bcast);
+		Core.set(Bcast);
 		
 		TerminalModel TerminalM = new TerminalModel();
 		TerminalManager Terminal = new TerminalManager(TerminalM, Core);
-		Core.setTerminal(Terminal);
+		Core.set(Terminal);
 		TerminalM.setManager(Terminal);
 		
 		this.core = Core;

@@ -28,16 +28,28 @@ public class PacketManager {
 		this.model = model;
 	}
 	
-	public void process(byte[] bPacket) throws ClassNotFoundException, SQLException{	
+	public synchronized void process(byte[] bPacket) throws ClassNotFoundException, SQLException{	
 		this.core.getLog().log(this,"New Packet arrived..processing");
 		//maybe check integrity maybe after decoding...
-		
-		//Dirty but for debug
-		//System.out.println("PlainPacket");
-		//System.out.println(new String(bPacket));
-		
-		this.core.getLog().log(this,"Decrypting.....");
-		
+		switch(this.core.getService()){
+		case "user":
+			this.processUser(bPacket);
+			break;
+		case "frontal":
+			this.processFrontal(bPacket);
+			break;
+		case "central":
+			this.processCentral(bPacket);
+			break;
+		default:
+			break;	
+		}
+	}
+	public void processFrontal(byte[] bPacket){ /*to be implemented*/ };
+	
+	public void processCentral(byte[] bPacket){ /*to be implemented*/ };
+	
+	public void processUser(byte[] bPacket) throws ClassNotFoundException, SQLException{
 		PacketModel packet = new PacketModel();
 		packet = (PacketModel)SerializationUtils.deserialize(this.core.getSecurity().decryptPacket(bPacket));
 		if(packet != null){
