@@ -8,11 +8,6 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-
-//import com.mysql.jdbc.Connection;
-
 import dataFormatter.*;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
@@ -42,7 +37,7 @@ public class DBManager {
 	// no need group here 
 	public void build(DataUtil du)
 	{
-		Pattern p = Pattern.compile("(/BEG/{1})([0-1]{1})::([0-3]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
+		Pattern p = Pattern.compile("(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
 		Matcher m = p.matcher(du.getData());
 		
 		/* Starting match */
@@ -67,7 +62,7 @@ public class DBManager {
 				}
 			}
 			
-			p = Pattern.compile("([0-3]{1})");
+			p = Pattern.compile("([0-6]{1})");
 			/* data type list matcher */ 
 			Matcher tm = p.matcher(m.group(3));
 			boolean flag = false;
@@ -97,10 +92,6 @@ public class DBManager {
 			ArrayList<String> assignementList = new ArrayList<String>();
 			System.out.println(m.group());
 		
-		//	GeneralizerModel genModel = new GeneralizerModel();
-			//GeneralizerManager genManager = new GeneralizerManager(genModel, this.core);	
-			
-			//new GsaList(gm.find(), (new GeneralizerModel()).getGroupTree());
 			/* group list matcher */
 			if(m.start(5) != -1) // check if the 5th group exists
 			{
@@ -108,10 +99,7 @@ public class DBManager {
 				Matcher gm = p.matcher(m.group(5));
 				while(gm.find())
 				{
-					grpList.add( 
-									(new GsaList
-											(gm.group(), GeneralizerModel.getGroupTree())
-									).getValue());
+					grpList.add((new GsaList(gm.group(), GeneralizerModel.getGroupTree())).getValue());
 				}
 			}
 			/* status list matcher */
@@ -120,10 +108,7 @@ public class DBManager {
 				Matcher sm = p.matcher(m.group(6));
 				while(sm.find())
 				{
-					statList.add(
-									(new GsaList
-											(sm.group(), GeneralizerModel.getStatusTree())
-									).getValue());
+					statList.add((new GsaList(sm.group(), GeneralizerModel.getStatusTree())).getValue());
 				}
 			}
 			/* assignement list matcher */
@@ -132,10 +117,7 @@ public class DBManager {
 				Matcher am = p.matcher(m.group(7));
 				while(am.find())
 				{
-					assignementList.add(
-											(new GsaList
-													(am.group(), GeneralizerModel.getAssignementTree())
-											).getValue());
+					assignementList.add((new GsaList(am.group(), GeneralizerModel.getAssignementTree())).getValue());
 				}
 			}
 			/* format GSA list into sql request */
@@ -146,40 +128,21 @@ public class DBManager {
 	
 	public void build(ArrayList<String> groupList, ArrayList<String> statusList, ArrayList<String> assignementList)
 	{	
-		
-		int i = 0; 
-		
+		int i = 0;
 		if(groupList.size() > 0)
 		{	
 			sql += "( dc.Affect_Gen = " + "'" + assignementList.get(0) +"'";
 			for (i = 1 ; i < assignementList.size() ; i++) 
-			{
 				sql += " OR dc.Affect_Gen = " + "'" + assignementList.get(i) + "'";	
-			}
 			sql += ")"; 
 		}
 		if(statusList.size() > 0)
 		{
 			sql += " AND ( dc.Statut_Gen = " + "'" + statusList.get(0) + "'";
-			for (i = 1 ; i < statusList.size
-					() ; i++) 
-			{
+			for (i = 1 ; i < statusList.size() ; i++) 
 				sql += " OR dc.Statut_Gen = " + "'"+ statusList.get(i) +"'";	
-			}
 			sql += ")"; 
 		} 
-		
-		/*
-		if(assignementList.size() > 0)
-		{
-			sql += " AND ( owner_aff = " + "'" + assignementList.get(0) + "'";
-			for (i = 1 ; i < assignementList.size() ; i++) 
-			{
-				sql += " OR owner_aff = " + "'"+ assignementList.get(i) +"'";	
-			}
-			sql += ")"; 
-		}*/
-		
 	}
 	
 	public String getSql()
@@ -194,9 +157,7 @@ public class DBManager {
 
 	public ArrayList<String> search() throws ClassNotFoundException, SQLException
 	{
-		
-		//////
-		String url = "jdbc:sqlite:datas/frontale.sqlite";
+		String url = DB_PATH+DB_NAME;
 		
 		Statement st = null;
 		ArrayList<String> results = new ArrayList<String>();
@@ -205,7 +166,7 @@ public class DBManager {
 		Class.forName(PLUGIN);
 		
 		// get connection
-		java.sql.Connection cn = DriverManager.getConnection(DB_PATH+DB_NAME);
+		java.sql.Connection cn = DriverManager.getConnection(url);
 		
 		// create statement 
 		st = cn.createStatement();
@@ -219,8 +180,8 @@ public class DBManager {
 		{
 			results.add(rs.getString(1));	// E_Cred_Ksec
 			results.add(rs.getString(2));	// Cred_Auto_Ref
-			results.add(rs.getString(3));	// Meta_Chiffree
-			results.add(rs.getString(4));	// Valeur_Chiffree
+			results.add(rs.getString(3));	// Metadonnees (chiffrees)
+			results.add(rs.getString(4));	// Valeur (chiffree)
 		}
 		
 		cn.close();
@@ -234,11 +195,10 @@ public class DBManager {
 		// print some interesting fields
 		while(rs.next())
 		{
-			System.out.println(rs.getString(1));	// ref
-			System.out.println(rs.getString(2));	// encipher_skey
-			System.out.println(rs.getString(3));	// owner_grp
-			System.out.println(rs.getString(4));	// owner_status
-			System.out.println(rs.getString(5));	// owner_aff
+			System.out.println(rs.getString(1));	// E_Cred_Ksec
+			System.out.println(rs.getString(2));	// Cred_Auto_Ref
+			System.out.println(rs.getString(3));	// Meta_Chiffree
+			System.out.println(rs.getString(4));	// Valeur_Chiffree
 		}	
 	}
 	

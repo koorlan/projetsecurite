@@ -5,7 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import dataFormatter.DataUtil;
-import generalizer.Filter;
+import filter.Filter;
+import filter.FilterModel;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 import model.RequestModel;
@@ -29,7 +30,6 @@ public class RequestManager {
 	
 	public void process(RequestModel request) throws ClassNotFoundException, SQLException
 	{
-
 		DBManager dbm = new DBManager(this.core);
 		ArrayList<String> results = new ArrayList<String>();
 		dbm.build(request.getDu());
@@ -38,9 +38,9 @@ public class RequestManager {
 			results = dbm.search();
 			System.out.println(results);
 		}
-
-	}
-	
+		else
+			this.core.getLog().err(this, "Non formatted content");
+	}	
 	/*
 	public void process(RequestModel request){
 		//Just user here but free feel to add attribute in RequestModel (Note: don't forget Serializable)
@@ -96,10 +96,12 @@ public class RequestManager {
 		{
 			this.core.getLog().err(this, "Wrong fields");
 		}
+		FilterModel filterM = new FilterModel();
+		Filter filter = new Filter(filterM, this.core);
 		
-		Filter filter = new Filter();
-		GeneralizerModel genModel = new GeneralizerModel();
-		GeneralizerManager genManager = new GeneralizerManager(genModel, this.core);	
+		GeneralizerModel genM = new GeneralizerModel();
+		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);	
+		
 		ArrayList<String> groupList = new ArrayList<String>();
 		ArrayList<String> statusList = new ArrayList<String>();
 		ArrayList<String> assignementList = new ArrayList<String>();
@@ -107,13 +109,13 @@ public class RequestManager {
 		groupList.add((String) group);
 		statusList.add((String) status);
 		assignementList.add((String) assignement);	
-		
-		filter.setGroupList(genManager.generalize(groupList,"group"));
-		filter.getGroupList().printGsaList();
-		filter.setStatusList(genManager.generalize(statusList,"status"));
-		filter.getStatusList().printGsaList();
-		filter.setAssignementList(genManager.generalize(assignementList,"assignement"));
-		filter.getAssignementList().printGsaList();
+	
+		filterM.setGroupList(genManager.generalize(groupList,"group"));
+		filterM.getGroupList().printGsaList();
+		filterM.setStatusList(genManager.generalize(statusList,"status"));
+		filterM.getStatusList().printGsaList();
+		filterM.setAssignementList(genManager.generalize(assignementList,"assignement"));
+		filterM.getAssignementList().printGsaList();
 		
 		/* building formatted string */
 		DataUtil du = new DataUtil();		
@@ -124,9 +126,9 @@ public class RequestManager {
 		/* Set Table */ 
 		du.setTable("SP_TABLE");		
 		/* Set GSA stuff */
-		du.setGSA(filter.getGroupList().getMainKeyList());
-		du.setGSA(filter.getStatusList().getMainKeyList());
-		du.setGSA(filter.getAssignementList().getMainKeyList());
+		du.setGSA(filterM.getGroupList().getMainKeyList());
+		du.setGSA(filterM.getStatusList().getMainKeyList());
+		du.setGSA(filterM.getAssignementList().getMainKeyList());
 		/* close formatted string */
 		du.close();
 		/* Print data util */

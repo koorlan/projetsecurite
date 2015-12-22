@@ -1,17 +1,17 @@
-package generalizer;
+package filter;
 
-public class Filter {
-	
+import java.util.ArrayList;
+
+import generalizer.GsaList;
+
+public class FilterModel {
+
 	private GsaList groupList; 
 	private GsaList statusList; 
 	private GsaList assignementList; 
 	
-	public Filter()
-	{
-		this.groupList = null;
-		this.statusList = null;
-		this.assignementList = null;
-	}
+	private ArrayList<String> response;
+	public boolean isReady = false;
 	
 	public void setGroupList(GsaList groupList) {
 		this.groupList = groupList;
@@ -35,6 +35,15 @@ public class Filter {
 	
 	public GsaList getAssignementList() {
 		return this.assignementList;
+	}
+
+	public ArrayList<String> getResponse() {
+		return response;
+	}
+
+	public void setResponse(ArrayList<String> response) {
+		this.response = response;
+		this.isReady = (this.response.isEmpty() == true) ? false : true;
 	}
 
 }
