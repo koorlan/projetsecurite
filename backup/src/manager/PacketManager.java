@@ -125,7 +125,7 @@ public class PacketManager {
 		Socket socket;
 		try {
 			socket = new Socket(InetAddress.getByName(ip), port);		
-			socket.getOutputStream().write(SerializationUtils.serialize(packet));
+			socket.getOutputStream().write(packet);
 			socket.close();
 		}catch( ConnectException e) {
 			this.core.getLog().err(this, "Connection refused");
