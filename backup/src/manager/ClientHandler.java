@@ -94,7 +94,7 @@ public class ClientHandler  implements Runnable{
                                         for(UserModel user : userList){
                                             String ip = user.getManager().getCore().getSever().getIpDest();
                                             int port = user.getManager().getCore().getSever().getPort();
-                                            this.server.getCore().getPacket().send(SerializationUtils.serialize(packetModel), ip, port);
+                                            this.server.getCore().getPacket().(SerializationUtils.serialize(packetModel), ip, port);
                                         }                                       
                                         break;
                                     case POST:

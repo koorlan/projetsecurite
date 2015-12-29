@@ -42,12 +42,12 @@ public class Frontal {
 		 LogManager Log = new LogManager(Core);
 		 Core.set(Log);
                  
-                 ServerModel internalServerM = new ServerModel(ip, internalPort, 0);
+         ServerModel internalServerM = new ServerModel(ip, internalPort, 0);
 		 ServerManager internalServer = new ServerManager(internalServerM, Core);
 		 Core.set(internalServer);
 		 internalServerM.setManager(internalServer);
 		 
-                 ServerModel externalServerM = new ServerModel(ip, externalPort, 0);
+         ServerModel externalServerM = new ServerModel(ip, externalPort, 0);
 		 ServerManager externalServer = new ServerManager(externalServerM, Core);
 		 Core.set(externalServer);
 		 externalServerM.setManager(externalServer);

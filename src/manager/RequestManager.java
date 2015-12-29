@@ -28,18 +28,22 @@ public class RequestManager {
 	//	this.core.getPacketManager().sendPacket(this.core.getPacketManager().forge("POST", this.core.getUserManager().debug()),port);
 	//}
 	
-	public void process(RequestModel request) throws ClassNotFoundException, SQLException
+	public byte[] process(RequestModel request) throws ClassNotFoundException, SQLException
 	{
-		DBManager dbm = new DBManager(this.core);
 		ArrayList<String> results = new ArrayList<String>();
-		dbm.build(request.getDu());
-		if(dbm.isFormatted())
+		this.core.getDB().build(request.getDu());
+		if(this.core.getDB().isFormatted())
 		{
-			results = dbm.search();
+			results = this.core.getDB().search();
 			System.out.println(results);
+			
+			//here forge POST to return...
+			this.core.getPacket().forge("POST", "ANSWER");
+			return null;
 		}
 		else
 			this.core.getLog().err(this, "Non formatted content");
+		return null;
 	}	
 	/*
 	public void process(RequestModel request){
@@ -73,24 +77,14 @@ public class RequestManager {
 		
 	}
 	*/
-	
-	public void group(String group, String port) throws NoSuchAlgorithmException{
-		RequestModel request = new RequestModel(); 
-		//populate fields we want with random number and null we don't want. Maybe use regex after to make something cool :)
-		final UserModel user = new UserModel();
-		user.setGroup(group);
-		request.setUser(user);
-		
-		this.send(request, port);
-	}
-	
-	private void send(RequestModel request, String port){
-		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),port);
+
+	private void send(RequestModel request) throws ClassNotFoundException, SQLException{
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
 
 
-	public void forge(Object type, Object group, Object status, Object assignement, String port)
+	public void forge(Object type, Object group, Object status, Object assignement) throws ClassNotFoundException, SQLException
 	{
 		if(!(type instanceof String && group instanceof String && status instanceof String && assignement instanceof String))
 		{
@@ -136,7 +130,7 @@ public class RequestManager {
 		
 		RequestModel tosend = new RequestModel();
 		tosend.setDu(du);
-		this.send(tosend, port);
+		this.send(tosend);
 	}
 
 	

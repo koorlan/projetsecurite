@@ -6,7 +6,7 @@ import manager.BroadcastManager;
 
 public class BroadcastModel {
 	private BroadcastManager manager;
-	private ArrayList<Front> fronts;
+	private ArrayList<FrontalModel> frontals = new ArrayList<FrontalModel>();
 	
 	//TODO Maybe Change for a list of FrontalModel
 	
@@ -14,14 +14,14 @@ public class BroadcastModel {
 	public void setManager(BroadcastManager manager){
 		this.manager = manager;
 	}
-	public ArrayList<Front> getFronts() {
-		return fronts;
+	public ArrayList<FrontalModel> getFrontals() {
+		return frontals;
 	}
-	public void setFronts(ArrayList<Front> fronts) {
-		this.fronts = fronts;
+	public void setFrontals(ArrayList<FrontalModel> frontals) {
+		this.frontals = frontals;
 	}
 	
-	public void addFronts(Front front){
-		this.fronts.add(front);
+	public void addFrontal(FrontalModel frontal){
+		this.frontals.add(frontal);
 	}
 }

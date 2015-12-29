@@ -1,5 +1,8 @@
 package Initialisation_BD;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.io.*;
@@ -34,7 +37,10 @@ public class DatabaseMain {
 		{
 			System.out.println("Mise en place des repertoires");
 			Runtime.getRuntime().exec("rm -r " + PREFIX);
-			Runtime.getRuntime().exec("mkdir " + PREFIX);		
+			//Runtime.getRuntime().exec("mkdir " + PREFIX);		
+			Runtime.getRuntime().exec(new String[] {"mkdir ",PREFIX});	
+			
+			
 			Runtime.getRuntime().exec("cp " + PREFIX + "/../" + INIT_NAME + " " + PREFIX); 
 
 			// On commence par completer la BD originale (avec les cles)
@@ -72,7 +78,8 @@ public class DatabaseMain {
 				ResultSet rs4 = stmt1.executeQuery(QUERIES[37] + login2 + "'"); //On recupere les groupes
 				String ListG = "";
 				while (rs4.next() == true){
-					ListG = ListG + "//" + rs4.getString("Groupe");
+					ListG += rs4.getString("Groupe");
+					
 				}				
 				rs4.close();
 				RunQuery(stmt1, QUERIES[39] + ListG + QUERIES[40] + login2 + "'"); 
@@ -93,8 +100,19 @@ public class DatabaseMain {
 				rsa.generateKeyPair();
 				byte[] publicKey = rsa.getPublicKeyInBytes();
 				byte[] privateKey = rsa.getPrivateKeyInBytes();
-				RunQuery(stmt1, QUERIES[58] + publicKey + QUERIES[59] + ID_Cle2 + "'"); 
-				RunQuery(stmt1, QUERIES[60] + privateKey + QUERIES[59] + ID_Cle2 + "'");
+				
+				Class.forName("org.sqlite.JDBC"); 
+				Connection con = DriverManager.getConnection("jdbc:sqlite:" + INIT_FILE); 
+				String query = "UPDATE Cles set Kpub = ?, Kpriv = ? WHERE ID_CLe = ?";
+				PreparedStatement pstmt = con.prepareStatement(query);
+						
+				pstmt.setBytes(1, publicKey);
+				pstmt.setBytes(2, privateKey);
+				pstmt.setString(3, ID_Cle2);
+				pstmt.execute();
+				
+				//RunQuery(stmt1, QUERIES[58] + publicKey + QUERIES[59] + ID_Cle2 + "'"); 
+				//RunQuery(stmt1, QUERIES[60] + privateKey + QUERIES[59] + ID_Cle2 + "'");
 			} 
 			rss.close();
 			
@@ -138,7 +156,7 @@ public class DatabaseMain {
 				RunQuery(stmt2, QUERIES[14] + login +"'"); //Copie des politiques de l'utilisateur
 				RunQuery(stmt2, QUERIES[15] + login +"'"); //Copie des types et cles, politiques de l'utilisateur
 				RunQuery(stmt2, QUERIES[16] + login +"'"); //Copie des credentials autorises de l'utilisateur
-				RunQuery(stmt2, QUERIES[17] + login +"'"); //Copie du login/passwd de l'utilisateur
+				RunQuery(stmt2, QUERIES[17] + login +"'"); //Copie du login/passwd/ip/port de l'utilisateur
 				RunQuery(stmt2, QUERIES[18] + login +"'"); //Copie de la frontale de l'utilisateur
 				RunQuery(stmt2, QUERIES[19]); //Copie de la tables des NoeudsTOR
 
@@ -168,6 +186,7 @@ public class DatabaseMain {
 				Statement stmt5=DBManager.OpenCreateDB(PREFIX + "/" + frontale + ".sqlite");
 				RunQuery(stmt5, QUERIES[5]); //attache initDB
 				RunQuery(stmt5, QUERIES[31]); //server
+				RunQuery(stmt5, QUERIES[65] + frontale + "'"); //Frontal
 				RunQuery(stmt5, QUERIES[32] + frontale +"'"); //table utilisateurs (Statut, Affectation generalises ? Ou desanonymisation ?)
 				RunQuery(stmt5, QUERIES[33] + frontale +"'"); //Donnees de base pour Donnees_Chiffrees, Liens et Cles_Types--> provisoire
 				RunQuery(stmt5, QUERIES[41]); //Creation colonne Metadonnees
@@ -193,6 +212,7 @@ public class DatabaseMain {
 			RunQuery(stmt6, QUERIES[5]); //attache initDB
 			RunQuery(stmt6, QUERIES[35]); //Copie de la tables des Frontales
 			RunQuery(stmt6, QUERIES[49]); //Table LogCOM
+			RunQuery(stmt6, QUERIES[64]); //Table Server
 
 			// On cree maintenant les BD Noeud TOR
 			// TODO il faut en faire n (ou n est le nombre de lignes dans la table NoeudsTOR
@@ -258,8 +278,8 @@ public class DatabaseMain {
 			/*15*/
 			"create table Types as select Type, Ksec, Dispo, Politique from BASE.Types_Utili WHERE Login = '",
 			"create table Cred_Autorise as Select C.Politique, Cred_Auto_Ref from BASE.Types_Utili T , BASE.Cred_Autorise C where C.Politique = T.Politique and Login = '",
-			"create table Utilisateurs as Select Login, Password from BASE.Utilisateurs where Login = '",
-			"create table Frontales as Select F.IP, F.Port from BASE.Utilisateurs U , BASE.Frontales F where U.Frontale = F.Frontale and Login = '",
+			"create table Utilisateurs as Select Login, Password, Ip, Port from BASE.Utilisateurs where Login = '",
+			"create table Frontales as Select F.IP, F.internalPort from BASE.Utilisateurs U , BASE.Frontales F where U.Frontale = F.Frontale and Login = '",
 			"create table NoeudsTOR as select * from BASE.NoeudsTOR",
 			/*20*/
 			"Update Cles set Kpriv = NULL where ID_Cle not in (SELECT ID_Cle from BASE.Statuts S, BASE.Utilisateurs U where U.ID_Statut = S.ID_Statut and Login = '",
@@ -275,12 +295,12 @@ public class DatabaseMain {
 			"Update U_Cles_Types set E_Cred_Ksec = Cred_Auto_ref || ' + CHIFFREMENT' ",
 			/*30*/
 			"SELECT Frontale from Frontales",
-			"create table Server as select IP, Port from BASE.Server",
+			"create table Server as select * from BASE.Server",
 			"create table Utilisateurs as select U.IP, U.Port, S.Statut_Gen, A.Affect_Gen from BASE.Utilisateurs U, BASE.Statuts S, BASE.Affectations A where U.ID_Statut = S.ID_Statut and U.ID_Affectation = A.ID_Affectation and Frontale = '",
 			"create table Provisoire as select U.Frontale, D.RefBD, C.ID_Cred, T.Ksec, T.Type, Cred_Auto_Ref, S.Statut_Gen, A.Affect_Gen, D.Valeur, D.Login, A.Affectation, S.Statut, U.Liste_groupes from BASE.Types_Utili T, BASE.Cred_Autorise C, BASE.Utilisateurs U, BASE.Donnees D, BASE.Statuts S, BASE.Affectations A where C.Politique = T.Politique and T.Login = U.Login and U.ID_Statut = S.ID_Statut and U.ID_Affectation = A.ID_Affectation and U.Login = D.Login and D.Type = T.Type and T.Dispo = 'Toujours' and Frontale = '",
 			"SELECT Ksec from Types_utili",
 			/*35*/
-			"create table Frontales as select * from BASE.Frontales",
+			"create table Frontales as select Frontale,Famille,IP,externalPort from BASE.Frontales",
 			"ALTER TABLE Utilisateurs ADD COLUMN Liste_groupes TEXT(500)",
 			"SELECT G.Groupe FROM Groupes G, Utilisateurs U, Inscription I where U.Login = I.Login and I.ID_Groupe = G.ID_Groupe and U.Login = '",
 			"UPDATE Types_Utili set Ksec = 'KSEC_' || Login ||'_' || Type",
@@ -288,7 +308,7 @@ public class DatabaseMain {
 			/*40*/
 			"' WHERE Login = '",
 			"ALTER TABLE Provisoire ADD COLUMN Metadonnees TEXT(500)",
-			"UPDATE Provisoire SET Metadonnees = Login || '//' || Affectation || '//' || Statut || Liste_groupes",
+			"UPDATE Provisoire SET Metadonnees = Login || '::' || Liste_groupes || '::' || Statut || '::' || Affectation",
 			"create table Donnees_Chiffrees as select distinct RefBD, Type, Statut_Gen, Affect_Gen, Valeur, Metadonnees from Provisoire where Frontale = '",
 			"DROP table Provisoire",
 			/*45*/
@@ -314,8 +334,9 @@ public class DatabaseMain {
 			"SELECT rowid from Types_Utili",/*61*/
 			"' WHERE rowid = '",/*62*/
 			"UPDATE Types_Utili set Ksec = '",/*63*/
-			"",/*64*/
-			/*65*/
+			"CREATE TABLE Server as SELECT * from BASE.Server ",/*64*/
+			/*65*/		
+			"CREATE TABLE Frontale as SELECT * from BASE.Frontales WHERE Frontale = '",
 			"",
 	""};
 

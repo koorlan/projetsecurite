@@ -16,13 +16,26 @@ public class PacketModel implements Serializable {
 	public enum Type { GET, POST};
 	
 	private Type type;
+	private String senderFamilly;
+    private byte[] id;
 	private byte[] content;
-	private boolean eof;
 	
 	private PacketModel temp;
-	
-	public boolean isEof() {
-		return eof;
+
+	public String getSenderFamilly() {
+		return senderFamilly;
+	}
+
+	public void setSenderFamilly(String senderFamilly) {
+		this.senderFamilly = senderFamilly;
+	}
+
+	public byte[] getId() {
+		return id;
+	}
+
+	public void setId(byte[] id) {
+		this.id = id;
 	}
 
 	public Type getType() {
@@ -41,7 +54,6 @@ public class PacketModel implements Serializable {
 
 	public void setContent(byte[] content) {
 		this.content = content;
-		this.eof = true;
 	}
 
 
@@ -60,12 +72,6 @@ public class PacketModel implements Serializable {
 		return this.temp;
 	}
 
-	@Override
-	public String toString() {
-		return "PacketModel [manager=" + manager + ", type=" + type + ", content=" + Arrays.toString(content) + ", eof="
-				+ eof + ", temp=" + temp + ", isEof()=" + isEof() + ", getType()=" + getType() + ", getContent()="
-				+ Arrays.toString(getContent()) + ", getPacket()=" + getPacket() + "]";
-	}
 
 
 
