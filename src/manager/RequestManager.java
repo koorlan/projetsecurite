@@ -73,9 +73,10 @@ public class RequestManager {
 	 * @param response	A non-serialized response, which contains the dataUtil to SEND 
 	 * 
 	 */
-	private void sendResponse(RequestModel response)
+	private void sendResponse(RequestModel response) throws ClassNotFoundException, SQLException
 	{
-		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response));
+		//User case
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
 	/*
@@ -142,7 +143,7 @@ public class RequestManager {
 	 * @param result	The result from a SQLite request (can be empty)
 	 *  		
 	 */
-	public void forgeResponse(ArrayList<String> results)
+	public void forgeResponse(ArrayList<String> results) throws ClassNotFoundException, SQLException
 	{
 		DataUtil du = new DataUtil();
 		du.setAction("ANSWER");
