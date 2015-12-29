@@ -1,7 +1,5 @@
 package manager;
 
-import java.security.NoSuchAlgorithmException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -12,7 +10,8 @@ import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 
 import model.RequestModel;
-import model.UserModel;
+import response.ResponseManager;
+import response.ResponseModel;
 
 public class RequestManager {
 	
@@ -24,54 +23,70 @@ public class RequestManager {
 		this.core = core;
 		this.model = model;
 	}
-
+	
 	/**
-	 * Method called by : [USER'S LOCAL APP]
-	 * Requirements: DBManager which interprets the request formatted content and ensures a database connection 
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Requirements : DBManager which interprets the request formatted content and ensures a database connection 
 	 * 
 	 * @param request	A de-serialized request, which contains the dataUtil to process
 	 * 
 	 */
-	public void processRequest(RequestModel request) throws ClassNotFoundException, SQLException
+	public byte[] process(RequestModel request) throws ClassNotFoundException, SQLException
 	{
-		DBManager dbm = new DBManager(this.core);
 		ArrayList<String> results = new ArrayList<String>();
-		dbm.build(request.getDu());
-		if(dbm.isFormatted())
+		this.core.getDB().build(request.getDu());
+		if(this.core.getDB().isFormatted())
 		{
-			results = dbm.search();
-			//TODO : <DEBUG> clean that later
+
+			results = this.core.getDB().search();
 			System.out.println(results);
+			
+			//here forge POST to return...
+			this.forgeResponse(results);
+			//this.core.getPacket().forge("POST", "ANSWER");
+			return null;
 		}
 		else
 			this.core.getLog().err(this, "Non formatted content");
-		this.forgeResponse(results);
+		return null;
 	}	
-	
+
 	/**
-	 * Method called by : [USER'S LOCAL APP][FRONTAL]
+	 * Method called by : [USER'S LOCAL APP]
 	 * Requirements:	ResponseManager which interprets the response formatted content
 	 * 				 	FilterManager which filter the answer 
-	 * @param reponse	A de-serialized response, which contains the dataUtil to process
+	 * @param reponse	A de-serialized response, which contains the dataUtil to process (filter, trash, print, store...)
 	 * 
 	 */
 	public void processResponse(RequestModel response) throws ClassNotFoundException, SQLException
-	{
-		ResponseManager rm = new ResponseManager(this.core);
+	{	
+		ResponseModel responseM = new ResponseModel();
+		ResponseManager rManager = new ResponseManager(responseM, this.core);	
+		if(rManager.isResponse(response.getDu()))
+		{	
+			if(rManager.isEmpty(response.getDu()))
+			{
+				//TODO : 
+					// Decipher E_Cred_Ksec with credential OR trash packet
+					// Use Ksec to decipher metadatas + value
+					// Use metadatas to filter packet (trash it, or keep it)
+					// Print results 
+			}
+			else
+			{
+				this.core.getLog().warn(this, "Empty response received");
+			}
+		}
+		else
+		{
+			this.core.getLog().err(this, "Response received with unexpected format");
+			rManager.trash(response);
+			return;
+		}
 		
+		//this.core.getFilter().model.setResponse(ArrayList<String> response);
 	}	
-	
-	
-	public void group(String group, String port) throws NoSuchAlgorithmException{
-		RequestModel request = new RequestModel(); 
-		//populate fields we want with random number and null we don't want. Maybe use regex after to make something cool :)
-		final UserModel user = new UserModel();
-		user.setGroup(group);
-		request.setUser(user);
-		
-		this.send(request, port);
-	}
-	
+
 	/**
 	 * Method called by : [USER'S LOCAL APP]
 	 * Requirements : a packet manager for serialization
@@ -80,8 +95,8 @@ public class RequestManager {
 	 * @param port 		The port number that is used for sending request 		
 	 * 
 	 */
-	private void send(RequestModel request, String port){
-		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),port);
+	private void send(RequestModel request) throws ClassNotFoundException, SQLException{
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
 	/**
@@ -91,9 +106,10 @@ public class RequestManager {
 	 * @param response	A non-serialized response, which contains the dataUtil to SEND 
 	 * 
 	 */
-	private void sendResponse(RequestModel response)
+	private void sendResponse(RequestModel response) throws ClassNotFoundException, SQLException
 	{
-		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response));
+		//User case
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
 	/**
@@ -109,7 +125,7 @@ public class RequestManager {
 	 * @param port			The port number that is used for sending request 
 	 * 
 	 */
-	public void forge(Object type, Object group, Object status, Object assignement, String port)
+	public void forge(Object type, Object group, Object status, Object assignement) throws ClassNotFoundException, SQLException
 	{
 		if(!(type instanceof String && group instanceof String && status instanceof String && assignement instanceof String))
 		{
@@ -117,6 +133,7 @@ public class RequestManager {
 		}
 		
 		FilterModel filterM = new FilterModel();		
+		FilterManager filter = new FilterManager(filterM, this.core);
 		
 		GeneralizerModel genM = new GeneralizerModel();
 		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);			
@@ -150,7 +167,7 @@ public class RequestManager {
 		
 		RequestModel tosend = new RequestModel();
 		tosend.setDu(du);
-		this.send(tosend, port);
+		this.send(tosend);
 	}
 
 	/**
@@ -160,7 +177,7 @@ public class RequestManager {
 	 * @param result	The result from a SQLite request (can be empty)
 	 *  		
 	 */
-	public void forgeResponse(ArrayList<String> results)
+	public void forgeResponse(ArrayList<String> results) throws ClassNotFoundException, SQLException
 	{
 		DataUtil du = new DataUtil();
 		du.setAction("ANSWER");
@@ -173,6 +190,7 @@ public class RequestManager {
 			du.setContent("FULL");
 			du.setResults(results);
 		}
+		du.close();
 		RequestModel toSend = new RequestModel();
 		toSend.setDu(du);
 		this.sendResponse(toSend);

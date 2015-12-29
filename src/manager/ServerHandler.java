@@ -17,6 +17,10 @@ public class ServerHandler implements Runnable{
 		super();
 		this.manager = manager;
 	}
+	
+	public ServerSocket getSocket(){
+		return this.socket;
+	}
 
 	@Override
 	public void run() {

@@ -32,6 +32,7 @@ public class DataUtil implements Serializable {
 		{
 			data += Content.FULL.getKey();
 		}
+		data += "::";
 	}
 	
 	/**
@@ -48,7 +49,12 @@ public class DataUtil implements Serializable {
 		}
 		else
 		{
-			data += result.toString();
+			for(String str : result)
+			{
+				data += str.toString();
+				data += "::";
+			}
+			
 		}
 		
 	}

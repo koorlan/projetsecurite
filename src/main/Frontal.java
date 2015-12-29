@@ -1,8 +1,10 @@
 package main;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import manager.CoreManager;
+import manager.DBManager;
 import manager.DialogQueryManager;
 import manager.FrontalManager;
 import manager.LogManager;
@@ -22,16 +24,15 @@ import model.UserModel;
 
 public class Frontal {
 	private CoreManager core = null;
-	
-	public Frontal(String familly, String name, String ip, int internalPort, int externalPort) throws Exception{
+
+	public Frontal(String db) throws Exception {
 		super();
-		this.initialize(familly, name, ip, internalPort, externalPort);
-                
+		this.initialize(db);
 	}
-	
-	public void initialize(String familly, String name, String ip, int internalPort, int externalPort) throws Exception{
+
+	public void initialize(String db) throws Exception{
 		 CoreModel CoreM = new CoreModel();
-		 CoreManager Core = new CoreManager(CoreM, "internalFrontal");
+		 CoreManager Core = new CoreManager(CoreM, "frontal");
 		 CoreM.setManager(Core);
 		 
 		 TerminalModel TerminalM = new TerminalModel();
@@ -42,20 +43,22 @@ public class Frontal {
 		 LogManager Log = new LogManager(Core);
 		 Core.set(Log);
                  
-         ServerModel internalServerM = new ServerModel(ip, internalPort, 0);
+         ServerModel internalServerM = new ServerModel();
 		 ServerManager internalServer = new ServerManager(internalServerM, Core);
 		 Core.set(internalServer);
 		 internalServerM.setManager(internalServer);
 		 
-         ServerModel externalServerM = new ServerModel(ip, externalPort, 0);
+         ServerModel externalServerM = new ServerModel();
 		 ServerManager externalServer = new ServerManager(externalServerM, Core);
 		 Core.set(externalServer);
 		 externalServerM.setManager(externalServer);
                  
-		 FrontalModel frontalM = new FrontalModel(name, familly, internalServer, externalServer);
+		 FrontalModel frontalM = new FrontalModel("default", "default", internalServer, externalServer);
 		 FrontalManager frontal = new FrontalManager(frontalM, Core);
 		 Core.set(frontal);
 		 frontalM.setManager(frontal);
+		 frontalM.setInternalserverManager(internalServer);
+		 frontalM.setExternalserverManager(externalServer);
 		 
 		 PacketModel PacketM = new PacketModel();
 		 PacketManager Packet = new PacketManager(PacketM, Core);
@@ -71,14 +74,35 @@ public class Frontal {
 		 RequestManager Request = new RequestManager(RequestM,Core);
 		 Core.set(Request);
 		 RequestM.setManager(Request);
-		
-		 DialogQueryManager dialog = new DialogQueryManager(Core);
-		 Core.set(dialog);
+		 
+		 DBManager DB = new DBManager(Core);
+		 Core.set(DB);
 		 
 		 this.core = Core;
+		 
+		 this.fill(db);
+		 
+		 //Now set Information to Instanced servers 
+		 internalServerM.setPort(frontalM.getInternalPort());
+		 externalServerM.setPort(frontalM.getExternalPort());
+		 String IpDest = this.core.getDB().getFrontalIP();
+		 internalServerM.setIpDest(IpDest);
+		 externalServerM.setIpDest(IpDest);
+
+		 //register Users
+		 frontalM.setUserList(this.core.getDB().getUsers());
+		 
+		 //register otherFronts
+		 
 		return;
 	}
-	public CoreManager getCore(){
+
+	public void fill(String db) throws ClassNotFoundException, SQLException {
+		this.core.getDB().setDB_INFO(db);
+		this.core.getDB().initialize();
+	}
+
+	public CoreManager getCore() {
 		return this.core;
 	}
 

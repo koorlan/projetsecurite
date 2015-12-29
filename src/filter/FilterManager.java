@@ -20,8 +20,7 @@ public class FilterManager{
 	}
 	
 	/**
-	 * 
-	 * @return true/false if the received response meets user's requirements 
+	 * @return true/false if received response meets user's requirements 
 	 */
 	public boolean isSuitable()
 	{
@@ -52,11 +51,11 @@ public class FilterManager{
 	public void buildResponse()
 	{
 		ArrayList<String> fResponse = new ArrayList<String>();
-		/* 0 */
+		/* 0 TYPE */
 		fResponse.add("NAME");
-		/* 1 */
+		/* 1 ASSIGNEMENT */
 		fResponse.add("INSA Rouen");
-		/* 2 */
+		/* 2 STATUS */
 		fResponse.add("Service relations internationales");
 		
 		
