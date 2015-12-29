@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import manager.CoreManager;
 
+/**
+ * @author lisa
+ * 
+ */
 public class FilterManager{
 
 	private CoreManager core; 
@@ -14,7 +18,11 @@ public class FilterManager{
 		this.core = core; 
 		this.model = model;
 	}
-
+	
+	/**
+	 * 
+	 * @return true/false if the received response meets user's requirements 
+	 */
 	public boolean isSuitable()
 	{
 		if(this.model.isReady == false)
@@ -38,8 +46,8 @@ public class FilterManager{
 		}
 	
 	}
-	/*
-	 * building a fake response atm 
+	/**
+	 * TODO : <CLEAN> building a fake response atm 
 	 */
 	public void buildResponse()
 	{

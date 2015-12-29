@@ -16,6 +16,12 @@ public class DataUtil implements Serializable {
 		this.data = "/BEG/";
 	}
 	
+	/**
+	 * 
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Context : To forge a response  
+	 * @param content	Matches with a key value in "Content", shows whether answer is empty or not
+	 */
 	public void setContent(String content)
 	{
 		if(content.compareTo("TRASH") == 0)
@@ -28,15 +34,31 @@ public class DataUtil implements Serializable {
 		}
 	}
 	
+	/**
+	 * 
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Context : To forge a response 
+	 * @param result	The full database results  	
+	 */
 	public void setResults(ArrayList<String> result)
 	{
 		if(result.isEmpty())
-		{
+		{	//TODO : <CLEAN> debug only 
 			System.out.println("<Building answer failed> Empty result non recognized previously");
+		}
+		else
+		{
+			data += result.toString();
 		}
 		
 	}
 	
+	/**
+	 * 
+	 * Method called by : [USER'S LOCAL APP]
+	 * Context : To forge a query or a response 
+	 * @param action	Matches with a key value in "Action", shows whether request contains a query or a response
+	 */
 	public void setAction(String action)
 	{
 		if(action.compareTo("QUERY") == 0)
@@ -51,6 +73,12 @@ public class DataUtil implements Serializable {
 		data += "::";
 	}
 
+	/**
+	 * 
+	 * Method called by : [USER'S LOCAL APP]
+	 * Context : To forge a query 
+	 * @param type	Matches with a key value in "Type", shows required data type (filled by user)
+	 */
 	public void setType(String type)
 	{
 		if(type.compareTo("Nom") == 0)
@@ -80,6 +108,12 @@ public class DataUtil implements Serializable {
 		data += "::";
 	}
 	
+	/**
+	 * 
+	 * Method called by : [USER'S LOCAL APP]
+	 * Context : To forge a query 
+	 * @param table		Matches with a key value in "Table", shows what tables will be used to process query 
+	 */
 	public void setTable(String table)
 	{
 		if(table.compareTo("FRONT_TABLE") == 0)
@@ -93,7 +127,13 @@ public class DataUtil implements Serializable {
 		
 		data += "::";
 	}
-
+	
+	/**
+	 * 
+	 * Method called by : [USER'S LOCAL APP]
+	 * Context : To forge a query 
+	 * @param gsaList	Shows required GSA (filled by user)
+	 */
 	public void setGSA(ArrayList<String> gsaList)
 	{
 		for(String gsa : gsaList)
@@ -101,6 +141,11 @@ public class DataUtil implements Serializable {
 		data += "::";
 	}
 	
+	/**
+	 * 
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Context : To forge a query or response 
+	 */
 	public void close()
 	{
 		data += "/END/";

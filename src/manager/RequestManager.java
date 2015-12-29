@@ -25,14 +25,14 @@ public class RequestManager {
 		this.model = model;
 	}
 
-	/*
+	/**
 	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
-	 * Requirements :DBManager which interprets the request formatted content and ensures a database connection 
+	 * Requirements: DBManager which interprets the request formatted content and ensures a database connection 
 	 * 
 	 * @param request	A de-serialized request, which contains the dataUtil to process
 	 * 
 	 */
-	public void process(RequestModel request) throws ClassNotFoundException, SQLException
+	public void processRequest(RequestModel request) throws ClassNotFoundException, SQLException
 	{
 		DBManager dbm = new DBManager(this.core);
 		ArrayList<String> results = new ArrayList<String>();
@@ -48,6 +48,20 @@ public class RequestManager {
 		this.forgeResponse(results);
 	}	
 	
+	/**
+	 * Method called by : [USER'S LOCAL APP]
+	 * Requirements:	ResponseManager which interprets the response formatted content
+	 * 				 	FilterManager which filter the answer 
+	 * @param reponse	A de-serialized response, which contains the dataUtil to process
+	 * 
+	 */
+	public void processResponse(RequestModel response) throws ClassNotFoundException, SQLException
+	{
+		ResponseManager rm = new ResponseManager(this.core);
+		
+	}	
+	
+	
 	public void group(String group, String port) throws NoSuchAlgorithmException{
 		RequestModel request = new RequestModel(); 
 		//populate fields we want with random number and null we don't want. Maybe use regex after to make something cool :)
@@ -58,7 +72,7 @@ public class RequestManager {
 		this.send(request, port);
 	}
 	
-	/*
+	/**
 	 * Method called by : [USER'S LOCAL APP]
 	 * Requirements : a packet manager for serialization
 	 * 
@@ -70,7 +84,7 @@ public class RequestManager {
 		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),port);
 	}
 	
-	/*
+	/**
 	 * Method called by : [FRONTAL] [USER'S LOCAL APP] 
 	 * Requirements : a packet manager for serialization
 	 * 
@@ -82,7 +96,7 @@ public class RequestManager {
 		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response));
 	}
 	
-	/*
+	/**
 	 * Method called by : [USER'S LOCAL APP]
 	 * Requirements : 	a Filter to preserve real request
 	 * 					a Generalizer to add noise in data 
@@ -139,7 +153,7 @@ public class RequestManager {
 		this.send(tosend, port);
 	}
 
-	/*
+	/**
 	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
 	 * Requirements : a DataUtil to apply a generic answer format 
 	 * 
