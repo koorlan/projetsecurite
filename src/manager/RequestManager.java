@@ -4,11 +4,13 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
 import dataFormatter.DataUtil;
-import filter.Filter;
+import filter.FilterManager;
 import filter.FilterModel;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
+
 import model.RequestModel;
 import model.UserModel;
 
@@ -22,12 +24,14 @@ public class RequestManager {
 		this.core = core;
 		this.model = model;
 	}
-	
-	//Not here..
-	//public void sendIdentity(String port){
-	//	this.core.getPacketManager().sendPacket(this.core.getPacketManager().forge("POST", this.core.getUserManager().debug()),port);
-	//}
-	
+
+	/*
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Requirements :DBManager which interprets the request formatted content and ensures a database connection 
+	 * 
+	 * @param request	A de-serialized request, which contains the dataUtil to process
+	 * 
+	 */
 	public void process(RequestModel request) throws ClassNotFoundException, SQLException
 	{
 		DBManager dbm = new DBManager(this.core);
@@ -36,43 +40,13 @@ public class RequestManager {
 		if(dbm.isFormatted())
 		{
 			results = dbm.search();
+			//TODO : <DEBUG> clean that later
 			System.out.println(results);
 		}
 		else
 			this.core.getLog().err(this, "Non formatted content");
+		this.forgeResponse(results);
 	}	
-	/*
-	public void process(RequestModel request){
-		//Just user here but free feel to add attribute in RequestModel (Note: don't forget Serializable)
-		if( !(request instanceof RequestModel)){
-			this.core.getLogManager().err(this,"Not a RequestModel format exiting.");
-		}
-		
-		System.out.println(request.getUser().toString());
-		
-		
-		//prepare response for the Answer manager TODO(he is not implemented... maybe think about a standard to communicate)
-		//For the moment just concat GSA
-		String query = "";
-		//Analyze.
-		if(!request.getUser().getName().equals(""))
-			query += "n";
-		if(!request.getUser().getGroup().equals(""))
-			query += "g";
-		if(!request.getUser().getAssignement().equals(""))
-			query += "a";
-		
-		System.out.println("Query Interpreted : \'" + query +"\'");
-		System.out.println("Mini - Interpreter - w/out check policy");
-		if(query.contains("n"))
-			System.out.println("Name :" + request.getUser().getName() + "Response :" + this.core.getUserManager().getName() );
-		if(query.contains("g"))
-			System.out.println("Group :" + request.getUser().getGroup()+ "Response :" + this.core.getUserManager().getGroup());
-		if(query.contains("a"))
-			System.out.println("Assignement :" + request.getUser().getAssignement()+ "Response :" + this.core.getUserManager().getAssignement());
-		
-	}
-	*/
 	
 	public void group(String group, String port) throws NoSuchAlgorithmException{
 		RequestModel request = new RequestModel(); 
@@ -84,23 +58,54 @@ public class RequestManager {
 		this.send(request, port);
 	}
 	
+	/*
+	 * Method called by : [USER'S LOCAL APP]
+	 * Requirements : a packet manager for serialization
+	 * 
+	 * @param request	A non-serialized request, which contains the dataUtil to SEND 
+	 * @param port 		The port number that is used for sending request 		
+	 * 
+	 */
 	private void send(RequestModel request, String port){
 		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),port);
 	}
 	
-
-
+	/*
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP] 
+	 * Requirements : a packet manager for serialization
+	 * 
+	 * @param response	A non-serialized response, which contains the dataUtil to SEND 
+	 * 
+	 */
+	private void sendResponse(RequestModel response)
+	{
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response));
+	}
+	
+	/*
+	 * Method called by : [USER'S LOCAL APP]
+	 * Requirements : 	a Filter to preserve real request
+	 * 					a Generalizer to add noise in data 
+	 * 					a DataUtil to apply a generic request format 
+	 * 
+	 * @param type			Search data type (filled by user)
+	 * @param group			Search group (filled by user)
+	 * @param status		Search status (filled by user)
+	 * @param assignement	Search assignement (filled by user) 
+	 * @param port			The port number that is used for sending request 
+	 * 
+	 */
 	public void forge(Object type, Object group, Object status, Object assignement, String port)
 	{
 		if(!(type instanceof String && group instanceof String && status instanceof String && assignement instanceof String))
 		{
 			this.core.getLog().err(this, "Wrong fields");
 		}
-		FilterModel filterM = new FilterModel();
-		Filter filter = new Filter(filterM, this.core);
+		
+		FilterModel filterM = new FilterModel();		
 		
 		GeneralizerModel genM = new GeneralizerModel();
-		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);	
+		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);			
 		
 		ArrayList<String> groupList = new ArrayList<String>();
 		ArrayList<String> statusList = new ArrayList<String>();
@@ -117,21 +122,16 @@ public class RequestManager {
 		filterM.setAssignementList(genManager.generalize(assignementList,"assignement"));
 		filterM.getAssignementList().printGsaList();
 		
-		/* building formatted string */
 		DataUtil du = new DataUtil();		
-		/* Set Action */
-		du.setAction("SELECT");		
-		/* Set Type */ 
+		du.setAction("QUERY");		
 		du.setType((String)type);		
-		/* Set Table */ 
-		du.setTable("SP_TABLE");		
-		/* Set GSA stuff */
+		//TODO : <MAJ> dissociate FRONT and USER tables OR unify the tables layout in DB 
+		du.setTable("FRONT_TABLE");			
 		du.setGSA(filterM.getGroupList().getMainKeyList());
 		du.setGSA(filterM.getStatusList().getMainKeyList());
 		du.setGSA(filterM.getAssignementList().getMainKeyList());
-		/* close formatted string */
 		du.close();
-		/* Print data util */
+		//TODO : <DEBUG> clean that later 
 		System.out.println(du);
 		
 		RequestModel tosend = new RequestModel();
@@ -139,5 +139,28 @@ public class RequestManager {
 		this.send(tosend, port);
 	}
 
-	
+	/*
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Requirements : a DataUtil to apply a generic answer format 
+	 * 
+	 * @param result	The result from a SQLite request (can be empty)
+	 *  		
+	 */
+	public void forgeResponse(ArrayList<String> results)
+	{
+		DataUtil du = new DataUtil();
+		du.setAction("ANSWER");
+		if(results.isEmpty())
+		{
+			du.setContent("TRASH");
+		}
+		else
+		{
+			du.setContent("FULL");
+			du.setResults(results);
+		}
+		RequestModel toSend = new RequestModel();
+		toSend.setDu(du);
+		this.sendResponse(toSend);
+	}
 }

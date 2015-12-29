@@ -2,11 +2,12 @@ package dataFormatter;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * @author lisa
+ *
+ */
 public class DataUtil implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private String data;
 	
@@ -15,15 +16,36 @@ public class DataUtil implements Serializable {
 		this.data = "/BEG/";
 	}
 	
+	public void setContent(String content)
+	{
+		if(content.compareTo("TRASH") == 0)
+		{
+			data += Content.TRASH.getKey();
+		}
+		else if(content.compareTo("FULL") == 0)
+		{
+			data += Content.FULL.getKey();
+		}
+	}
+	
+	public void setResults(ArrayList<String> result)
+	{
+		if(result.isEmpty())
+		{
+			System.out.println("<Building answer failed> Empty result non recognized previously");
+		}
+		
+	}
+	
 	public void setAction(String action)
 	{
-		if(action.compareTo("SELECT") == 0)
+		if(action.compareTo("QUERY") == 0)
 		{	
-			data += Action.SELECT.getKey();
+			data += Action.QUERY.getKey();
 		}
-		else if(action.compareTo("CREATE") == 0)
+		else if(action.compareTo("ANSWER") == 0)
 		{	
-			data += Action.CREATE.getKey();
+			data += Action.ANSWER.getKey();
 		}
 		
 		data += "::";
@@ -60,9 +82,9 @@ public class DataUtil implements Serializable {
 	
 	public void setTable(String table)
 	{
-		if(table.compareTo("SP_TABLE") == 0)
+		if(table.compareTo("FRONT_TABLE") == 0)
 		{	
-			data += Table.SP_TABLE.getKey();
+			data += Table.FRONT_TABLE.getKey();
 		}
 		else if(table.compareTo("DATA_TABLE") == 0)
 		{	
@@ -88,9 +110,10 @@ public class DataUtil implements Serializable {
 	{
 		return this.data;
 	}
-
+	
 	public String toString()
 	{
 		return this.data;
 	}
+
 }
