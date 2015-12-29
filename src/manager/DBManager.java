@@ -237,6 +237,20 @@ public class DBManager {
 	}
 
 	public ArrayList<String> search() throws ClassNotFoundException, SQLException {
+		switch(this.core.getService()){
+		case "frontal":
+			return this.searchFrontal();
+		case "user":
+			return this.searchUser();
+		default:
+			return null;
+		}
+	}
+	
+	//TODO not implemented
+	public ArrayList<String> searchUser() throws ClassNotFoundException, SQLException{return null;};
+	
+	public ArrayList<String> searchFrontal() throws ClassNotFoundException, SQLException{
 		String url = DB_PATH + DB_INFO;
 
 		Statement st = null;
@@ -268,7 +282,7 @@ public class DBManager {
 
 		return results;
 	}
-
+	
 	public void printResult(ResultSet rs) throws SQLException {
 		// print some interesting fields
 		while (rs.next()) {
