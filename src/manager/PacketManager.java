@@ -36,6 +36,8 @@ public class PacketManager {
 
 
 	public synchronized byte[] processFrontal(byte[] bPacket,String mode,Socket socket) throws IOException, NoSuchAlgorithmException, ClassNotFoundException, SQLException{
+		//Request -> Answer
+		//GI->GE->PI->PE
 		PacketModel packet = new PacketModel();
 		packet = (PacketModel)SerializationUtils.deserialize(bPacket);
 		switch (packet.getType()){
@@ -46,7 +48,9 @@ public class PacketManager {
                     String ip = user.getCore().getServer().getModel().getIpDest();
                     int port = user.getCore().getServer().getModel().getPort();
                     this.core.getPacket().sendPacket(packet, ip, port);
-                }        
+                }
+                //TODO Look DB and answer..
+   
 				break;
 			case "INTERNAL":
 				  packet.setSenderFamilly(this.core.getFrontal().getFamilly());
@@ -59,7 +63,9 @@ public class PacketManager {
                   byte[] id = this.core.getSecurity().sha1(this.core.getFrontal().getName() + random);
                   packet.setId(id);
                   this.core.getPacket().sendPacket(packet,this.core.getDB().getCentralIP(),this.core.getDB().getCentralPort());	
-				break;
+                  //TODO look DB then answer :)
+                  
+                  break;
 			default:
 				break;
 			}

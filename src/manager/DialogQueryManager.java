@@ -211,10 +211,10 @@ public class DialogQueryManager extends JFrame {
 				}
 				else {
 				
-					System.out.println(type.getSelectedItem());
-					System.out.println(affectation.getSelectedItem());
-					System.out.println(groupe.getSelectedItem());
-					System.out.println(statut.getSelectedItem());
+					//System.out.println(type.getSelectedItem());
+					//System.out.println(affectation.getSelectedItem());
+					//System.out.println(groupe.getSelectedItem());
+					//System.out.println(statut.getSelectedItem());
 					
 					try {
 						core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem());
