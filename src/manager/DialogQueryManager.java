@@ -211,12 +211,17 @@ public class DialogQueryManager extends JFrame {
 				}
 				else {
 				
-					System.out.println(type.getSelectedItem());
-					System.out.println(affectation.getSelectedItem());
-					System.out.println(groupe.getSelectedItem());
-					System.out.println(statut.getSelectedItem());
+					//System.out.println(type.getSelectedItem());
+					//System.out.println(affectation.getSelectedItem());
+					//System.out.println(groupe.getSelectedItem());
+					//System.out.println(statut.getSelectedItem());
 					
-					core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem(), port);
+					try {
+						core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem());
+					} catch (ClassNotFoundException | SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			} 
 		});

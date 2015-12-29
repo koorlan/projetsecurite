@@ -25,38 +25,34 @@ public class RequestManager {
 		this.model = model;
 	}
 
-	/*
-	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
-	 * Requirements :DBManager which interprets the request formatted content and ensures a database connection 
-	 * 
-	 * @param request	A de-serialized request, which contains the dataUtil to process
-	 * 
-	 */
-	public void process(RequestModel request) throws ClassNotFoundException, SQLException
+	
+/*
+ * Method called by : [FRONTAL] [USER'S LOCAL APP]
+ * Requirements :DBManager which interprets the request formatted content and ensures a database connection 
+ * 
+ * @param request	A de-serialized request, which contains the dataUtil to process
+ * 
+ */
+	
+	public byte[] process(RequestModel request) throws ClassNotFoundException, SQLException
+
 	{
-		DBManager dbm = new DBManager(this.core);
 		ArrayList<String> results = new ArrayList<String>();
-		dbm.build(request.getDu());
-		if(dbm.isFormatted())
+		this.core.getDB().build(request.getDu());
+		if(this.core.getDB().isFormatted())
 		{
-			results = dbm.search();
-			//TODO : <DEBUG> clean that later
+
+			results = this.core.getDB().search();
 			System.out.println(results);
+			
+			//here forge POST to return...
+			this.core.getPacket().forge("POST", "ANSWER");
+			return null;
 		}
 		else
 			this.core.getLog().err(this, "Non formatted content");
-		this.forgeResponse(results);
+		return null;
 	}	
-	
-	public void group(String group, String port) throws NoSuchAlgorithmException{
-		RequestModel request = new RequestModel(); 
-		//populate fields we want with random number and null we don't want. Maybe use regex after to make something cool :)
-		final UserModel user = new UserModel();
-		user.setGroup(group);
-		request.setUser(user);
-		
-		this.send(request, port);
-	}
 	
 	/*
 	 * Method called by : [USER'S LOCAL APP]
@@ -66,8 +62,8 @@ public class RequestManager {
 	 * @param port 		The port number that is used for sending request 		
 	 * 
 	 */
-	private void send(RequestModel request, String port){
-		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),port);
+	private void send(RequestModel request) throws ClassNotFoundException, SQLException{
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
 	/*
@@ -77,9 +73,10 @@ public class RequestManager {
 	 * @param response	A non-serialized response, which contains the dataUtil to SEND 
 	 * 
 	 */
-	private void sendResponse(RequestModel response)
+	private void sendResponse(RequestModel response) throws ClassNotFoundException, SQLException
 	{
-		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response));
+		//User case
+		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
 	/*
@@ -95,7 +92,7 @@ public class RequestManager {
 	 * @param port			The port number that is used for sending request 
 	 * 
 	 */
-	public void forge(Object type, Object group, Object status, Object assignement, String port)
+	public void forge(Object type, Object group, Object status, Object assignement) throws ClassNotFoundException, SQLException
 	{
 		if(!(type instanceof String && group instanceof String && status instanceof String && assignement instanceof String))
 		{
@@ -136,7 +133,7 @@ public class RequestManager {
 		
 		RequestModel tosend = new RequestModel();
 		tosend.setDu(du);
-		this.send(tosend, port);
+		this.send(tosend);
 	}
 
 	/*
@@ -146,7 +143,7 @@ public class RequestManager {
 	 * @param result	The result from a SQLite request (can be empty)
 	 *  		
 	 */
-	public void forgeResponse(ArrayList<String> results)
+	public void forgeResponse(ArrayList<String> results) throws ClassNotFoundException, SQLException
 	{
 		DataUtil du = new DataUtil();
 		du.setAction("ANSWER");

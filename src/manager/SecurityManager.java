@@ -2,6 +2,8 @@ package manager;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Random;
 
@@ -128,5 +130,11 @@ public class SecurityManager {
         }
 
         return key;
+    }
+    public byte[] sha1(String message) throws NoSuchAlgorithmException{
+        MessageDigest sha = MessageDigest.getInstance("sha-1");
+        sha.update(message.getBytes());
+        byte[] digest  = sha.digest();
+        return digest;
     }
 }

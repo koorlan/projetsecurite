@@ -50,6 +50,14 @@ public class UserManager {
 		return this.model.getPrivateKey();
 	}
 	
+	public String getStatus() {
+		return this.model.getStatus();
+	}
+
+	public void setStatus(String status) {
+		this.model.setStatus(status);
+	}
+	
 	public void update(String str){
 		if(str.equals("name"))
 			this.core.getLog().log(this,"Changed username to \'" + this.model.getName() + "\'");

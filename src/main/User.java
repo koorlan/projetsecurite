@@ -1,6 +1,9 @@
 package main;
 
+import java.sql.SQLException;
+
 import manager.CoreManager;
+import manager.DBManager;
 import manager.DialogQueryManager;
 import manager.LogManager;
 import manager.PacketManager;
@@ -23,6 +26,7 @@ public class User {
 	public User() throws Exception{
 		super();
 		this.initialize();
+		
 	}
 	
 	public void initialize() throws Exception{
@@ -66,6 +70,9 @@ public class User {
 		 DialogQueryManager dialog = new DialogQueryManager(Core);
 		 Core.set(dialog);
 		 
+		 DBManager db = new DBManager(Core);
+		 Core.set(db);
+		 
 		 this.core = Core;
 		return;
 	}
@@ -73,4 +80,11 @@ public class User {
 		return this.core;
 	}
 
+	public void fill(String dbSec, String dbData) throws ClassNotFoundException, SQLException{
+		/**Set secured DB**/
+		this.core.getDB().setDB_INFO(dbSec);
+		/**Set data DB **/
+		this.core.getDB().setDB_DATA(dbData);
+		this.core.getDB().initialize();
+	}
 }

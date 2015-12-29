@@ -14,8 +14,11 @@ public class UserModel implements Serializable{
 	private UserManager manager = null;
 	
 	private String name = new String();
-	private String assignement = new String();
+	
 	private String group = new String();
+	private String status = new String();
+	private String assignement = new String();
+	
 	
 	private KeyPair key = null;
 	
@@ -81,6 +84,14 @@ public class UserModel implements Serializable{
 			this.manager.update(str);
 		else 
 			return;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	@Override

@@ -61,23 +61,7 @@ public class TerminalManager {
 				this.inputThread = null;
 				return;
 			}
-			if(str.contains("testsocket")){
-				String[] cmd = str.split(" ");
-				
-				String ip = cmd[1];
-				int port = Integer.parseInt(cmd[2]);
-				
-				
-				PacketModel packet = new PacketModel();
-				packet = this.core.getPacket().forge("POST", "FLOOD");
-				while(true){
-					this.core.getPacket().sendPacket(packet, cmd[2]);
-					System.out.println("Sended...");
-					Thread.sleep(2000);
-					if(false)
-						break;
-				}
-			}
+			
 			
 			this.core.process(str);
 			

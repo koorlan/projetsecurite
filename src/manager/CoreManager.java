@@ -48,6 +48,17 @@ public class CoreManager{
 		//do smthg
 		this.getLog().log(this, "Core started.");
 		this.getTerminal().start();
+		switch (this.service){
+		case "user":
+			break;
+		case "frontal":
+			this.getFrontal().getInternalserverManager().start();
+			this.getFrontal().getExternalserverManager().start();
+			break;
+		case "central":
+			break;
+		}
+		
 		
 		//wait closing
 		this.loop();
@@ -231,5 +242,39 @@ public class CoreManager{
 		return null;
 	}
 	
+	public DBManager getDB(){
+		for(Object o: this.modules){
+			if(o instanceof DBManager){
+				return (DBManager)o;
+			}		
+		}
+		return null;
+	}
 	
+	public ServerManager getServer(){
+		for(Object o: this.modules){
+			if(o instanceof ServerManager){
+				return (ServerManager)o;
+			}		
+		}
+		return null;
+	}
+	
+	 public FrontalManager getFrontal() {
+			for(Object o: this.modules){
+				if(o instanceof FrontalManager){
+					return (FrontalManager)o;
+				}		
+			}
+			return null;
+		}
+	
+	public ServerManager getServerByPort(int port){
+		for(Object o: this.modules){
+			if(o instanceof ServerManager && ((ServerManager) o).getModel().getPort() == port){
+				return (ServerManager)o;
+			}		
+		}
+		return null;
+	}
 }

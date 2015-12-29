@@ -12,201 +12,438 @@ import dataFormatter.*;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 import generalizer.GsaList;
+import main.User;
+import model.FrontalModel;
+import model.ServerModel;
+import model.UserModel;
 
 public class DBManager {
 
 	private CoreManager core;
-	
+
 	private static String sql;
-	private static boolean isFormatted; 
+	private static boolean isFormatted;
 	private static long id;
 
 	private final String PLUGIN = "org.sqlite.JDBC";
-	
-	private final String DB_PATH = "jdbc:sqlite:Initialisation/datas/";
-	private final String DB_NAME = "F1.sqlite";
 
-	public DBManager(CoreManager core)
-	{
+	private final String DB_PATH = "jdbc:sqlite:Initialisation/datas/";
+	private String DB_INFO = null;
+	private String DB_DATA = null;
+
+	public DBManager(CoreManager core) {
 		this.core = core;
 		sql = "";
-		setFormatted(false); 
-		id = 0; 
+		setFormatted(false);
+		id = 0;
 	}
-	
-	// no need group here 
-	public void build(DataUtil du)
-	{
-		Pattern p = Pattern.compile("(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
+
+	// no need group here
+	public void build(DataUtil du) {
+		switch (this.core.getService()) {
+		case "frontal":
+			this.buildFrontal(du);
+			break;
+		case "user":
+			this.buildUser(du);
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void buildFrontal(DataUtil du) {
+
+		Pattern p = Pattern.compile(
+				"(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
 		Matcher m = p.matcher(du.getData());
-		
+
 		/* Starting match */
-		if(m.matches())
-		{	
+		if (m.matches()) {
 			setFormatted(true);
 			/* Action (enum) */
-			for(Action action : Action.values())
-			{
-				if(m.group(2).compareTo(action.getKey()) == 0)
-				{
-						sql += action.getValue() + " ";
+			for (Action action : Action.values()) {
+				if (m.group(2).compareTo(action.getKey()) == 0) {
+					sql += action.getValue() + " ";
 				}
 			}
-			
+
 			/* Table (enum) */
-			for(Table table : Table.values())
-			{
-				if(m.group(4).compareTo(table.getKey()) == 0)
-				{
-						sql += "FROM " + table.getValue() + " ";
+			for (Table table : Table.values()) {
+				if (m.group(4).compareTo(table.getKey()) == 0) {
+					sql += "FROM " + table.getValue() + " ";
 				}
 			}
-			
+
 			p = Pattern.compile("([0-6]{1})");
-			/* data type list matcher */ 
+			/* data type list matcher */
 			Matcher tm = p.matcher(m.group(3));
 			boolean flag = false;
-			
+
 			/* Data (enum) */
 			sql += "WHERE ( l.RefBD = dc.RefBD AND l.ID_Cred = ct.ID_Cred AND ";
-			
-			while (tm.find()) 	
-			{	
-				if(flag)
+
+			while (tm.find()) {
+				if (flag)
 					sql += "OR ";
-				for(Type type : Type.values())
-				{
-					if(tm.group().compareTo(type.getKey()) == 0)
-					{
-							sql += "dc.Type = '" + type.getValue() + "' ";
-							flag = true; 
+				for (Type type : Type.values()) {
+					if (tm.group().compareTo(type.getKey()) == 0) {
+						sql += "dc.Type = '" + type.getValue() + "' ";
+						flag = true;
 					}
-					
+
 				}
 			}
 			sql += " ) ";
-			
+
 			p = Pattern.compile("([A-Z]{1}[1-9]{1,})");
 			ArrayList<String> grpList = new ArrayList<String>();
 			ArrayList<String> statList = new ArrayList<String>();
 			ArrayList<String> assignementList = new ArrayList<String>();
 			System.out.println(m.group());
-		
+
 			/* group list matcher */
-			if(m.start(5) != -1) // check if the 5th group exists
+			if (m.start(5) != -1) // check if the 5th group exists
 			{
 				sql += "AND ";
 				Matcher gm = p.matcher(m.group(5));
-				while(gm.find())
-				{
+				while (gm.find()) {
 					grpList.add((new GsaList(gm.group(), GeneralizerModel.getGroupTree())).getValue());
 				}
 			}
 			/* status list matcher */
-			if(m.start(6) != -1)
-			{	
+			if (m.start(6) != -1) {
 				Matcher sm = p.matcher(m.group(6));
-				while(sm.find())
-				{
+				while (sm.find()) {
 					statList.add((new GsaList(sm.group(), GeneralizerModel.getStatusTree())).getValue());
 				}
 			}
 			/* assignement list matcher */
-			if(m.start(7) != -1)
-			{	
+			if (m.start(7) != -1) {
 				Matcher am = p.matcher(m.group(7));
-				while(am.find())
-				{
+				while (am.find()) {
 					assignementList.add((new GsaList(am.group(), GeneralizerModel.getAssignementTree())).getValue());
 				}
 			}
 			/* format GSA list into sql request */
 			build(grpList, statList, assignementList);
-		
+
 		} /* ENDIF */
+
 	}
-	
-	public void build(ArrayList<String> groupList, ArrayList<String> statusList, ArrayList<String> assignementList)
-	{	
+
+	private void buildUser(DataUtil du) {
+
+		Pattern p = Pattern.compile(
+				"(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
+		Matcher m = p.matcher(du.getData());
+
+		/* Starting match */
+		if (m.matches()) {
+			setFormatted(true);
+			/* Action (enum) */
+			for (Action action : Action.values()) {
+				if (m.group(2).compareTo(action.getKey()) == 0) {
+					sql += "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, dc.Valeur ";
+				}
+			}
+
+			/* Table (enum) */
+			for (Table table : Table.values()) {
+				if (m.group(4).compareTo(table.getKey()) == 0) {
+					sql += "FROM U_Cles_Types AS ct, Donnees_Chiffrees AS dc, Liens as l ";
+				}
+			}
+
+			p = Pattern.compile("([0-6]{1})");
+			/* data type list matcher */
+			Matcher tm = p.matcher(m.group(3));
+			boolean flag = false;
+
+			/* Data (enum) */
+			sql += "WHERE ( l.RefBD = dc.RefBD AND l.ID_Cred = ct.ID_Cred AND ";
+
+			while (tm.find()) {
+				if (flag)
+					sql += "OR ";
+				for (Type type : Type.values()) {
+					if (tm.group().compareTo(type.getKey()) == 0) {
+						sql += "dc.Type = '" + type.getValue() + "' ";
+						flag = true;
+					}
+
+				}
+			}
+			sql += " ) ";
+
+			p = Pattern.compile("([A-Z]{1}[1-9]{1,})");
+			ArrayList<String> grpList = new ArrayList<String>();
+			ArrayList<String> statList = new ArrayList<String>();
+			ArrayList<String> assignementList = new ArrayList<String>();
+			System.out.println(m.group());
+
+			/* group list matcher */
+			if (m.start(5) != -1) // check if the 5th group exists
+			{
+				sql += "AND ";
+				Matcher gm = p.matcher(m.group(5));
+				while (gm.find()) {
+					grpList.add((new GsaList(gm.group(), GeneralizerModel.getGroupTree())).getValue());
+				}
+			}
+			/* status list matcher */
+			if (m.start(6) != -1) {
+				Matcher sm = p.matcher(m.group(6));
+				while (sm.find()) {
+					statList.add((new GsaList(sm.group(), GeneralizerModel.getStatusTree())).getValue());
+				}
+			}
+			/* assignement list matcher */
+			if (m.start(7) != -1) {
+				Matcher am = p.matcher(m.group(7));
+				while (am.find()) {
+					assignementList.add((new GsaList(am.group(), GeneralizerModel.getAssignementTree())).getValue());
+				}
+			}
+			/* format GSA list into sql request */
+			build(grpList, statList, assignementList);
+
+		} /* ENDIF */
+
+	}
+
+	public void build(ArrayList<String> groupList, ArrayList<String> statusList, ArrayList<String> assignementList) {
 		int i = 0;
-		if(groupList.size() > 0)
-		{	
-			sql += "( dc.Affect_Gen = " + "'" + assignementList.get(0) +"'";
-			for (i = 1 ; i < assignementList.size() ; i++) 
-				sql += " OR dc.Affect_Gen = " + "'" + assignementList.get(i) + "'";	
-			sql += ")"; 
+		if (groupList.size() > 0) {
+			sql += "( dc.Affect_Gen = " + "'" + assignementList.get(0) + "'";
+			for (i = 1; i < assignementList.size(); i++)
+				sql += " OR dc.Affect_Gen = " + "'" + assignementList.get(i) + "'";
+			sql += ")";
 		}
-		if(statusList.size() > 0)
-		{
+		if (statusList.size() > 0) {
 			sql += " AND ( dc.Statut_Gen = " + "'" + statusList.get(0) + "'";
-			for (i = 1 ; i < statusList.size() ; i++) 
-				sql += " OR dc.Statut_Gen = " + "'"+ statusList.get(i) +"'";	
-			sql += ")"; 
-		} 
+			for (i = 1; i < statusList.size(); i++)
+				sql += " OR dc.Statut_Gen = " + "'" + statusList.get(i) + "'";
+			sql += ")";
+		}
 	}
-	
-	public String getSql()
-	{
+
+	public String getSql() {
 		return sql;
 	}
-	
-	public long getId()
-	{
+
+	public long getId() {
 		return id;
 	}
 
-	public ArrayList<String> search() throws ClassNotFoundException, SQLException
-	{
-		String url = DB_PATH+DB_NAME;
-		
+	public ArrayList<String> search() throws ClassNotFoundException, SQLException {
+		String url = DB_PATH + DB_INFO;
+
 		Statement st = null;
 		ArrayList<String> results = new ArrayList<String>();
 
 		// load driver
 		Class.forName(PLUGIN);
-		
+
 		// get connection
 		java.sql.Connection cn = DriverManager.getConnection(url);
-		
-		// create statement 
+
+		// create statement
 		st = cn.createStatement();
-		
+
 		// execute "select" request
-		System.out.println(sql+";");
+		System.out.println(sql + ";");
 		ResultSet rs = st.executeQuery(sql);
-		
+
 		// saving some interesting fields
-		while(rs.next())
-		{
-			results.add(rs.getString(1));	// E_Cred_Ksec
-			results.add(rs.getString(2));	// Cred_Auto_Ref
-			results.add(rs.getString(3));	// Metadonnees (chiffrees)
-			results.add(rs.getString(4));	// Valeur (chiffree)
+		while (rs.next()) {
+			results.add(rs.getString(1)); // E_Cred_Ksec
+			results.add(rs.getString(2)); // Cred_Auto_Ref
+			results.add(rs.getString(3)); // Metadonnees (chiffrees)
+			results.add(rs.getString(4)); // Valeur (chiffree)
 		}
-		
+
 		cn.close();
 		st.close();
-	
+
 		return results;
 	}
 
-	public void printResult(ResultSet rs) throws SQLException
-	{
+	public void printResult(ResultSet rs) throws SQLException {
 		// print some interesting fields
-		while(rs.next())
-		{
-			System.out.println(rs.getString(1));	// E_Cred_Ksec
-			System.out.println(rs.getString(2));	// Cred_Auto_Ref
-			System.out.println(rs.getString(3));	// Meta_Chiffree
-			System.out.println(rs.getString(4));	// Valeur_Chiffree
-		}	
+		while (rs.next()) {
+			System.out.println(rs.getString(1)); // E_Cred_Ksec
+			System.out.println(rs.getString(2)); // Cred_Auto_Ref
+			System.out.println(rs.getString(3)); // Meta_Chiffree
+			System.out.println(rs.getString(4)); // Valeur_Chiffree
+		}
 	}
-	
+
 	public boolean isFormatted() {
 		return isFormatted;
 	}
 
 	public static void setFormatted(boolean isFormatted) {
 		DBManager.isFormatted = isFormatted;
+	}
+
+	public void setDB_INFO(String dB_INFO) {
+		this.DB_INFO = dB_INFO;
+	}
+
+	public void setDB_DATA(String dB_DATA) {
+		DB_DATA = dB_DATA;
+	}
+
+	public void initialize() throws ClassNotFoundException, SQLException {
+		// load driver
+		Class.forName(PLUGIN);
+		// get connection
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+		// create statement
+		Statement st = cn.createStatement();
+		ResultSet rs = null;
+		switch (this.core.getService()) {
+		case "central":
+			// read ip/port from DB
+			rs = st.executeQuery("SELECT IP,Port FROM Server");
+			this.core.getServer().setIp(rs.getString("IP"));
+			this.core.getServer().setPort(rs.getInt("Port"));
+			// populate Fronts to broadcast
+			rs = st.executeQuery("SELECT * FROM Frontales");
+			while (rs.next()) {
+				ServerModel srv = new ServerModel();
+				srv.setIpDest(rs.getString("IP"));
+				srv.setPort(rs.getInt("externalPort"));
+				ServerManager srvMan = new ServerManager(srv, null);
+
+				// Dirty 2nd argument
+				FrontalModel frontal = new FrontalModel(rs.getString("Famille"), rs.getString("Frontale"), srvMan,
+						srvMan);
+				this.core.getBroadcast().addFrontal(frontal);
+			}
+			break;
+		case "user":
+			// read name/ip/port from DB
+			rs = st.executeQuery("SELECT * FROM Utilisateurs");
+			this.core.getServer().setIp(rs.getString("IP"));
+			this.core.getServer().setPort(rs.getInt("Port"));
+			this.core.getUser().setName(rs.getString("Login"));
+			break;
+		case "frontal":
+			// set frontal info
+			rs = st.executeQuery("SELECT * FROM Frontale");
+			this.core.getFrontal().setFamilly(rs.getString("Famille"));
+			this.core.getFrontal().setName(rs.getString("Frontale"));
+			// this.core.getFrontal.setIp(rs.getString("IP"));
+			this.core.getFrontal().setInternalPort(rs.getInt("internalPort"));
+			this.core.getFrontal().setExternalPort(rs.getInt("externalPort"));
+			break;
+
+		}
+	}
+
+	public String getFrontalIP() throws ClassNotFoundException, SQLException {
+		Class.forName(PLUGIN);
+		
+		ResultSet rs = null;
+		java.sql.Connection cn = null;
+		Statement st = null;
+		switch (this.core.getService()) {
+		case "frontal":
+			cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+			st = cn.createStatement();
+			rs = st.executeQuery("SELECT * FROM Frontale");
+			return rs.getString("IP");
+		case "user":
+			cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+			st = cn.createStatement();
+			rs = st.executeQuery("SELECT * FROM Frontales");
+			return rs.getString("IP");
+		default:
+			break;
+		}
+		return null;
+	}
+	
+	public int getFrontalPort() throws ClassNotFoundException, SQLException {
+		Class.forName(PLUGIN);
+		
+		ResultSet rs = null;
+		java.sql.Connection cn = null;
+		Statement st = null;
+		switch (this.core.getService()) {
+		case "user":
+			cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+			st = cn.createStatement();
+			rs = st.executeQuery("SELECT * FROM Frontales");
+			return rs.getInt("internalPort");
+		default:
+			break;
+		}
+		return -1;
+	}
+
+	public ArrayList<User> getUsers() throws Exception {
+		// load driver
+		Class.forName(PLUGIN);
+		// get connection
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+		// create statement
+		Statement st = cn.createStatement();
+		ResultSet rs = null;
+		switch (this.core.getService()) {
+		case "frontal":
+			rs = st.executeQuery("SELECT * FROM Utilisateurs");
+			ArrayList<User> users = new ArrayList<User>();
+			while (rs.next()) {
+				User user = new User();
+				user.getCore().getServer().setIp(rs.getString("IP"));
+				user.getCore().getServer().setPort(rs.getInt("Port"));
+				user.getCore().getUser().setStatus(rs.getString("Statut_Gen"));
+				user.getCore().getUser().setAssignement(rs.getString("Affect_Gen"));
+				users.add(user);
+			}
+			return users;
+		default:
+			break;
+		}
+		return null;
+	}
+
+	public String getCentralIP() throws ClassNotFoundException, SQLException {
+		// load driver
+		Class.forName(PLUGIN);
+		// get connection
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+		// create statement
+		Statement st = cn.createStatement();
+		ResultSet rs = null;
+		switch (this.core.getService()) {
+		case "frontal":
+			rs = st.executeQuery("SELECT * FROM Server");
+			return rs.getString("IP");
+		default:
+			break;
+		}
+		return null;
+	}
+
+	public int getCentralPort() throws SQLException, ClassNotFoundException {
+		// load driver
+		Class.forName(PLUGIN);
+		// get connection
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+		// create statement
+		Statement st = cn.createStatement();
+		ResultSet rs = null;
+		switch (this.core.getService()) {
+		case "frontal":
+			rs = st.executeQuery("SELECT * FROM Server");
+			return rs.getInt("Port");
+		default:
+			break;
+		}
+		return -1;
 	}
 }
