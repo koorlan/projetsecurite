@@ -1,9 +1,13 @@
 package dataFormatter;
 
+/**
+ * @author lisa
+ *
+ */
 public enum Action {
 	
-	SELECT("0", "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, dc.Metadonnees, dc.Valeur"), 
-	CREATE("1", "CREATE");
+	QUERY("0", "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, dc.Metadonnees, dc.Valeur"), 
+	ANSWER("1", "ANSWER RECEIVED");
 
 	private String key = "";
 	private String value = "";

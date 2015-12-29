@@ -1,10 +1,12 @@
 package dataFormatter;
 
+/**
+ * @author lisa
+ *
+ */
 public enum Table {
 	
-	//share policy table 
-	SP_TABLE("0", "Cles_Types AS ct, Donnees_Chiffrees AS dc, Liens as l"),
-	//
+	FRONT_TABLE("0", "Cles_Types AS ct, Donnees_Chiffrees AS dc, Liens as l"),
 	DATA_TABLE("1", "donnees_chiffrees");
 	
 	private String key = "";

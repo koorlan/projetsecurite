@@ -1,7 +1,5 @@
-/Initialisation_BD/
-/dataFormatter/
-/generalizer/
-/main/
-/manager/
-/model/
 /filter/
+/manager/
+/dataFormatter/
+/docStyle/
+/rednblack.css
