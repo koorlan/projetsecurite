@@ -1,5 +1,9 @@
 package dataFormatter;
 
+/**
+ * @author lisa
+ *
+ */
 public enum Type {
 	
 	ALL("0", "*"),

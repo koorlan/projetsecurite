@@ -2,15 +2,14 @@ package filter;
 
 import java.util.ArrayList;
 
-import generalizer.GsaList;
 import manager.CoreManager;
 
-public class Filter {
+public class FilterManager{
 
 	private CoreManager core; 
 	private FilterModel model;
 	
-	public Filter(FilterModel model, CoreManager core)
+	public FilterManager(FilterModel model, CoreManager core)
 	{
 		this.core = core; 
 		this.model = model;
