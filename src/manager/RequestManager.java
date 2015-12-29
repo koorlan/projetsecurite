@@ -26,7 +26,7 @@ public class RequestManager {
 	}
 
 	/**
-	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Method called by : [USER'S LOCAL APP]
 	 * Requirements: DBManager which interprets the request formatted content and ensures a database connection 
 	 * 
 	 * @param request	A de-serialized request, which contains the dataUtil to process
@@ -49,7 +49,7 @@ public class RequestManager {
 	}	
 	
 	/**
-	 * Method called by : [USER'S LOCAL APP]
+	 * Method called by : [USER'S LOCAL APP][FRONTAL]
 	 * Requirements:	ResponseManager which interprets the response formatted content
 	 * 				 	FilterManager which filter the answer 
 	 * @param reponse	A de-serialized response, which contains the dataUtil to process

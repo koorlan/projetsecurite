@@ -44,7 +44,7 @@ public class PacketManager {
 			switch(packet.getType()){
 			case GET:
 				try{
-					this.core.getLog().log(this,"Pass to RequestManager");
+					this.core.getLog().log(this,"Pass to RequestManager");	
 					this.core.getRequest().process((RequestModel)SerializationUtils.deserialize(packet.getContent()));
 				} catch (SerializationException e){
 					this.core.getLog().err(this,"Not a SerializedRequestModel type.");
