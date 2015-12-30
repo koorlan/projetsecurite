@@ -69,7 +69,7 @@ public class RequestManager {
 				//TODO : 
 					// Decipher E_Cred_Ksec with credential OR trash packet
 					// Use Ksec to decipher metadatas + value
-					// Use metadatas to filter packet (trash it, or keep it)
+					// Use owner metadatas to filter packet (trash it, or keep it)
 					// Print results 
 			}
 			else
