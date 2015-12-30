@@ -2,12 +2,10 @@ package manager;
 
 import model.PacketModel.*;
 import model.RequestModel;
-import model.UserModel;
 import model.FrontalModel;
 import model.PacketModel;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -139,7 +137,15 @@ public class PacketManager {
 
 				break;
 			case POST:
-				this.core.getLog().log(this, "Pass to UnamedManager ;)");
+				try {
+					this.core.getLog().log(this, "Pass to ResponseManager ;)");
+					//TODO : <?> 
+					this.core.getRequest()
+							.processResponse((RequestModel) SerializationUtils.deserialize(packet.getContent()));
+				} catch (SerializationException e) {
+					this.core.getLog().err(this, "Not a SerializedRequestModel type.");
+				}
+
 				break;
 			default:
 				this.core.getLog().log(this, "Don't know this command abort..");

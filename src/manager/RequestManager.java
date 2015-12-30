@@ -1,7 +1,5 @@
 package manager;
 
-import java.security.NoSuchAlgorithmException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -12,7 +10,8 @@ import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 
 import model.RequestModel;
-import model.UserModel;
+import response.ResponseManager;
+import response.ResponseModel;
 
 public class RequestManager {
 	
@@ -24,18 +23,15 @@ public class RequestManager {
 		this.core = core;
 		this.model = model;
 	}
-
 	
-/*
- * Method called by : [FRONTAL] [USER'S LOCAL APP]
- * Requirements :DBManager which interprets the request formatted content and ensures a database connection 
- * 
- * @param request	A de-serialized request, which contains the dataUtil to process
- * 
- */
-	
+	/**
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
+	 * Requirements : DBManager which interprets the request formatted content and ensures a database connection 
+	 * 
+	 * @param request	A de-serialized request, which contains the dataUtil to process
+	 * 
+	 */
 	public byte[] process(RequestModel request) throws ClassNotFoundException, SQLException
-
 	{
 		ArrayList<String> results = new ArrayList<String>();
 		this.core.getDB().build(request.getDu());
@@ -46,15 +42,52 @@ public class RequestManager {
 			System.out.println(results);
 			
 			//here forge POST to return...
-			this.core.getPacket().forge("POST", "ANSWER");
+			this.forgeResponse(results);
+			//this.core.getPacket().forge("POST", "ANSWER");
 			return null;
 		}
 		else
 			this.core.getLog().err(this, "Non formatted content");
 		return null;
 	}	
-	
-	/*
+
+	/**
+	 * Method called by : [USER'S LOCAL APP]
+	 * Requirements:	ResponseManager which interprets the response formatted content
+	 * 				 	FilterManager which filter the answer 
+	 * @param reponse	A de-serialized response, which contains the dataUtil to process (filter, trash, print, store...)
+	 * 
+	 */
+	public void processResponse(RequestModel response) throws ClassNotFoundException, SQLException
+	{	
+		ResponseModel responseM = new ResponseModel();
+		ResponseManager rManager = new ResponseManager(responseM, this.core);	
+		if(rManager.isResponse(response.getDu()))
+		{	
+			if(rManager.isEmpty(response.getDu()))
+			{
+				//TODO : 
+					// Decipher E_Cred_Ksec with credential OR trash packet
+					// Use Ksec to decipher metadatas + value
+					// Use metadatas to filter packet (trash it, or keep it)
+					// Print results 
+			}
+			else
+			{
+				this.core.getLog().warn(this, "Empty response received");
+			}
+		}
+		else
+		{
+			this.core.getLog().err(this, "Response received with unexpected format");
+			rManager.trash(response);
+			return;
+		}
+		
+		//this.core.getFilter().model.setResponse(ArrayList<String> response);
+	}	
+
+	/**
 	 * Method called by : [USER'S LOCAL APP]
 	 * Requirements : a packet manager for serialization
 	 * 
@@ -66,7 +99,7 @@ public class RequestManager {
 		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
-	/*
+	/**
 	 * Method called by : [FRONTAL] [USER'S LOCAL APP] 
 	 * Requirements : a packet manager for serialization
 	 * 
@@ -79,7 +112,7 @@ public class RequestManager {
 		this.core.getPacket().sendPacket(this.core.getPacket().forge("POST", response),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
 	}
 	
-	/*
+	/**
 	 * Method called by : [USER'S LOCAL APP]
 	 * Requirements : 	a Filter to preserve real request
 	 * 					a Generalizer to add noise in data 
@@ -100,6 +133,7 @@ public class RequestManager {
 		}
 		
 		FilterModel filterM = new FilterModel();		
+		FilterManager filter = new FilterManager(filterM, this.core);
 		
 		GeneralizerModel genM = new GeneralizerModel();
 		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);			
@@ -136,7 +170,7 @@ public class RequestManager {
 		this.send(tosend);
 	}
 
-	/*
+	/**
 	 * Method called by : [FRONTAL] [USER'S LOCAL APP]
 	 * Requirements : a DataUtil to apply a generic answer format 
 	 * 
@@ -156,6 +190,7 @@ public class RequestManager {
 			du.setContent("FULL");
 			du.setResults(results);
 		}
+		du.close();
 		RequestModel toSend = new RequestModel();
 		toSend.setDu(du);
 		this.sendResponse(toSend);

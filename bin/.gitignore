@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-/Initialisation_BD/
 /manager/
-/model/
-/main/
-=======
-/filter/
-/manager/
+/response/
 /dataFormatter/
-/docStyle/
-/rednblack.css
->>>>>>> cdbc2d542f75bf1fe9189fd84d88a06a55e1eb5f

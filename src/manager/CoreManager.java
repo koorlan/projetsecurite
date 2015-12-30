@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import filter.FilterManager;
 import generalizer.GeneralizerManager;
 import model.CoreModel;
 
@@ -273,6 +274,16 @@ public class CoreManager{
 		for(Object o: this.modules){
 			if(o instanceof ServerManager && ((ServerManager) o).getModel().getPort() == port){
 				return (ServerManager)o;
+			}		
+		}
+		return null;
+	}
+
+
+	public FilterManager getFilter() {
+		for(Object o: this.modules){
+			if(o instanceof FilterManager){
+				return (FilterManager)o;
 			}		
 		}
 		return null;

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import manager.CoreManager;
 
+/**
+ * @author lisa
+ * 
+ */
 public class FilterManager{
 
 	private CoreManager core; 
@@ -14,7 +18,10 @@ public class FilterManager{
 		this.core = core; 
 		this.model = model;
 	}
-
+	
+	/**
+	 * @return true/false if received response meets user's requirements 
+	 */
 	public boolean isSuitable()
 	{
 		if(this.model.isReady == false)
@@ -38,17 +45,17 @@ public class FilterManager{
 		}
 	
 	}
-	/*
-	 * building a fake response atm 
+	/**
+	 * TODO : <CLEAN> building a fake response atm 
 	 */
 	public void buildResponse()
 	{
 		ArrayList<String> fResponse = new ArrayList<String>();
-		/* 0 */
+		/* 0 TYPE */
 		fResponse.add("NAME");
-		/* 1 */
+		/* 1 ASSIGNEMENT */
 		fResponse.add("INSA Rouen");
-		/* 2 */
+		/* 2 STATUS */
 		fResponse.add("Service relations internationales");
 		
 		
