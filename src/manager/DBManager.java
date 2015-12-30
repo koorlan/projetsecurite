@@ -276,7 +276,8 @@ public class DBManager {
 			results.add(rs.getString(3)); // Metadonnees (chiffrees)
 			results.add(rs.getString(4)); // Valeur (chiffree)
 		}
-
+		
+		sql = "";
 		cn.close();
 		st.close();
 

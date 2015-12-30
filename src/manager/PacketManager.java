@@ -34,62 +34,83 @@ public class PacketManager {
 		this.model = model;
 	}
 
-
-	public synchronized byte[] processFrontal(byte[] bPacket,String mode,Socket socket) throws IOException, NoSuchAlgorithmException, ClassNotFoundException, SQLException{
-		//Request -> Answer
-		//GI->GE->PI->PE
+	public synchronized byte[] processFrontal(byte[] bPacket, String mode, Socket socket)
+			throws IOException, NoSuchAlgorithmException, ClassNotFoundException, SQLException {
+		// Request -> Answer
+		// GI->GE->PI->PE
 		PacketModel packet = new PacketModel();
-		packet = (PacketModel)SerializationUtils.deserialize(bPacket);
-		switch (packet.getType()){
+		packet = (PacketModel) SerializationUtils.deserialize(bPacket);
+		switch (packet.getType()) {
 		case GET:
-			switch(mode){
+			switch (mode) {
 			case "EXTERNAL":
-                for(User user : this.core.getFrontal().getUserList()){
-                    String ip = user.getCore().getServer().getModel().getIpDest();
-                    int port = user.getCore().getServer().getModel().getPort();
-                    this.core.getPacket().sendPacket(packet, ip, port);
-                }
-                //TODO Look DB and answer..
-   
+				this.core.getLog().log(this, "packet GET + EXTERNAL arrived");
+				for (User user : this.core.getFrontal().getUserList()) {
+					String ip = user.getCore().getServer().getModel().getIpDest();
+					int port = user.getCore().getServer().getModel().getPort();
+					this.core.getPacket().sendPacket(packet, ip, port);
+				}
+
+				// TODO Look DB and answer if results..
+
 				break;
 			case "INTERNAL":
-				  packet.setSenderFamilly(this.core.getFrontal().getFamilly());
-                  int random;
-                  do {
-                      Random r = new Random();
-                      random = r.nextInt(1000); 
-                  } while(this.core.getFrontal().getFrontalMap().containsKey(random));
-                  this.core.getFrontal().getFrontalMap().put(random, socket);
-                  byte[] id = this.core.getSecurity().sha1(this.core.getFrontal().getName() + random);
-                  packet.setId(id);
-                  this.core.getPacket().sendPacket(packet,this.core.getDB().getCentralIP(),this.core.getDB().getCentralPort());	
-                  //TODO look DB then answer :)
-                  
-                  break;
+				this.core.getLog().log(this, "packet GET + INTERNAL arrived");
+				packet.setSenderFamilly(this.core.getFrontal().getFamilly());
+				int random;
+				do {
+					Random r = new Random();
+					random = r.nextInt(1000);
+				} while (this.core.getFrontal().getFrontalMap().containsKey(random));
+				this.core.getFrontal().getFrontalMap().put(random, socket);
+				byte[] id = this.core.getSecurity().sha1(this.core.getFrontal().getName() + random);
+				packet.setId(id);
+				this.core.getPacket().sendPacket(packet, this.core.getDB().getCentralIP(),
+						this.core.getDB().getCentralPort());
+				// TODO look DB then answer if results...
+				ArrayList<String> results = new ArrayList<String>();
+				RequestModel request = (RequestModel) SerializationUtils.deserialize(packet.getContent());
+				this.core.getDB().build(request.getDu());
+				if (this.core.getDB().isFormatted()) {
+					results = this.core.getDB().search();
+					System.out.println("result:");
+					System.out.println("result:" + results);
+					// here forge POST to return...
+					// this.core.getPacket().forge("POST", "ANSWER");
+					return null;
+				} else
+					this.core.getLog().err(this, "Non formatted content");
+
+				break;
 			default:
 				break;
 			}
 			break;
 		case POST:
-			switch(mode){
-			case "EXTERNAL":	
-				  for(Entry<Integer, Socket> entry : this.core.getFrontal().getFrontalMap().entrySet()){
-                      Integer key = entry.getKey();
-                      if(Arrays.equals(packet.getId(), this.core.getSecurity().sha1(this.core.getFrontal().getName() + key))){
-                          Socket s = entry.getValue();
-                          s.getOutputStream().write(SerializationUtils.serialize(packet));
-                          break;
-                      }                         
-                  }
+			switch (mode) {
+			case "EXTERNAL":
+				this.core.getLog().log(this, "packet POST + EXTERNAL arrived");
+				for (Entry<Integer, Socket> entry : this.core.getFrontal().getFrontalMap().entrySet()) {
+					Integer key = entry.getKey();
+					if (Arrays.equals(packet.getId(),
+							this.core.getSecurity().sha1(this.core.getFrontal().getName() + key))) {
+						Socket s = entry.getValue();
+						s.getOutputStream().write(SerializationUtils.serialize(packet));
+						break;
+					}
+				}
 				break;
 			case "INTERNAL":
-				 ArrayList<FrontalModel> frontalList = this.core.getFrontal().getFrontalFamillyMap().get(packet.getSenderFamilly());
-                 for(FrontalModel frontal : frontalList)
-                     this.sendPacket(packet, frontal.getExternalserverManager().getModel().getIpDest(), frontal.getExternalserverManager().getModel().getPort());	
+				this.core.getLog().log(this, "packet POST + INTERNAL arrived");
+				ArrayList<FrontalModel> frontalList = this.core.getFrontal().getFrontalFamillyMap()
+						.get(packet.getSenderFamilly());
+				for (FrontalModel frontal : frontalList)
+					this.sendPacket(packet, frontal.getExternalserverManager().getModel().getIpDest(),
+							frontal.getExternalserverManager().getModel().getPort());
 				break;
 			default:
 				break;
-			}	
+			}
 			break;
 		default:
 			break;
@@ -151,7 +172,7 @@ public class PacketManager {
 		}
 		return null;
 	}
-	
+
 	public void sendTo(String ip, int port) {
 		// grab temp packet
 		PacketModel packet = this.model.getPacket();
@@ -169,15 +190,15 @@ public class PacketManager {
 			socket.getOutputStream().write(bPacket);
 			socket.close();
 		} catch (ConnectException e) {
-			this.core.getLog().err(this, "Connection refused @" +ip+":"+port );
+			this.core.getLog().err(this, "Connection refused @" + ip + ":" + port);
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void sendPacket(PacketModel req, String ip,int port) {
+	public void sendPacket(PacketModel req, String ip, int port) {
 		this.model.save(req);
-		this.sendTo(ip,port);
+		this.sendTo(ip, port);
 	}
 
 	public void testCentral(String str, String port) {

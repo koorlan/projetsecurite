@@ -3,6 +3,9 @@ package main;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import generalizer.GeneralizerManager;
+import generalizer.GeneralizerModel;
 import manager.CoreManager;
 import manager.DBManager;
 import manager.DialogQueryManager;
@@ -77,6 +80,11 @@ public class Frontal {
 		 
 		 DBManager DB = new DBManager(Core);
 		 Core.set(DB);
+		 
+		 GeneralizerModel GeneralM = new GeneralizerModel();
+		 GeneralizerManager General = new GeneralizerManager(GeneralM,Core);
+		 Core.set(General);
+		 //TODO setManager ??
 		 
 		 this.core = Core;
 		 
