@@ -1,14 +1,21 @@
 package manager;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 import dataFormatter.DataUtil;
 import filter.FilterManager;
 import filter.FilterModel;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
-
+import model.PacketModel;
 import model.RequestModel;
 import response.ResponseManager;
 import response.ResponseModel;
@@ -93,10 +100,25 @@ public class RequestManager {
 	 * 
 	 * @param request	A non-serialized request, which contains the dataUtil to SEND 
 	 * @param port 		The port number that is used for sending request 		
+	 * @throws IOException 
 	 * 
 	 */
-	private void send(RequestModel request) throws ClassNotFoundException, SQLException{
-		this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
+	private void send(RequestModel request) throws ClassNotFoundException, SQLException, IOException{
+		Socket socket;
+		socket = this.core.getPacket().sendPacket(this.core.getPacket().forge("GET",request),this.core.getDB().getFrontalIP(),this.core.getDB().getFrontalPort());
+		InputStream inputStream = socket.getInputStream();
+		int count;
+		byte[] packet = new byte[0];
+		byte[] buffer = new byte[1024];
+		
+		long startTime = System.currentTimeMillis(); //fetch starting time
+		while(false||(System.currentTimeMillis()-startTime)<3000)
+		{
+			count = inputStream.read(buffer);
+			packet = ArrayUtils.addAll(packet, buffer);
+			if(count != -1)
+				System.out.println(count);
+		}
 	}
 	
 	/**
@@ -123,9 +145,10 @@ public class RequestManager {
 	 * @param status		Search status (filled by user)
 	 * @param assignement	Search assignement (filled by user) 
 	 * @param port			The port number that is used for sending request 
+	 * @throws IOException 
 	 * 
 	 */
-	public void forge(Object type, Object group, Object status, Object assignement) throws ClassNotFoundException, SQLException
+	public void forge(Object type, Object group, Object status, Object assignement) throws ClassNotFoundException, SQLException, IOException
 	{
 		if(!(type instanceof String && group instanceof String && status instanceof String && assignement instanceof String))
 		{
@@ -177,7 +200,7 @@ public class RequestManager {
 	 * @param result	The result from a SQLite request (can be empty)
 	 *  		
 	 */
-	public void forgeResponse(ArrayList<String> results) throws ClassNotFoundException, SQLException
+	public RequestModel forgeResponse(ArrayList<String> results) throws ClassNotFoundException, SQLException
 	{
 		DataUtil du = new DataUtil();
 		du.setAction("ANSWER");
@@ -193,6 +216,6 @@ public class RequestManager {
 		du.close();
 		RequestModel toSend = new RequestModel();
 		toSend.setDu(du);
-		this.sendResponse(toSend);
+		return toSend;
 	}
 }

@@ -15,6 +15,7 @@ import model.CoreModel;
 
 
 public class CoreManager{
+	
 	Function<String, String> StandardizationModule = instanceName -> {
 		instanceName = instanceName.replace("manager.", "");
         instanceName = instanceName.replace("Manager", "");

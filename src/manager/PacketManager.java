@@ -71,10 +71,8 @@ public class PacketManager {
 				this.core.getDB().build(request.getDu());
 				if (this.core.getDB().isFormatted()) {
 					results = this.core.getDB().search();
-					System.out.println("result:");
-					System.out.println("result:" + results);
-					// here forge POST to return...
-					// this.core.getPacket().forge("POST", "ANSWER");
+					RequestModel response = this.core.getRequest().forgeResponse(results);
+					socket.getOutputStream().write(SerializationUtils.serialize(this.forge("POST", response)));
 					return null;
 				} else
 					this.core.getLog().err(this, "Non formatted content");
@@ -179,7 +177,7 @@ public class PacketManager {
 		return null;
 	}
 
-	public void sendTo(String ip, int port) {
+	public Socket sendTo(String ip, int port) {
 		// grab temp packet
 		PacketModel packet = this.model.getPacket();
 		// Security
@@ -194,30 +192,20 @@ public class PacketManager {
 		try {
 			socket = new Socket(InetAddress.getByName(ip), port);
 			socket.getOutputStream().write(bPacket);
-			socket.close();
+			return socket;
+			//socket.close();
 		} catch (ConnectException e) {
 			this.core.getLog().err(this, "Connection refused @" + ip + ":" + port);
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 
-	public void sendPacket(PacketModel req, String ip, int port) {
+	public Socket sendPacket(PacketModel req, String ip, int port) {
 		this.model.save(req);
-		this.sendTo(ip, port);
+		return this.sendTo(ip, port);
 	}
 
-	public void testCentral(String str, String port) {
-		Socket socket;
-		try {
-			socket = new Socket(InetAddress.getByName("127.0.0.1"), Integer.parseInt(port));
-			byte[] buffer = str.getBytes();
-			socket.getOutputStream().write(buffer);
-			socket.close();
-		} catch (ConnectException e) {
-			this.core.getLog().err(this, "Connection refused");
-		} catch (NumberFormatException | IOException e) {
-			e.printStackTrace();
-		}
-	}
+	
 }
