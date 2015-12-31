@@ -1,5 +1,5 @@
+//package database; pour Nathan et Taïna
 package Initialisation_BD;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -35,16 +35,15 @@ public class DatabaseMain {
 	{
 		try
 		{
-			System.out.println("Mise en place des repertoires");
+		    System.out.println("Mise en place des repertoires");
 			Runtime.getRuntime().exec("rm -r " + PREFIX);
-			//Runtime.getRuntime().exec("mkdir " + PREFIX);		
-			Runtime.getRuntime().exec(new String[] {"mkdir ",PREFIX});	
-			
-			
+			Runtime.getRuntime().exec("mkdir " + PREFIX);		
+			//Runtime.getRuntime().exec(new String[] {"mkdir ",PREFIX});	
 			Runtime.getRuntime().exec("cp " + PREFIX + "/../" + INIT_NAME + " " + PREFIX); 
 
 			// On commence par completer la BD originale (avec les cles)
-			Statement stmt1=DBManager.OpenCreateDB(INIT_FILE);
+			Connection con1=DBManager.OpenCreateDB(INIT_FILE);
+			Statement stmt1=DBManager.CreateStatement(con1);
 			RunQuery(stmt1, QUERIES[0]); //Supprime la table Cles
 			RunQuery(stmt1, QUERIES[1]); //Cree la table Cles avec Kpub et Kpriv
 			RunQuery(stmt1, QUERIES[2]); //Rempli Cles (ID de Groupes/Statuts/Affectations)
@@ -54,11 +53,14 @@ public class DatabaseMain {
 			RunQuery(stmt1, QUERIES[53]); //On rajoute un colonne ID_Cred à Cred_Autorise
 			RunQuery(stmt1, QUERIES[54]); //On rajoute un ID_Cred aleatoire à Cred_Autorise
 			RunQuery(stmt1, QUERIES[3]); //Rajoute le champ Ksec à la table Types_Utili
+			// TODO rajouter les GSA comme donnees-> Fait via SQLiteManager
 
+			
 			// On copie les tables contenant les noeuds, users et frontales dans une BD TEMP
 			// Pour pouvoir la parcourir (et en même temps attacher la BD originale) car sinon
 			// on a des problemes de verrouillage de la BD pendant le parcours
-			Statement stmt4=DBManager.OpenCreateDB(PREFIX + "/TEMP.sqlite");
+			Connection con4=DBManager.OpenCreateDB(PREFIX + "/TEMP.sqlite");
+			Statement stmt4=DBManager.CreateStatement(con4);
 			RunQuery(stmt4, QUERIES[5]); //attache initDB
 			RunQuery(stmt4, QUERIES[6]); //Copie de la table utilisateurs
 			RunQuery(stmt4, QUERIES[7]); //Copie de la table frontales
@@ -69,7 +71,7 @@ public class DatabaseMain {
 			
 			
 			
-			
+		//  CALCUL DE LA LISTE DES GROUPES  ET TODO DES METADONNEES DE CHAQUE UTLISATEUR
 			ResultSet rs3 = stmt4.executeQuery(QUERIES[4]); //On recupere les Logins 
 			String login2 =null;
 			while (rs3.next()==true ) {
@@ -78,8 +80,9 @@ public class DatabaseMain {
 				ResultSet rs4 = stmt1.executeQuery(QUERIES[37] + login2 + "'"); //On recupere les groupes
 				String ListG = "";
 				while (rs4.next() == true){
-					ListG += rs4.getString("Groupe");
-					
+					ListG += rs4.getString("Groupe")+ "::";
+				//ListG += rs4.getString("Groupe");
+
 				}				
 				rs4.close();
 				RunQuery(stmt1, QUERIES[39] + ListG + QUERIES[40] + login2 + "'"); 
@@ -87,30 +90,26 @@ public class DatabaseMain {
 			rs3.close();
 
 
-			// TODO INSERER ICI LE CALCUL DES CLES PUB/PRIV
-			// Il faut iterer sur cles (comme on itere sur les logins)
-			
-			
+			//  CALCUL DES CLES PUB/PRIV
 			ResultSet rss = stmt4.executeQuery(QUERIES[57]);
 			String ID_Cle2=null;
 			while (rss.next()==true ) {
 				ID_Cle2 = rss.getString("ID_Cle");
-				System.out.println("On traite " + ID_Cle2);
 				MyRSA rsa = new MyRSA();
 				rsa.generateKeyPair();
 				byte[] publicKey = rsa.getPublicKeyInBytes();
 				byte[] privateKey = rsa.getPrivateKeyInBytes();
-				
-				Class.forName("org.sqlite.JDBC"); 
-				Connection con = DriverManager.getConnection("jdbc:sqlite:" + INIT_FILE); 
+				//RunQuery(stmt1, QUERIES[58] + publicKey + QUERIES[59] + ID_Cle2 + "'"); 
+				//RunQuery(stmt1, QUERIES[60] + privateKey + QUERIES[59] + ID_Cle2 + "'");
+			
 				String query = "UPDATE Cles set Kpub = ?, Kpriv = ? WHERE ID_CLe = ?";
-				PreparedStatement pstmt = con.prepareStatement(query);
+				PreparedStatement pstmt = con1.prepareStatement(query);
 						
 				pstmt.setBytes(1, publicKey);
 				pstmt.setBytes(2, privateKey);
 				pstmt.setString(3, ID_Cle2);
 				pstmt.execute();
-				
+			 
 			} 
 			rss.close();
 			
@@ -143,10 +142,13 @@ public class DatabaseMain {
 				login = rs.getString("Login");
 				// On cree la BD "Securisee". Normalement cette BD devrait être deportee dans un token securise
 				// Car elle contient les donnees en clair et les cles secretes et privees....
-				Statement stmt2=DBManager.OpenCreateDB(PREFIX + "/" + login + "_SEC.sqlite");
+				Connection con2=DBManager.OpenCreateDB(PREFIX + "/" + login + "_SEC.sqlite");
+				Statement stmt2=DBManager.CreateStatement(con2);
 				RunQuery(stmt2, QUERIES[5]); //attache initDB
 				RunQuery(stmt2, QUERIES[9]); //Copie de la tables des cles
-				RunQuery(stmt2, QUERIES[20] + login +"' " + QUERIES[21] + login +"' " + QUERIES[22] + login +"') "); //Suppression des cles privees qui ne sont pas associees à l'utilisateur
+				RunQuery(stmt2, QUERIES[20] + login +"' " + QUERIES[66] + login +"' " + QUERIES[21] + login +"' " + QUERIES[67] + login +"' " + QUERIES[22] + login +"' " + QUERIES[68] + login +"') "); //Suppression des cles privees qui ne sont pas associees à l'utilisateur
+				// TODO Il faudrait aussi garder les cles privees des GSA jusqu'a la racine: utiliser la table Predecesseurs_Cle -> done...
+				
 				RunQuery(stmt2, QUERIES[10]); //Copie de la tables des groupes
 				RunQuery(stmt2, QUERIES[11]); //Copie de la tables des statuts
 				RunQuery(stmt2, QUERIES[12]); //Copie de la tables des affectations
@@ -157,9 +159,11 @@ public class DatabaseMain {
 				RunQuery(stmt2, QUERIES[17] + login +"'"); //Copie du login/passwd/ip/port de l'utilisateur
 				RunQuery(stmt2, QUERIES[18] + login +"'"); //Copie de la frontale de l'utilisateur
 				RunQuery(stmt2, QUERIES[19]); //Copie de la tables des NoeudsTOR
-
+				// TODO rajouter SA dans la table utilisateur de la BD -> done
+				
 				// Creation de la BD non securisee pour l'utilisateur
-				Statement stmt3=DBManager.OpenCreateDB(PREFIX + "/" + login+ ".sqlite");
+				Connection con3=DBManager.OpenCreateDB(PREFIX + "/" + login+ ".sqlite");
+				Statement stmt3=DBManager.CreateStatement(con3);
 				RunQuery(stmt3, QUERIES[5]); //attache initDB
 				RunQuery(stmt3, QUERIES[24] + login +"'"); // Types
 				RunQuery(stmt3, QUERIES[25] + login +"'"); //Donnees
@@ -181,11 +185,12 @@ public class DatabaseMain {
 			while (rs2.next()==true){
 				frontale = rs2.getString("Frontale");
 				//C'est parti !
-				Statement stmt5=DBManager.OpenCreateDB(PREFIX + "/" + frontale + ".sqlite");
+				Connection con5=DBManager.OpenCreateDB(PREFIX + "/" + frontale + ".sqlite");
+				Statement stmt5=DBManager.CreateStatement(con5);
 				RunQuery(stmt5, QUERIES[5]); //attache initDB
 				RunQuery(stmt5, QUERIES[31]); //server
 				RunQuery(stmt5, QUERIES[65] + frontale + "'"); //Frontal
-				RunQuery(stmt5, QUERIES[66] + frontale + "'");	//Frontales
+				RunQuery(stmt5, QUERIES[69] + frontale + "'");	//Frontales
 				RunQuery(stmt5, QUERIES[32] + frontale +"'"); //table utilisateurs (Statut, Affectation generalises ? Ou desanonymisation ?)
 				RunQuery(stmt5, QUERIES[33] + frontale +"'"); //Donnees de base pour Donnees_Chiffrees, Liens et Cles_Types--> provisoire
 				RunQuery(stmt5, QUERIES[41]); //Creation colonne Metadonnees
@@ -207,12 +212,14 @@ public class DatabaseMain {
 			rs2.close();
 
 			// On cree maintenant le Serveur Central
-			Statement stmt6 = DBManager.OpenCreateDB(PREFIX + "/Server.sqlite");
+			Connection con6=DBManager.OpenCreateDB(PREFIX + "/Server.sqlite");
+			Statement stmt6=DBManager.CreateStatement(con6);
 			RunQuery(stmt6, QUERIES[5]); //attache initDB
 			RunQuery(stmt6, QUERIES[35]); //Copie de la tables des Frontales
 			RunQuery(stmt6, QUERIES[49]); //Table LogCOM
 			RunQuery(stmt6, QUERIES[64]); //Table Server
 
+			/*
 			// On cree maintenant les BD Noeud TOR
 			// TODO il faut en faire n (ou n est le nombre de lignes dans la table NoeudsTOR
 			// TODO il faut aussi ajouter un nom aux noeuds.... (pour que chacun sache qui il est)
@@ -220,13 +227,15 @@ public class DatabaseMain {
 			String NoeudTOR =null;
 			while (rs4.next()==true){
 				NoeudTOR = rs4.getString("NoeudTOR");
-				Statement stmt7=DBManager.OpenCreateDB(PREFIX + "/" + NoeudTOR + ".sqlite");
+				Connection con7=DBManager.OpenCreateDB(PREFIX + "/" + NoeudTOR + ".sqlite");
+			    Statement stmt7=DBManager.CreateStatement(con7);
 				RunQuery(stmt7, QUERIES[5]); //attache initDB
 				RunQuery(stmt7, QUERIES[49]); //Table Logcom
 				RunQuery(stmt7, QUERIES[50]); //Table Routage
 				RunQuery(stmt7, QUERIES[19]); //Table NoeudsTOR
 			}
 			rs4.close();
+			*/
 		}
 		catch (Exception e) 
 		{
@@ -253,7 +262,9 @@ public class DatabaseMain {
 
 	}
 
+	//public final static String PREFIX = "../../BDs"; pour Nathan et Taïna
 	public final static String PREFIX = "Initialisation/datas";
+
 	public final static String INIT_NAME = "InitDB.sqlite";
 	public final static String INIT_FILE = PREFIX + "/" + INIT_NAME;
 	public static final String[] QUERIES = {
@@ -282,13 +293,13 @@ public class DatabaseMain {
 			"create table NoeudsTOR as select * from BASE.NoeudsTOR",
 			/*20*/
 			"Update Cles set Kpriv = NULL where ID_Cle not in (SELECT ID_Cle from BASE.Statuts S, BASE.Utilisateurs U where U.ID_Statut = S.ID_Statut and Login = '",
-			"UNION SELECT ID_Cle from BASE.Affectations A, BASE.Utilisateurs U where U.ID_Affectation = A.Affectation and Login = '",
+			"UNION SELECT ID_Cle from BASE.Affectations A, BASE.Utilisateurs U where U.ID_Affectation = A.ID_Affectation and Login = '",
 			"UNION SELECT ID_Cle from BASE.Groupes G, BASE.Inscription I where I.ID_Groupe = G.ID_Groupe and Login = '",
 			"create table Types_Utili as select * from BASE.Types_Utili",
-			"create table Types as select Type from BASE.Types_Utili WHERE Login = '",
+			"create table Types as select Type from BASE.Types_Utili WHERE Login = '", // !!!!!!!!METADONNEE !!!!!!
 			/*25*/
 			"create table Donnees_Chiffrees as select Type, Valeur from BASE.Donnees WHERE Login = '",
-			"Update Donnees_Chiffrees set Valeur = Valeur || ' + CHIFFREMENT' ",
+			"Update Donnees_Chiffrees set Valeur = Valeur || ' + CHIFFREMENT' ", // TODO rentrer les données chiffrees !
 			"create table U_Cles_Types as select T.Type, Cred_Auto_Ref from BASE.Types_Utili T, BASE.Cred_Autorise C where C.Politique = T.Politique and Login = '",
 			"ALTER TABLE U_Cles_Types ADD COLUMN E_Cred_Ksec TEXT",
 			"Update U_Cles_Types set E_Cred_Ksec = Cred_Auto_ref || ' + CHIFFREMENT' ",
@@ -303,11 +314,11 @@ public class DatabaseMain {
 			"ALTER TABLE Utilisateurs ADD COLUMN Liste_groupes TEXT(500)",
 			"SELECT G.Groupe FROM Groupes G, Utilisateurs U, Inscription I where U.Login = I.Login and I.ID_Groupe = G.ID_Groupe and U.Login = '",
 			"UPDATE Types_Utili set Ksec = 'KSEC_' || Login ||'_' || Type",
-			"UPDATE Utilisateurs set Liste_groupes = '",
+			"UPDATE Utilisateurs SET Liste_groupes = '",
 			/*40*/
 			"' WHERE Login = '",
 			"ALTER TABLE Provisoire ADD COLUMN Metadonnees TEXT(500)",
-			"UPDATE Provisoire SET Metadonnees = Login || '::' || Liste_groupes || '::' || Statut || '::' || Affectation",
+			"UPDATE Provisoire SET Metadonnees = Login  || '::' || Liste_groupes || Statut || '::' || Affectation",
 			"create table Donnees_Chiffrees as select distinct RefBD, Type, Statut_Gen, Affect_Gen, Valeur, Metadonnees from Provisoire where Frontale = '",
 			"DROP table Provisoire",
 			/*45*/
@@ -335,8 +346,11 @@ public class DatabaseMain {
 			"UPDATE Types_Utili set Ksec = '",/*63*/
 			"CREATE TABLE Server as SELECT * from BASE.Server ",/*64*/
 			/*65*/		
-			"CREATE TABLE Frontale as SELECT * from BASE.Frontales WHERE Frontale = '",
+			"CREATE TABLE Frontale as SELECT * from BASE.Frontales WHERE Frontale = '",/*65*/
+			"UNION SELECT P.ID_Parent from BASE.Utilisateurs U, BASE.Statuts S, BASE.Predecesseurs_Cle P where U.ID_Statut = S.ID_Statut and S.ID_Cle = P.ID_Cle and Login = '",/*66*/
+			"UNION SELECT P.ID_Parent from BASE.Utilisateurs U, BASE.Affectations A, BASE.Predecesseurs_Cle P where U.ID_Affectation = A.ID_Affectation and A.ID_Cle = P.ID_Cle and Login = '",/*67*/
+			"UNION SELECT P.ID_Parent from BASE.Inscription I, BASE.Groupes G, BASE.Predecesseurs_Cle P where I.ID_Groupe = G.ID_Groupe and G.ID_Cle = P.ID_Cle and Login = '",/*68*/
 			"CREATE TABLE Frontales as SELECT * from BASE.Frontales WHERE Frontale != '",
 	""};
-
+	
 }
