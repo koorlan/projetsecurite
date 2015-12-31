@@ -11,7 +11,7 @@ public class ResponseModel {
 	
 	private boolean isFormatted;
 	private final String regex = 
-		"(.BEG.)([0-1]{1})::([0-1]{1})::(.{0,})::(.{0,})::(.{0,})::(.{0,})::(.END.)";
+		"(/BEG/{1})(1{1})::([0-1]{1})::(.{1,}::{1})?(.{1,}::{1})?(.{1,}::{1})?(.{1,}::{1})?(/END/{1})";
 	
 	
 	
