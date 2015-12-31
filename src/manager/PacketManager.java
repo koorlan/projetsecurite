@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 
+import main.Frontal;
 import main.User;
 
 public class PacketManager {
@@ -51,7 +52,8 @@ public class PacketManager {
 				}
 
 				// TODO Look DB and answer if results..
-
+				//LA C4EST CASS2222
+				
 				break;
 			case "INTERNAL":
 				this.core.getLog().log(this, "packet GET + INTERNAL arrived");
@@ -64,14 +66,13 @@ public class PacketManager {
 				this.core.getFrontal().getFrontalMap().put(random, socket);
 				byte[] id = this.core.getSecurity().sha1(this.core.getFrontal().getName() + random);
 				packet.setId(id);
-				this.core.getPacket().sendPacket(packet, this.core.getDB().getCentralIP(),
-						this.core.getDB().getCentralPort());
-				// TODO look DB then answer if results...
+				this.core.getPacket().sendPacket(packet, this.core.getDB().getCentralIP(),this.core.getDB().getCentralPort());
 				ArrayList<String> results = new ArrayList<String>();
 				RequestModel request = (RequestModel) SerializationUtils.deserialize(packet.getContent());
 				this.core.getDB().build(request.getDu());
 				if (this.core.getDB().isFormatted()) {
 					results = this.core.getDB().search();
+					//TODO ... if many results -> do a for to send X responses
 					RequestModel response = this.core.getRequest().forgeResponse(results);
 					DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 					byte[] toSend = SerializationUtils.serialize(this.forge("POST", response));
@@ -102,11 +103,11 @@ public class PacketManager {
 				break;
 			case "INTERNAL":
 				this.core.getLog().log(this, "packet POST + INTERNAL arrived");
-				ArrayList<FrontalModel> frontalList = this.core.getFrontal().getFrontalFamillyMap()
+				ArrayList<Frontal> frontalList = this.core.getFrontal().getFrontalFamillyMap()
 						.get(packet.getSenderFamilly());
-				for (FrontalModel frontal : frontalList)
-					this.sendPacket(packet, frontal.getExternalserverManager().getModel().getIpDest(),
-							frontal.getExternalserverManager().getModel().getPort());
+				for (Frontal frontal : frontalList)
+					this.sendPacket(packet, frontal.getCore().getFrontal().getExternalserverManager().getModel().getIpDest(),
+							frontal.getCore().getFrontal().getExternalserverManager().getModel().getPort());
 				break;
 			default:
 				break;

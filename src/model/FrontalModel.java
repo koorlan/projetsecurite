@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import main.Frontal;
 import main.User;
 import manager.FrontalManager;
 import manager.ServerManager;
@@ -29,7 +30,7 @@ public class FrontalModel {
     private ServerManager internalserverManager = null;
     private ServerManager externalserverManager = null;
     private HashMap<Integer, Socket> frontalMap = new HashMap<Integer, Socket>();
-    private HashMap<String, ArrayList<FrontalModel>> frontalFamillyMap = new HashMap<String, ArrayList<FrontalModel>>();
+    private HashMap<String, ArrayList<Frontal>> frontalFamillyMap = new HashMap<String, ArrayList<Frontal>>();
     private ArrayList<User> userList = new ArrayList<User>();
     
     public FrontalManager getManager() {
@@ -72,17 +73,18 @@ public class FrontalModel {
         this.frontalMap = frontalMap;
     }
 
-    public HashMap<String, ArrayList<FrontalModel>> getFrontalFamillyMap() {
-        return frontalFamillyMap;
-    }
-
-    public void setFrontalFamillyMap(HashMap<String, ArrayList<FrontalModel>> frontalFamillyMap) {
-        this.frontalFamillyMap = frontalFamillyMap;
-    }
 
    
     
-    public ArrayList<User> getUserList() {
+    public HashMap<String, ArrayList<Frontal>> getFrontalFamillyMap() {
+		return frontalFamillyMap;
+	}
+
+	public void setFrontalFamillyMap(HashMap<String, ArrayList<Frontal>> frontalFamillyMap) {
+		this.frontalFamillyMap = frontalFamillyMap;
+	}
+
+	public ArrayList<User> getUserList() {
 		return userList;
 	}
 

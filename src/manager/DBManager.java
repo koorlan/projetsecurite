@@ -12,6 +12,7 @@ import dataFormatter.*;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 import generalizer.GsaList;
+import main.Frontal;
 import main.User;
 import model.FrontalModel;
 import model.ServerModel;
@@ -237,7 +238,7 @@ public class DBManager {
 	}
 
 	public ArrayList<String> search() throws ClassNotFoundException, SQLException {
-		switch(this.core.getService()){
+		switch (this.core.getService()) {
 		case "frontal":
 			return this.searchFrontal();
 		case "user":
@@ -246,11 +247,13 @@ public class DBManager {
 			return null;
 		}
 	}
-	
-	//TODO not implemented
-	public ArrayList<String> searchUser() throws ClassNotFoundException, SQLException{return null;};
-	
-	public ArrayList<String> searchFrontal() throws ClassNotFoundException, SQLException{
+
+	// TODO not implemented
+	public ArrayList<String> searchUser() throws ClassNotFoundException, SQLException {
+		return null;
+	};
+
+	public ArrayList<String> searchFrontal() throws ClassNotFoundException, SQLException {
 		String url = DB_PATH + DB_INFO;
 
 		Statement st = null;
@@ -276,14 +279,14 @@ public class DBManager {
 			results.add(rs.getString(3)); // Metadonnees (chiffrees)
 			results.add(rs.getString(4)); // Valeur (chiffree)
 		}
-		
+
 		sql = "";
 		cn.close();
 		st.close();
 
 		return results;
 	}
-	
+
 	public void printResult(ResultSet rs) throws SQLException {
 		// print some interesting fields
 		while (rs.next()) {
@@ -360,7 +363,7 @@ public class DBManager {
 
 	public String getFrontalIP() throws ClassNotFoundException, SQLException {
 		Class.forName(PLUGIN);
-		
+
 		ResultSet rs = null;
 		java.sql.Connection cn = null;
 		Statement st = null;
@@ -380,10 +383,10 @@ public class DBManager {
 		}
 		return null;
 	}
-	
+
 	public int getFrontalPort() throws ClassNotFoundException, SQLException {
 		Class.forName(PLUGIN);
-		
+
 		ResultSet rs = null;
 		java.sql.Connection cn = null;
 		Statement st = null;
@@ -460,5 +463,40 @@ public class DBManager {
 			break;
 		}
 		return -1;
+	}
+
+	public ArrayList<Frontal> getFrontals() throws Exception {
+		// load driver
+		Class.forName(PLUGIN);
+		// get connection
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+		// create statement
+		Statement st = cn.createStatement();
+		ResultSet rs = null;
+		switch (this.core.getService()) {
+		case "frontal":
+			rs = st.executeQuery("SELECT * FROM Frontales");
+			ArrayList<Frontal> frontals = new ArrayList<Frontal>();
+			while(rs.next()){
+				String ip = rs.getString("IP");
+				int intP = rs.getInt("internalPort");
+				int extP = rs.getInt("externalPort");
+				
+				Frontal frontal = new Frontal();
+				frontal.getCore().getFrontal().setFamilly(rs.getString("Famille"));
+				frontal.getCore().getFrontal().setName(rs.getString("Frontale"));
+				frontal.getCore().getFrontal().getExternalserverManager().setIp(ip);
+				frontal.getCore().getFrontal().getInternalserverManager().setIp(ip);
+				frontal.getCore().getFrontal().getInternalserverManager().setPort(intP);
+				frontal.getCore().getFrontal().getExternalserverManager().setPort(extP);
+				
+				frontals.add(frontal);
+			}
+			return frontals;
+			
+		default:
+			break;
+		}
+		return null;
 	}
 }
