@@ -27,4 +27,6 @@ public class DBManager {
 		}
 		return stmt;
 	}
+	
+
 }

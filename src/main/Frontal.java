@@ -115,16 +115,15 @@ public class Frontal {
 		//order by familly name.
 		HashMap<String, ArrayList<Frontal>> map = new HashMap<String, ArrayList<Frontal>>();
 		for (Frontal frontal: otherFrontals){
-			if(map.containsKey(frontal.core.getFrontal().getName())){
-				map.get(frontal.core.getFrontal().getName()).add(frontal);
+			if(map.containsKey(frontal.core.getFrontal().getFamilly())){
+				map.get(frontal.core.getFrontal().getFamilly()).add(frontal);
 			}else{
 				ArrayList<Frontal> newl = new ArrayList<Frontal>();
 				newl.add(frontal);
-				map.put(frontal.core.getFrontal().getName(), newl );
+				map.put(frontal.core.getFrontal().getFamilly(), newl );
 			}
-			
 		}
-		
+		frontalM.setFrontalFamillyMap(map);
 		//frontalM.getFrontalFamillyMap().put(arg0, arg1)
 	}
 

@@ -116,7 +116,7 @@ public class RequestManager {
 		int len;
 
 		long startTime = System.currentTimeMillis(); // fetch starting time
-		while ((false || (System.currentTimeMillis() - startTime) < 3000)) {
+		while ((false || (System.currentTimeMillis() - startTime) < 10000)) {
 			try{
 			len = dis.readInt();
 			if (len > 0) {
@@ -126,11 +126,12 @@ public class RequestManager {
 				PacketModel Dpacket = (PacketModel)SerializationUtils.deserialize(packet);
 				RequestModel response = (RequestModel)SerializationUtils.deserialize(Dpacket.getContent());
 				this.processResponse(response);
-			}
+				}
 			}catch (EOFException e){
 				//System.out.print("wait>");
 			}
 		}
+		System.out.println("Finished Waiting answer");
 	}
 
 	/**

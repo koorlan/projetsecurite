@@ -28,8 +28,8 @@ public class DialogQueryManager extends JFrame {
 	}
 	
 
-	public void start() throws SQLException {
-		
+	public void start(String port) throws SQLException {
+		this.port = port;
 		l = new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
 				//System.exit(0);

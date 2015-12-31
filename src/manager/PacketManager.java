@@ -38,6 +38,9 @@ public class PacketManager {
 			throws IOException, NoSuchAlgorithmException, ClassNotFoundException, SQLException {
 		// Request -> Answer
 		// GI->GE->PI->PE
+		ArrayList<String> results;
+		RequestModel request ;
+		
 		PacketModel packet = new PacketModel();
 		packet = (PacketModel) SerializationUtils.deserialize(bPacket);
 		switch (packet.getType()) {
@@ -52,7 +55,29 @@ public class PacketManager {
 				}
 
 				// TODO Look DB and answer if results..
-				//LA C4EST CASS2222
+				results = new ArrayList<String>();
+				request = (RequestModel) SerializationUtils.deserialize(packet.getContent());
+				this.core.getDB().build(request.getDu());
+				if (this.core.getDB().isFormatted()) {
+					results = this.core.getDB().search();
+					//TODO ... if many results -> do a for to send X responses
+					RequestModel response = this.core.getRequest().forgeResponse(results);
+					DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+					PacketModel toSendP = this.forge("POST", response);
+					toSendP.setId(packet.getId());
+					toSendP.setSenderFamilly(packet.getSenderFamilly());
+					//byte[] toSend = SerializationUtils.serialize(toSendP);
+					
+					//Send my results to frontal familly
+					ArrayList<Frontal> frontalList = this.core.getFrontal().getFrontalFamillyMap()
+							.get(packet.getSenderFamilly());
+					for (Frontal frontal : frontalList)
+						this.sendPacket(toSendP, frontal.getCore().getFrontal().getExternalserverManager().getModel().getIpDest(),
+								frontal.getCore().getFrontal().getExternalserverManager().getModel().getPort());
+					
+					return null;
+				} else
+					this.core.getLog().err(this, "Non formatted content");
 				
 				break;
 			case "INTERNAL":
@@ -67,8 +92,8 @@ public class PacketManager {
 				byte[] id = this.core.getSecurity().sha1(this.core.getFrontal().getName() + random);
 				packet.setId(id);
 				this.core.getPacket().sendPacket(packet, this.core.getDB().getCentralIP(),this.core.getDB().getCentralPort());
-				ArrayList<String> results = new ArrayList<String>();
-				RequestModel request = (RequestModel) SerializationUtils.deserialize(packet.getContent());
+				results = new ArrayList<String>();
+				request = (RequestModel) SerializationUtils.deserialize(packet.getContent());
 				this.core.getDB().build(request.getDu());
 				if (this.core.getDB().isFormatted()) {
 					results = this.core.getDB().search();
@@ -82,6 +107,12 @@ public class PacketManager {
 				} else
 					this.core.getLog().err(this, "Non formatted content");
 
+				ArrayList<Frontal> frontalList = this.core.getFrontal().getFrontalFamillyMap()
+						.get(packet.getSenderFamilly());
+				for (Frontal frontal : frontalList)
+					this.sendPacket(packet, frontal.getCore().getFrontal().getExternalserverManager().getModel().getIpDest(),
+							frontal.getCore().getFrontal().getExternalserverManager().getModel().getPort());
+				
 				break;
 			default:
 				break;
@@ -96,7 +127,11 @@ public class PacketManager {
 					if (Arrays.equals(packet.getId(),
 							this.core.getSecurity().sha1(this.core.getFrontal().getName() + key))) {
 						Socket s = entry.getValue();
-						s.getOutputStream().write(SerializationUtils.serialize(packet));
+						DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+						byte[] toSend = SerializationUtils.serialize(packet);
+						dos.writeInt(toSend.length);
+						dos.write(toSend);
+						s.close();
 						break;
 					}
 				}

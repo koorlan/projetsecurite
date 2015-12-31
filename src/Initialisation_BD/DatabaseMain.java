@@ -111,8 +111,6 @@ public class DatabaseMain {
 				pstmt.setString(3, ID_Cle2);
 				pstmt.execute();
 				
-				//RunQuery(stmt1, QUERIES[58] + publicKey + QUERIES[59] + ID_Cle2 + "'"); 
-				//RunQuery(stmt1, QUERIES[60] + privateKey + QUERIES[59] + ID_Cle2 + "'");
 			} 
 			rss.close();
 			
@@ -279,7 +277,7 @@ public class DatabaseMain {
 			/*15*/
 			"create table Types as select Type, Ksec, Dispo, Politique from BASE.Types_Utili WHERE Login = '",
 			"create table Cred_Autorise as Select C.Politique, Cred_Auto_Ref from BASE.Types_Utili T , BASE.Cred_Autorise C where C.Politique = T.Politique and Login = '",
-			"create table Utilisateurs as Select Login, Password, Ip, Port from BASE.Utilisateurs where Login = '",
+			"create table Utilisateurs as Select Login, Password, Ip, Port, ID_Statut, ID_Affectation from BASE.Utilisateurs where Login = '",
 			"create table Frontales as Select F.IP, F.internalPort from BASE.Utilisateurs U , BASE.Frontales F where U.Frontale = F.Frontale and Login = '",
 			"create table NoeudsTOR as select * from BASE.NoeudsTOR",
 			/*20*/

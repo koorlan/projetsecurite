@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -38,11 +39,9 @@ public class DialogWindow extends JFrame {
 		// We give a name for the interface
 		super("Interface utilisateur");		
 		this.core = core;
-		
-		this.start(new String("10000"));
 	}
 	
-	private void start(String port) throws SQLException {
+	public void start() throws SQLException {
 		this.port = port;
 		l = new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
@@ -143,7 +142,6 @@ public class DialogWindow extends JFrame {
 		
 		bouton.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent e) { 
-				/*
 				int poids = type.getSelectedIndex() + 
 						affectation.getSelectedIndex() +
 						statut.getSelectedIndex() +
@@ -160,9 +158,14 @@ public class DialogWindow extends JFrame {
 					System.out.println(groupe.getSelectedItem());
 					System.out.println(statut.getSelectedItem());
 					
-					core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem(), port);
+					try {
+						core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem());
+					} catch (ClassNotFoundException | SQLException | IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
-				*/
+				
 			} 
 		});
 	}

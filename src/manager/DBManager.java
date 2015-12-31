@@ -208,15 +208,15 @@ public class DBManager {
 			}
 			/* format GSA list into sql request */
 			build(grpList, statList, assignementList);
-
+			
 		} /* ENDIF */
 
 	}
 
 	public void build(ArrayList<String> groupList, ArrayList<String> statusList, ArrayList<String> assignementList) {
 		int i = 0;
-		if (groupList.size() > 0) {
-			sql += "( dc.Affect_Gen = " + "'" + assignementList.get(0) + "'";
+		if (assignementList.size() > 0) {
+			sql += " AND ( dc.Affect_Gen = " + "'" + assignementList.get(0) + "'";
 			for (i = 1; i < assignementList.size(); i++)
 				sql += " OR dc.Affect_Gen = " + "'" + assignementList.get(i) + "'";
 			sql += ")";

@@ -70,7 +70,7 @@ public class ClientHandler implements Runnable {
 			}
 			if (res != null)
 				socket.getOutputStream().write(res);
-			this.socket.close();
+			//this.socket.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();

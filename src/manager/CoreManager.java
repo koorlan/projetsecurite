@@ -18,6 +18,9 @@ public class CoreManager{
 	
 	Function<String, String> StandardizationModule = instanceName -> {
 		instanceName = instanceName.replace("manager.", "");
+		instanceName = instanceName.replace("dialog.", "");
+		instanceName = instanceName.replace("generalizer.", "");
+		//etc... all package name where they are manager ..
         instanceName = instanceName.replace("Manager", "");
         instanceName = instanceName.toLowerCase();
         return instanceName;
@@ -42,6 +45,7 @@ public class CoreManager{
 	
 	public void set(Object o){
 		modules.add(o);
+		System.out.println(o.getClass().getName());
 	}
 
 	public void start() throws Exception{
