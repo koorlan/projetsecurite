@@ -5,6 +5,7 @@ import model.RequestModel;
 import model.FrontalModel;
 import model.PacketModel;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.ConnectException;
@@ -72,7 +73,10 @@ public class PacketManager {
 				if (this.core.getDB().isFormatted()) {
 					results = this.core.getDB().search();
 					RequestModel response = this.core.getRequest().forgeResponse(results);
-					socket.getOutputStream().write(SerializationUtils.serialize(this.forge("POST", response)));
+					DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+					byte[] toSend = SerializationUtils.serialize(this.forge("POST", response));
+					dos.writeInt(toSend.length);
+					dos.write(toSend);
 					return null;
 				} else
 					this.core.getLog().err(this, "Non formatted content");
@@ -191,7 +195,9 @@ public class PacketManager {
 		Socket socket;
 		try {
 			socket = new Socket(InetAddress.getByName(ip), port);
-			socket.getOutputStream().write(bPacket);
+			DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+			dos.writeInt(bPacket.length);
+			dos.write(bPacket);
 			return socket;
 			//socket.close();
 		} catch (ConnectException e) {
