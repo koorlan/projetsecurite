@@ -249,7 +249,7 @@ public class DatabaseMain {
 			ex.printStackTrace();
 			System.exit(1);
 
-		}   
+		}
 
 	}
 
