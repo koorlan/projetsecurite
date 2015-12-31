@@ -187,6 +187,7 @@ public class DatabaseMain {
 				RunQuery(stmt5, QUERIES[5]); //attache initDB
 				RunQuery(stmt5, QUERIES[31]); //server
 				RunQuery(stmt5, QUERIES[65] + frontale + "'"); //Frontal
+				RunQuery(stmt5, QUERIES[66] + frontale + "'");	//Frontales
 				RunQuery(stmt5, QUERIES[32] + frontale +"'"); //table utilisateurs (Statut, Affectation generalises ? Ou desanonymisation ?)
 				RunQuery(stmt5, QUERIES[33] + frontale +"'"); //Donnees de base pour Donnees_Chiffrees, Liens et Cles_Types--> provisoire
 				RunQuery(stmt5, QUERIES[41]); //Creation colonne Metadonnees
@@ -337,7 +338,7 @@ public class DatabaseMain {
 			"CREATE TABLE Server as SELECT * from BASE.Server ",/*64*/
 			/*65*/		
 			"CREATE TABLE Frontale as SELECT * from BASE.Frontales WHERE Frontale = '",
-			"",
+			"CREATE TABLE Frontales as SELECT * from BASE.Frontales WHERE Frontale != '",
 	""};
 
 }

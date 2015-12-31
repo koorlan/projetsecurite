@@ -82,6 +82,7 @@ public class RequestManager {
 				// Use metadatas to filter packet (trash it, or keep it)
 				// Print results
 				System.out.println("Processing..(to be implemented in RequestManager ~line91");
+				System.out.println("DEBUG >> "+response.getDu().getData());
 			} else {
 				this.core.getLog().warn(this, "Empty response received");
 			}
