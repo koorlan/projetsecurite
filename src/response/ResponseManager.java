@@ -42,7 +42,7 @@ public class ResponseManager {
 					if (matcher.group(2).compareTo(action.getKey()) == 0)
 					{	//TODO : <DEBUG> Clean this later
 						System.out.println(action.getValue());
-						return (action.getValue() == "ANSWER");
+						return (action == Action.ANSWER);
 					}
 				
 				}		
