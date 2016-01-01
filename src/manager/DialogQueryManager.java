@@ -4,6 +4,7 @@ package manager;
 import javax.swing.*;
 import java.sql.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.awt.GridLayout;
 
 public class DialogQueryManager extends JFrame {
@@ -219,6 +220,9 @@ public class DialogQueryManager extends JFrame {
 					try {
 						core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem());
 					} catch (ClassNotFoundException | SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}

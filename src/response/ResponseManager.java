@@ -29,6 +29,7 @@ public class ResponseManager {
 		{
 			Pattern p = Pattern.compile(this.model.getRegex());
 			this.matcher = p.matcher(data);
+			
 			return matcher.matches();
 		}
 		

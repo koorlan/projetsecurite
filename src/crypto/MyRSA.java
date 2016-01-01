@@ -1,4 +1,5 @@
-package Initialisation_BD;
+package crypto;
+
 
 import java.io.*;
 import java.math.*;
@@ -6,9 +7,11 @@ import javax.crypto.*;
 import java.security.*;
 import java.security.spec.*;
 import java.security.interfaces.*;
-
+import java.util.Base64;
+import java.util.*;
 public class MyRSA {
-	  public final static int KEY_SIZE = 1024;  // [512..2048]
+	  public final static int KEY_SIZE = 512;//[512..2048]
+	  //TODO REMETTRE 1024 ou 2048
 
 	  private RSAPublicKey publicKey;
 	  private RSAPrivateKey privateKey;
@@ -139,9 +142,11 @@ public class MyRSA {
 */
 public static void main(String[] args) {
 	 String plaintext = "154E6";
+
 	    System.out.println("plaintext = " + plaintext);
 	    MyRSA rsa = new MyRSA();
 	    rsa.generateKeyPair();
+	    String encodedKey = Base64.getEncoder().encodeToString(rsa.privateKey.getEncoded());
 	    byte[] publicKey = rsa.getPublicKeyInBytes();
 	    byte[] privateKey = rsa.getPrivateKeyInBytes();
 	    byte[] ciphertext = rsa.crypt(plaintext);   

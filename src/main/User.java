@@ -2,6 +2,9 @@ package main;
 
 import java.sql.SQLException;
 
+import dialog.DialogWindow;
+import generalizer.GeneralizerManager;
+import generalizer.GeneralizerModel;
 import manager.CoreManager;
 import manager.DBManager;
 import manager.DialogQueryManager;
@@ -67,12 +70,16 @@ public class User {
 		 Core.set(Request);
 		 RequestM.setManager(Request);
 		
-		 DialogQueryManager dialog = new DialogQueryManager(Core);
+		 DialogWindow dialog = new DialogWindow(Core);
 		 Core.set(dialog);
 		 
 		 DBManager db = new DBManager(Core);
 		 Core.set(db);
 		 
+		 GeneralizerModel GeneralM = new GeneralizerModel();
+		 GeneralizerManager General = new GeneralizerManager(GeneralM, Core);
+		 Core.set(General);
+		
 		 this.core = Core;
 		return;
 	}

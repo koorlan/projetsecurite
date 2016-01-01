@@ -13,6 +13,8 @@ public class ResponseModel {
 	private final String regex = 
 		"(/BEG/{1})(1{1})::([0-1]{1})::(.{1,}::{1})?(.{1,}::{1})?(.{1,}::{1})?(.{1,}::{1})?(/END/{1})";
 	
+	
+	
 	public ResponseModel()
 	{
 		this.setFormatted(false);

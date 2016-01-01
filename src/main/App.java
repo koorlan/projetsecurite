@@ -17,7 +17,9 @@ public class App {
 			user.getCore().start();
 			break;
 		case "frontal":
-			Frontal frontal = new Frontal(args[1]);
+			Frontal frontal = new Frontal();
+			frontal.fill(args[1]);
+			frontal.populate();
 			frontal.getCore().start();
 			break;
 		default:

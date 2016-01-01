@@ -1,5 +1,6 @@
 package manager;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -28,20 +29,21 @@ public class ClientHandler implements Runnable {
 		try {
 
 			InputStream inputStream = socket.getInputStream();
-			int count;
-			byte[] packet = new byte[0];
-			byte[] buffer = new byte[64];
-
-			// TODO: rewrite
+			DataInputStream dis = new DataInputStream(inputStream);
+			
+			byte[] packet,res = null;
+			int len;
+			
 			while (true) {
-				count = inputStream.read(buffer);
-				packet = ArrayUtils.addAll(packet, buffer);
-				if (count != buffer.length) {
+				len = dis.readInt();
+				if (len > 0) {
+					System.out.println(len);
+					packet = new byte[len];
+					dis.readFully(packet, 0, packet.length);
 					break;
 				}
 			}
-
-			byte[] res = null;
+			
 			this.server.getCore().getLog().log(this, "New Packet arrived..processing");
 			// maybe check integrity maybe after decoding...
 			switch (this.server.getCore().getService()) {
@@ -68,7 +70,7 @@ public class ClientHandler implements Runnable {
 			}
 			if (res != null)
 				socket.getOutputStream().write(res);
-			this.socket.close();
+			//this.socket.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -81,7 +83,7 @@ public class ClientHandler implements Runnable {
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} 
 	}
 
 }

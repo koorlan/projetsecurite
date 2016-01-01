@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import main.Frontal;
 import main.User;
 import model.FrontalModel;
 import model.UserModel;
@@ -54,13 +55,13 @@ public class FrontalManager {
         this.model.setFrontalMap(frontalMap);
     }
 
-    public HashMap<String, ArrayList<FrontalModel>> getFrontalFamillyMap() {
-        return this.model.getFrontalFamillyMap();
-    }
+    public HashMap<String, ArrayList<Frontal>> getFrontalFamillyMap() {
+		return this.model.getFrontalFamillyMap();
+	}
 
-    public void setFrontalFamillyMap(HashMap<String, ArrayList<FrontalModel>> frontalFamillyMap) {
-        this.model.setFrontalFamillyMap(frontalFamillyMap);
-    }
+	public void setFrontalFamillyMap(HashMap<String, ArrayList<Frontal>> frontalFamillyMap) {	
+		this.model.setFrontalFamillyMap(frontalFamillyMap);
+	}
 
     public ArrayList<User> getUserList() {
         return this.model.getUserList();

@@ -1,5 +1,6 @@
 package manager;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -48,7 +49,9 @@ public class BroadcastManager {
 		for(FrontalModel front :this.model.getFrontals()){			
 			try {
 				socket = new Socket(InetAddress.getByName(front.getInternalserverManager().getModel().getIpDest()),front.getInternalserverManager().getModel().getPort());		
-				socket.getOutputStream().write(packet);
+				DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+				dos.writeInt(packet.length);
+				dos.write(packet);
 				socket.close();
 				this.core.getLog().log(this, "sended to "+ front.getName() +"@" + front.getInternalserverManager().getModel().getIpDest() +":"+ front.getInternalserverManager().getModel().getPort());
 			}catch( ConnectException e) {
