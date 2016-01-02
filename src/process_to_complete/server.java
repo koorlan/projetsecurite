@@ -12,7 +12,7 @@ public class server {
 		try
 		{
 			// ON TEST SI LA BD CORRESPONDANTE A CE PROCESSUS EXISTE
-			String Ma_BD = "../" + initialisation_BD.DatabaseMain.PREFIX + "/" + args[0] + ".sqlite";
+			String Ma_BD = initialisation_BD.DatabaseMain.PREFIX + "/" + args[0] + ".sqlite";
 			File f1 = new File(Ma_BD); 
 			if(f1.exists())
 			{

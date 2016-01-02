@@ -25,7 +25,7 @@ public class LancementMain {
 		    PrintWriter ecrivain;
 		    ecrivain =  new PrintWriter(new BufferedWriter (new FileWriter("lancement.sh")));
 		   
-			Connection con=DBManager.OpenCreateDB("../" + initialisation_BD.DatabaseMain.PREFIX + "/Lancement.sqlite");
+			Connection con=DBManager.OpenCreateDB(initialisation_BD.DatabaseMain.PREFIX + "/Lancement.sqlite");
 			Statement stmt=DBManager.CreateStatement(con);
 			ResultSet rs = stmt.executeQuery(initialisation_BD.DatabaseMain.QUERIES[33]); // Recupere les logins
 			String login =null;
