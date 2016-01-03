@@ -226,7 +226,7 @@ public class RequestManager {
 	 * 			a RequestModel with DataUtil completed  
 	 * @throws Exception 
 	 */
-	public void addHeader(RequestModel request) throws Exception
+	public void addHeader(RequestModel request) throws Exception	
 	{
 		DataHeaderModel dHeaderM = new DataHeaderModel();
 		DataHeaderManager dHeader = new DataHeaderManager(dHeaderM, this.core);
