@@ -5,6 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,9 +32,8 @@ public class DBManager {
 	private final String PLUGIN = "org.sqlite.JDBC";
 
 	private final String DB_PATH = "jdbc:sqlite:Initialisation/datas/";
-	// une seule bd
+
 	private String DB_INFO = null;
-	// db non securisée de l'utilisateur
 	private String DB_DATA = null;
 
 	public DBManager(CoreManager core) {
@@ -500,5 +502,72 @@ public class DBManager {
 			break;
 		}
 		return null;
+	}
+	
+	public List<String> buildKeysList() throws Exception
+	{
+		List<String> result = new ArrayList<String>();
+		List<String> status = new ArrayList<String>();
+		List<String> assignement = new ArrayList<String>();
+		int statID = -1;
+		int assignID = -1;
+
+		Class.forName(PLUGIN);
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+		Statement st = cn.createStatement();
+		ResultSet rs = null;
+		
+		if(this.core.getService() != "user")
+		{
+			this.core.getLog().warn(this, "Acces to database refused");
+			return result;
+		}
+		
+		rs = st.executeQuery("SELECT Statuts.ID_Cle, Utilisateurs.ID_Statut, "
+				+ "Affectations.ID_Cle, Utilisateurs.ID_Affectation "
+				+ "FROM Statuts, Affectations, Utilisateurs "
+				+ "WHERE Utilisateurs.ID_Statut = Statuts.ID_Statut "
+				+ "AND Utilisateurs.ID_Affectation = Affectations.ID_Affectation");
+		while(rs.next())
+		{
+			status.add(rs.getString("Statuts.ID_Cle"));
+			assignement.add(rs.getString("Affectations.ID_Cle"));
+			statID = rs.getInt("Utilisateurs.ID_Statut");
+			assignID = rs.getInt("Utilisateurs.ID_Affectation");
+		}
+		rs.close();
+		rs = null;
+		
+		// adding random credentials 
+		Random rand = new Random();
+		int n, m;
+		do{
+			n = rand.nextInt(17 - 1 + 1) + 1;
+		}while(n == statID);
+		do{
+			m = rand.nextInt(8 - 1 + 1) + 1;
+		}while(m == assignID);
+		
+		rs = st.executeQuery("SELECT Statuts.ID_Cle, Affectations.ID_Cle "
+				+ "FROM Statuts, Affectations "
+				+ "WHERE Statuts.ID_Statut = " +  n
+				+ " AND Affectations.ID_Affectation = " + m);
+		while(rs.next())
+		{
+			status.add(rs.getString("Statuts.ID_Cle"));
+			assignement.add(rs.getString("Affectation.ID_Cle"));
+		}
+		rs.close();
+		st.close();
+		
+		Collections.sort(status);
+		Collections.sort(assignement);
+		result.addAll(status);
+		result.addAll(2,assignement);
+		
+		// TODO : <DEBUG> clean this soon
+		System.out.println(result);
+		
+		return result;
 	}
 }

@@ -52,7 +52,6 @@ public class GsaList{
 		return initialKeyList; 
 	}
 	
-	
 	public ArrayList<String> getMainKeyList()
 	{
 		return mainKeyList; 
@@ -68,9 +67,15 @@ public class GsaList{
 		return mainDataList; 
 	}
 	
+	/**
+	 * Find all generalized contents, merge them, remove duplicates and sort result
+	 * @param s
+	 * 			a node in tree
+	 * @param tree
+	 * 			a GSA tree
+	 */
 	private void mergeList(String s, Tree tree)
 	{
-		/* Find all generalized contents, merge them, remove duplicates and sort result */  
 		ArrayList<String> tmp = tree.generalize(s);
 		mainKeyList.removeAll(tmp);
 		for(String str : tmp)
@@ -78,7 +83,6 @@ public class GsaList{
 			if(str.charAt(0) == 'B')
 				mainKeyList.add(str);
 		}
-		//mainKeyList.addAll(tmp);
 		Collections.sort(mainKeyList);
 	}
 	

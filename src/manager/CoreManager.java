@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import anonymizer.DataHeaderManager;
 import filter.FilterManager;
 import generalizer.GeneralizerManager;
 import model.CoreModel;
@@ -289,6 +290,15 @@ public class CoreManager{
 		for(Object o: this.modules){
 			if(o instanceof FilterManager){
 				return (FilterManager)o;
+			}		
+		}
+		return null;
+	}
+	
+	public DataHeaderManager getDataHeader() {
+		for(Object o: this.modules){
+			if(o instanceof DataHeaderManager){
+				return (DataHeaderManager)o;
 			}		
 		}
 		return null;

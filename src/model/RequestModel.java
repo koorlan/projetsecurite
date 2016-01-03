@@ -17,6 +17,7 @@ public class RequestModel  implements Serializable {
 
 	
 	private DataUtil du = null; 
+	private String header;
 
 
 	public void setManager(RequestManager manager){
@@ -29,6 +30,14 @@ public class RequestModel  implements Serializable {
 
 	public void setDu(DataUtil du) {
 		this.du = du;
+	}
+
+	public String getHeader() {
+		return header;
+	}
+
+	public void setHeader(String header) {
+		this.header = header;
 	}
 
 }

@@ -8,10 +8,10 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
-
+import anonymizer.DataHeaderModel;
+import anonymizer.DataHeaderManager;
 import dataFormatter.DataUtil;
 import filter.FilterManager;
 import filter.FilterModel;
@@ -34,9 +34,10 @@ public class RequestManager {
 	}
 
 	/**
-	 * Method called by : [FRONTAL] [USER'S LOCAL APP] Requirements : DBManager
-	 * which interprets the request formatted content and ensures a database
-	 * connection
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP] 
+	 * Requirements : 
+	 * 	a DBManager which interprets the request formatted content 
+	 * 	and ensures a database connection
 	 * 
 	 * @param request
 	 *            A de-serialized request, which contains the dataUtil to
@@ -61,9 +62,10 @@ public class RequestManager {
 	}
 
 	/**
-	 * Method called by : [USER'S LOCAL APP] Requirements: ResponseManager which
-	 * interprets the response formatted content FilterManager which filter the
-	 * answer
+	 * Method called by : [USER'S LOCAL APP] 
+	 * Requirements: 
+	 * 	a ResponseManager which interprets the response formatted content 
+	 * 	a FilterManager which filter the answer
 	 * 
 	 * @param reponse
 	 *            A de-serialized response, which contains the dataUtil to
@@ -85,6 +87,7 @@ public class RequestManager {
 				System.out.println("DEBUG >> "+response.getDu().getData());
 			} else {
 				this.core.getLog().warn(this, "Empty response received");
+				rManager.trash(response);
 			}
 		} else {
 			this.core.getLog().err(this, "Response received with unexpected format");
@@ -96,8 +99,9 @@ public class RequestManager {
 	}
 
 	/**
-	 * Method called by : [USER'S LOCAL APP] Requirements : a packet manager for
-	 * serialization
+	 * Method called by : [USER'S LOCAL APP] 
+	 * Requirements : 
+	 * 	a packet manager for serialization
 	 * 
 	 * @param request
 	 *            A non-serialized request, which contains the dataUtil to SEND
@@ -135,8 +139,9 @@ public class RequestManager {
 	}
 
 	/**
-	 * Method called by : [FRONTAL] [USER'S LOCAL APP] Requirements : a packet
-	 * manager for serialization
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP] 
+	 * Requirements : 
+	 * 	a packet manager for serialization
 	 * 
 	 * @param response
 	 *            A non-serialized response, which contains the dataUtil to SEND
@@ -149,9 +154,11 @@ public class RequestManager {
 	}
 
 	/**
-	 * Method called by : [USER'S LOCAL APP] Requirements : a Filter to preserve
-	 * real request a Generalizer to add noise in data a DataUtil to apply a
-	 * generic request format
+	 * Method called by : [USER'S LOCAL APP] 
+	 * Requirements : 
+	 * 	a Filter to preserve real request 
+	 * 	a Generalizer to add noise in data 
+	 * 	a DataUtil to apply generic request format
 	 * 
 	 * @param type
 	 *            Search data type (filled by user)
@@ -163,11 +170,11 @@ public class RequestManager {
 	 *            Search assignement (filled by user)
 	 * @param port
 	 *            The port number that is used for sending request
-	 * @throws IOException
+	 * @throws Exception 
 	 * 
 	 */
 	public void forge(Object type, Object group, Object status, Object assignement)
-			throws ClassNotFoundException, SQLException, IOException {
+			throws Exception {
 		if (!(type instanceof String && group instanceof String && status instanceof String
 				&& assignement instanceof String)) {
 			this.core.getLog().err(this, "Wrong fields");
@@ -176,7 +183,7 @@ public class RequestManager {
 		FilterModel filterM = new FilterModel();
 		FilterManager filter = new FilterManager(filterM, this.core);
 
-		GeneralizerModel genM = new GeneralizerModel();
+		GeneralizerModel genM = new GeneralizerModel( );
 		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);
 
 		ArrayList<String> groupList = new ArrayList<String>();
@@ -197,8 +204,6 @@ public class RequestManager {
 		DataUtil du = new DataUtil();
 		du.setAction("QUERY");
 		du.setType((String) type);
-		// TODO : <MAJ> dissociate FRONT and USER tables OR unify the tables
-		// layout in DB
 		du.setTable("FRONT_TABLE");
 		du.setGSA(filterM.getGroupList().getMainKeyList());
 		du.setGSA(filterM.getStatusList().getMainKeyList());
@@ -209,12 +214,37 @@ public class RequestManager {
 
 		RequestModel tosend = new RequestModel();
 		tosend.setDu(du);
-		this.send(tosend);
+		this.addHeader(tosend);
+	}
+	
+	/**
+	 * Method called by : [USER'S LOCAL APP]
+	 * Requirements : 
+	 * 	DataHeaderManager, DataHeaderModel to build and store header 
+	 * 
+	 * @param request
+	 * 			a RequestModel with DataUtil completed  
+	 * @throws Exception 
+	 */
+	public void addHeader(RequestModel request) throws Exception
+	{
+		DataHeaderModel dHeaderM = new DataHeaderModel();
+		DataHeaderManager dHeader = new DataHeaderManager(dHeaderM, this.core);
+		if( dHeader.getKeysList() == 0 )
+		{
+			request.setHeader(dHeaderM.getData());
+		}
+		else
+			this.core.getLog().err(this, "Public keys list builder failed");
+		//TODO : clean
+		System.out.println(request.getHeader());
+		this.send(request);
 	}
 
 	/**
-	 * Method called by : [FRONTAL] [USER'S LOCAL APP] Requirements : a DataUtil
-	 * to apply a generic answer format
+	 * Method called by : [FRONTAL] [USER'S LOCAL APP] 
+	 * Requirements : 
+	 * 	a DataUtil to apply a generic answer format
 	 * 
 	 * @param result
 	 *            The result from a SQLite request (can be empty)
