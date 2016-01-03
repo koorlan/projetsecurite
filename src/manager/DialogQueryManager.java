@@ -225,6 +225,9 @@ public class DialogQueryManager extends JFrame {
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
 				}
 			} 

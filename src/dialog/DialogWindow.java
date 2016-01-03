@@ -162,6 +162,9 @@ public class DialogWindow extends JFrame {
 					} catch (ClassNotFoundException | SQLException | IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
 				}
 				

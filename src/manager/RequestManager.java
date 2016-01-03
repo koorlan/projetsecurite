@@ -45,11 +45,15 @@ public class RequestManager {
 	 * 
 	 */
 	public byte[] process(RequestModel request) throws ClassNotFoundException, SQLException {
+		
 		ArrayList<String> results = new ArrayList<String>();
-		this.core.getDB().build(request.getDu());
+		
+		ArrayList<String> policy = this.core.getDataHeader().combines(request.getHeader());
+		this.core.getDB().build(request.getDu(), policy);
 		if (this.core.getDB().isFormatted()) {
 
 			results = this.core.getDB().search();
+			// TODO : clean this
 			System.out.println(results);
 
 			// here forge POST to return...

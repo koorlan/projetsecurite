@@ -51,7 +51,7 @@ public class DBManager {
 	}
 
 	// no need group here
-	public void build(DataUtil du) {
+	public void build(DataUtil du, ArrayList<String> policy) {
 		switch (this.core.getService()) {
 		case "frontal":
 			this.buildFrontal(du);
@@ -307,7 +307,7 @@ public class DBManager {
 			System.out.println(rs.getString(4)); // Valeur_Chiffree
 		}
 	}
-
+	
 	public boolean isFormatted() {
 		return isFormatted;
 	}
@@ -315,6 +315,7 @@ public class DBManager {
 	public static void setFormatted(boolean isFormatted) {
 		DBManager.isFormatted = isFormatted;
 	}
+	String[] header = this.data.split("/KEND/"); String sub = header[0]; 
 
 	public void setDB_INFO(String dB_INFO) {
 		this.DB_INFO = dB_INFO;
