@@ -45,7 +45,6 @@ public class CoreManager{
 	
 	public void set(Object o){
 		modules.add(o);
-		System.out.println(o.getClass().getName());
 	}
 
 	public void start() throws Exception{
