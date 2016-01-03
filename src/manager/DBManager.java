@@ -33,7 +33,14 @@ public class DBManager {
 	private String DB_INFO = null;
 	// db non securisée de l'utilisateur
 	private String DB_DATA = null;
-
+	
+	public String getDB_INFO(){
+		return this.DB_INFO;
+	}
+	public String getDB_PATH(){
+		return this.DB_PATH;
+	}
+	
 	public DBManager(CoreManager core) {
 		this.core = core;
 		sql = "";

@@ -103,7 +103,7 @@ public class DialogWindow extends JFrame {
 		Statement stmt = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:Initialisation/datas/InitDB.sqlite");
+			c = DriverManager.getConnection(this.core.getDB().getDB_PATH() + this.core.getDB().getDB_INFO());
 		} catch ( Exception e ) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
@@ -111,7 +111,6 @@ public class DialogWindow extends JFrame {
 		
 		stmt = c.createStatement();
 		String sql = "SELECT " + dbChamp + " FROM " + dbTable + ";";
-		
 		ResultSet rs = stmt.executeQuery(sql);
 		
 		while (rs.next()) {
