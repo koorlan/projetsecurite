@@ -155,8 +155,9 @@ public class DBManager {
 		/* Starting match */
 		if (m.matches()) {
 			setFormatted(true);
-			sql += "dc.Valeur_Chiffree, ct.Cred_Auto_Ref, ct.E_Cred_Ksec, u.Statut_Gen, u.Affectation_Gen "
+			sql += " ct.E_Cred_Ksec, ct.Cred_Auto_Ref, Types.Meta_Chiffrees, dc.Valeur_Chiffree "
 					+ "FROM Donnees_Chiffrees AS dc, Cles_Types AS ct, Utilisateur as u, Types ";
+			
 			p = Pattern.compile("([0-6]{1})");
 			
 			Matcher tm = p.matcher(m.group(3));
@@ -305,7 +306,6 @@ public class DBManager {
 
 		// get connection
 		java.sql.Connection cn = DriverManager.getConnection(url);
-
 		// create statement
 		st = cn.createStatement();
 
