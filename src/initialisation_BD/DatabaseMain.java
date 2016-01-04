@@ -42,6 +42,7 @@ public class DatabaseMain {
 			//Rajout des colonnes (en rouge dans le PPT)
 			RunQuery(stmt1, QUERIES[6]); //Rajoute le champ Ksec à la table Types_Utili
 			RunQuery(stmt1, QUERIES[7]); //Rajoute le champ E_Cred_Ksec à la table Types_Utili
+			RunQuery(stmt1, QUERIES[67]); //On cree la colonne Liste_Groupe dans la table Utilisateurs
 			RunQuery(stmt1, QUERIES[8]); //On cree la colonne Metadonnees dans la table Utilisateurs
 			RunQuery(stmt1, QUERIES[9]); //On cree la colonne Meta_Chiffrees dans la table Types_Utili
 			RunQuery(stmt1, QUERIES[10]); //On cree la colonne Valeur_Chiffree dans la table Donnees
@@ -108,7 +109,7 @@ public class DatabaseMain {
 
 			// 6 - CALCUL DES METADONNEES ET STOCKAGE DANS LA TABLE Utilisateurs
 			//--------------------------------------------------------------------------------
-			//  Calcul de la list des groupes puis des metadonnees de chaque utilisateur
+			//  Calcul de la liste des groupes puis des metadonnees de chaque utilisateur
 			Statement stmt9=DBManager.CreateStatement(con1);
 			rss = stmt9.executeQuery(QUERIES[17]); //On recupere les Logins, statut, affectation
 			String login2 =null;
@@ -118,12 +119,14 @@ public class DatabaseMain {
 				String affectation = rss.getString("Affectation");
 				ResultSet rss1 = stmt1.executeQuery(QUERIES[18] + login2 + "'"); //On recupere les groupes 
 				String Meta = "";
+				String Liste_Groupe ="";
 				while (rss1.next() == true){
-					Meta += rss1.getString("Groupe")+ "::";
+					Liste_Groupe += rss1.getString("Groupe")+ ",";
 				}		
-				Meta=login2 + "::" + Meta + statut + "::" + affectation;
+				Meta=login2 + "," + Liste_Groupe + statut + "," + affectation;
 				rss1.close();
 				RunQuery(stmt1, QUERIES[19] + Meta + QUERIES[20] + login2 + "'"); 
+				RunQuery(stmt1, QUERIES[68] + Liste_Groupe + QUERIES[20] + login2 + "'");
 			}
 			rss.close();
 
@@ -224,6 +227,8 @@ public class DatabaseMain {
 				RunQuery(stmt3, QUERIES[49] + login +"'"); // Types
 				RunQuery(stmt3, QUERIES[50] + login +"'"); //Donnees_Chiffree
 				RunQuery(stmt3, QUERIES[51] + login +"'"); //Cles_Types
+				RunQuery(stmt3, QUERIES[69] + login +"'"); //Utilisateurs
+				
 				RunQuery(stmt3, QUERIES[32]); //Detache initDB
 
 			}
@@ -372,7 +377,7 @@ public class DatabaseMain {
 			"create table Politiques as Select P.Politique, Expression from BASE.Types_Utili T , BASE.Politiques P where P.Politique = T.Politique and Login = '",//44
 			"create table Types as select Type, Ksec, Dispo, Politique from BASE.Types_Utili WHERE Login = '",//45
 			"create table Cred_Autorise as Select C.Politique, Cred_Auto_Ref from BASE.Types_Utili T , BASE.Cred_Autorise C where C.Politique = T.Politique and Login = '",//46
-			"create table Utilisateurs as Select Login, Password, Ip, Port, ID_Statut, ID_Affectation from BASE.Utilisateurs where Login = '",//47
+			"create table Utilisateurs as Select Login, Password, Ip, Port, ID_Statut, ID_Affectation, Liste_Groupe from BASE.Utilisateurs where Login = '",//47
 			"create table Frontales as Select F.IP, F.internalPort from BASE.Utilisateurs U , BASE.Frontales F where U.Frontale = F.Frontale and Login = '",//48
 			"create table Types as select Type, Meta_Chiffrees from BASE.Types_Utili WHERE Login = '",//49
 			"create table Donnees_Chiffrees as select Type, Valeur_Chiffree from BASE.Donnees WHERE Login = '",//50
@@ -398,8 +403,13 @@ public class DatabaseMain {
 			"CREATE TABLE Server as SELECT * from BASE.Server ",//61
 			"SELECT NoeudTOR, Icone from NoeudsTOR",//62
 			"SELECT Frontale, Icone from Frontales", //63
-			"CREATE Table Utilisateurs as SELECT Login, Icone from BASE.Utilisateurs",
-			"CREATE Table Frontales as SELECT Frontale, Icone from BASE.Frontales",
-			"CREATE Table NoeudsTOR as SELECT NoeudTOR, Icone from BASE.NoeudsTOR",
+			"CREATE Table Utilisateurs as SELECT Login, Icone from BASE.Utilisateurs",//64
+			"CREATE Table Frontales as SELECT Frontale, Icone from BASE.Frontales",//65
+			"CREATE Table NoeudsTOR as SELECT NoeudTOR, Icone from BASE.NoeudsTOR",//66
+			"ALTER TABLE Utilisateurs ADD COLUMN Liste_Groupe TEXT",//67
+			"UPDATE Utilisateurs SET Liste_Groupe = '",//68
+			"CREATE TABLE Utilisateurs AS SELECT U.Ip, U.Port, S.Statut_Gen, A.Affect_Gen FROM BASE.Utilisateurs U, BASE.Affectations A, BASE.Statuts S "
+			+ "WHERE U.ID_Statut = S.ID_Statut AND U.ID_Affectation = A.ID_Affectation AND Login = '",//69
+
 			""};
 }

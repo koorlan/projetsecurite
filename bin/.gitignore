@@ -1,2 +1,14 @@
+<<<<<<< Updated upstream
 /dialog/
 /manager/
+=======
+/initialisation_BD/
+>>>>>>> Stashed changes
+/crypto/
+/dataFormatter/
+/filter/
+/lancement/
+/main/
+/model/
+/process_to_complete/
+/response/
