@@ -42,7 +42,7 @@ public class DialogWindow extends JFrame {
 	}
 	
 	public void start() throws SQLException {
-		this.port = port;
+		
 		l = new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
 				//System.exit(0);
