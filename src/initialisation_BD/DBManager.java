@@ -1,4 +1,4 @@
-package Initialisation_BD;
+package initialisation_BD;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

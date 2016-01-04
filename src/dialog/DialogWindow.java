@@ -164,30 +164,12 @@ public class DialogWindow extends JFrame {
 		
 		bouton.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent e) { 
-				int poids = type.getSelectedIndex() + 
-						affectation.getSelectedIndex() +
-						statut.getSelectedIndex() +
-						groupe.getSelectedIndex();
-				
-				if(poids < 4){
-					System.out.println("QueryError : "
-							+ "Merci de remplir l'ensemble des champs.");
-				}
-				else {
-				
-					System.out.println(type.getSelectedItem());
-					System.out.println(affectation.getSelectedItem());
-					System.out.println(groupe.getSelectedItem());
-					System.out.println(statut.getSelectedItem());
-					
 					try {
 						core.getRequest().forge(type.getSelectedItem(), groupe.getSelectedItem(), statut.getSelectedItem(), affectation.getSelectedItem());
 					} catch (ClassNotFoundException | SQLException | IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}
-				}
-				
+					}	
 			} 
 		});
 	}

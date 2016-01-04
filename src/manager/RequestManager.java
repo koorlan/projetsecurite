@@ -187,7 +187,6 @@ public class RequestManager {
 				&& assignement instanceof String)) {
 			this.core.getLog().err(this, "Wrong fields");
 		}
-
 		FilterModel filterM = new FilterModel();
 		FilterManager filter = new FilterManager(filterM, this.core);
 
@@ -203,11 +202,11 @@ public class RequestManager {
 		assignementList.add((String) assignement);
 
 		filterM.setGroupList(genManager.generalize(groupList, "group"));
-		filterM.getGroupList().printGsaList();
+		//filterM.getGroupList().printGsaList();
 		filterM.setStatusList(genManager.generalize(statusList, "status"));
-		filterM.getStatusList().printGsaList();
+		//filterM.getStatusList().printGsaList();
 		filterM.setAssignementList(genManager.generalize(assignementList, "assignement"));
-		filterM.getAssignementList().printGsaList();
+		//filterM.getAssignementList().printGsaList();
 
 		DataUtil du = new DataUtil();
 		du.setAction("QUERY");
@@ -221,7 +220,7 @@ public class RequestManager {
 		du.close();
 		// TODO : <DEBUG> clean that later
 		System.out.println(du);
-
+		
 		RequestModel tosend = new RequestModel();
 		tosend.setDu(du);
 		this.send(tosend);
