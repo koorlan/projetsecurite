@@ -29,9 +29,18 @@ public class DBManager {
 	private final String PLUGIN = "org.sqlite.JDBC";
 
 	private final String DB_PATH = "jdbc:sqlite:Initialisation/datas/";
+	// une seule bd
 	private String DB_INFO = null;
+	// db non securisée de l'utilisateur
 	private String DB_DATA = null;
-
+	
+	public String getDB_INFO(){
+		return this.DB_INFO;
+	}
+	public String getDB_PATH(){
+		return this.DB_PATH;
+	}
+	
 	public DBManager(CoreManager core) {
 		this.core = core;
 		sql = "";
