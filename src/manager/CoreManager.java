@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import dialog.DialogWindow;
 import filter.FilterManager;
 import generalizer.GeneralizerManager;
 import model.CoreModel;
@@ -229,10 +230,10 @@ public class CoreManager{
 		return null;
 	}
 
-	public DialogQueryManager getDialog() {
+	public DialogWindow getDialog() {
 		for(Object o: this.modules){
-			if(o instanceof DialogQueryManager){
-				return (DialogQueryManager)o;
+			if(o instanceof DialogWindow){
+				return (DialogWindow)o;
 			}		
 		}
 		return null;

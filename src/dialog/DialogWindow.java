@@ -2,6 +2,9 @@ package dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.Insets;
 
 import javax.swing.*;
 
@@ -42,7 +46,10 @@ public class DialogWindow extends JFrame {
 	}
 	
 	public void start() throws SQLException {
-		
+		if(l != null){
+			this.setVisible(true);
+			return;
+		}
 		l = new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
 				//System.exit(0);
@@ -54,19 +61,26 @@ public class DialogWindow extends JFrame {
 		this.divide();
 		
 		this.addWindowListener(l);
-		this.setSize(900,170);
+		this.setSize(900,120);
+		pack();
 		this.setVisible(true);
 	}
 	
 	private void buildComponent() throws SQLException{
+	    type = new JComboBox<String>();
+	    affectation = new JComboBox<String>();
+		statut = new JComboBox<String>();
+		groupe = new JComboBox<String>();
+		
 		cGauche = new JPanel();
-		cGauche.setLayout(new GridLayout(6, 2));
-		cGauche.setSize(300, 170);
+		cGauche.setLayout(new BoxLayout(cGauche, BoxLayout.Y_AXIS));
+		//cGauche.setSize(300, 170);
 		this.buildForm();
 		
 		cDroit = new JPanel();
-		cDroit.setLayout(new GridLayout(1, 1));
-		cDroit.setSize(600, 170);
+		
+		cDroit.setLayout(new BoxLayout(cDroit, BoxLayout.Y_AXIS));
+		//cDroit.setSize(600, 170);
 		this.buildReponses();
 	}
     
@@ -88,16 +102,20 @@ public class DialogWindow extends JFrame {
 	}
 	
 	private void formNom(){
-		this.cGauche.add(new JLabel("Nom :"));
 		
+		this.cGauche.add(new JLabel("Nom :"));
+	
 		nom = new JTextField();
+		//nom.setMaximumSize( nom.getPreferredSize() );
+
+		nom.setMaximumSize(new Dimension(Integer.MAX_VALUE, nom.getPreferredSize().height));
 		this.cGauche.add(nom);
 	}
 	
 	private void formChampDB(JComboBox<String> champ, String dbTable, String dbChamp) throws SQLException{
 		this.cGauche.add(new JLabel(dbChamp + " :"));
 		
-		JComboBox<String> nChamp = new JComboBox<String>();
+		
 		
 		Connection c = null;
 		Statement stmt = null;
@@ -114,14 +132,19 @@ public class DialogWindow extends JFrame {
 		ResultSet rs = stmt.executeQuery(sql);
 		
 		while (rs.next()) {
-			nChamp.addItem(rs.getString(dbChamp));
+			champ.addItem(rs.getString(dbChamp));
 		}
 		
 		rs.close();
 		stmt.close();
 		c.close();
 		
-		this.cGauche.add(nChamp);
+		//JPanel wrapper = new JPanel();
+		//wrapper.add(champ);
+		//champ.setSize(champ.getPreferredSize());
+		//champ.setPrototypeDisplayValue("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	
+		this.cGauche.add(champ);
 	}
 	
 	private void divide(){
@@ -167,5 +190,11 @@ public class DialogWindow extends JFrame {
 				
 			} 
 		});
+	}
+	public void addResponse(String nom, String type, String affectation, String statut, String groupe, String data){
+		this.modele.addReponse(new DialogDataReponse(nom,type,affectation,statut,groupe,data));
+	}
+	public void refresh(){
+		this.modele.refresh();
 	}
 }

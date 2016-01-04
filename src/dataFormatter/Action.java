@@ -6,7 +6,7 @@ package dataFormatter;
  */
 public enum Action {
 	
-	QUERY("0", "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, dc.Metadonnees, dc.Valeur"), 
+	QUERY("0", "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, dc.Meta_Chiffrees, dc.Valeur_Chiffree"), 
 	ANSWER("1", "ANSWER RECEIVED");
 
 	private String key = "";

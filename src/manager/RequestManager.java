@@ -5,6 +5,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
 import dataFormatter.DataUtil;
+import dialog.DialogWindow;
 import filter.FilterManager;
 import filter.FilterModel;
 import generalizer.GeneralizerManager;
@@ -83,6 +85,8 @@ public class RequestManager {
 				// Print results
 				System.out.println("Processing..(to be implemented in RequestManager ~line91");
 				System.out.println("DEBUG >> "+response.getDu().getData());
+				this.core.getDialog().addResponse("nom", "type", "affectation", "statut", "groupe",response.getDu().getData());
+				
 			} else {
 				this.core.getLog().warn(this, "Empty response received");
 			}
@@ -110,13 +114,22 @@ public class RequestManager {
 		Socket socket;
 		socket = this.core.getPacket().sendPacket(this.core.getPacket().forge("GET", request),
 				this.core.getDB().getFrontalIP(), this.core.getDB().getFrontalPort());
+		if(socket == null)
+			return;
+		//Clear window
+		DialogWindow dialog = this.core.getDialog();
+		if(dialog != null){
+			dialog.refresh();
+		}
+		
+		socket.setSoTimeout(1000);
 		InputStream inputStream = socket.getInputStream();
 		DataInputStream dis = new DataInputStream(inputStream);
 
 		int len;
 
 		long startTime = System.currentTimeMillis(); // fetch starting time
-		while ((false || (System.currentTimeMillis() - startTime) < 10000)) {
+		while ((false || (System.currentTimeMillis() - startTime) < 3000)) {
 			try{
 			len = dis.readInt();
 			if (len > 0) {
@@ -129,6 +142,8 @@ public class RequestManager {
 				}
 			}catch (EOFException e){
 				//System.out.print("wait>");
+			}catch (SocketTimeoutException e){
+				continue;
 			}
 		}
 		System.out.println("Finished Waiting answer");
