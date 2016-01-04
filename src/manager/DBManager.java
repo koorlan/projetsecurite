@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -49,23 +50,22 @@ public class DBManager {
 		setFormatted(false);
 		id = 0;
 	}
-
-	// no need group here
+	
 	public void build(DataUtil du, ArrayList<String> policy) {
 		switch (this.core.getService()) {
 		case "frontal":
-			this.buildFrontal(du);
+			this.buildFrontal(du, policy);
 			break;
 		case "user":
-			this.buildUser(du);
+			this.buildUser(du, policy);
 			break;
 		default:
 			break;
 		}
 	}
 
-	private void buildFrontal(DataUtil du) {
-
+	private void buildFrontal(DataUtil du, ArrayList<String> policy) {
+		// TODO : <FIX> no need group here clear goups group in pattern
 		Pattern p = Pattern.compile(
 				"(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
 		Matcher m = p.matcher(du.getData());
@@ -113,7 +113,8 @@ public class DBManager {
 			ArrayList<String> statList = new ArrayList<String>();
 			ArrayList<String> assignementList = new ArrayList<String>();
 			System.out.println(m.group());
-
+			
+			//TODO <FIX> no need groups here
 			/* group list matcher */
 			if (m.start(5) != -1) // check if the 5th group exists
 			{
@@ -130,6 +131,7 @@ public class DBManager {
 					statList.add((new GsaList(sm.group(), GeneralizerModel.getStatusTree())).getValue());
 				}
 			}
+			
 			/* assignement list matcher */
 			if (m.start(7) != -1) {
 				Matcher am = p.matcher(m.group(7));
@@ -139,41 +141,28 @@ public class DBManager {
 			}
 			/* format GSA list into sql request */
 			build(grpList, statList, assignementList);
-
+			buildPolicyFrontal(policy);
+			
 		} /* ENDIF */
 
 	}
 
-	private void buildUser(DataUtil du) {
-
+	private void buildUser(DataUtil du, ArrayList<String> policy) {
+		//TODO : <FIX> No need groups group
 		Pattern p = Pattern.compile(
 				"(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
 		Matcher m = p.matcher(du.getData());
-
 		/* Starting match */
 		if (m.matches()) {
 			setFormatted(true);
-			/* Action (enum) */
-			for (Action action : Action.values()) {
-				if (m.group(2).compareTo(action.getKey()) == 0) {
-					sql += "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, dc.Valeur ";
-				}
-			}
-
-			/* Table (enum) */
-			for (Table table : Table.values()) {
-				if (m.group(4).compareTo(table.getKey()) == 0) {
-					sql += "FROM U_Cles_Types AS ct, Donnees_Chiffrees AS dc, Liens as l ";
-				}
-			}
-
+			sql += "dc.Valeur_Chiffree, ct.Cred_Auto_Ref, ct.E_Cred_Ksec, u.Statut_Gen, u.Affectation_Gen "
+					+ "FROM Donnees_Chiffrees AS dc, Cles_Types AS ct, Utilisateur as u, Types ";
 			p = Pattern.compile("([0-6]{1})");
-			/* data type list matcher */
+			
 			Matcher tm = p.matcher(m.group(3));
 			boolean flag = false;
 
-			/* Data (enum) */
-			sql += "WHERE ( l.RefBD = dc.RefBD AND l.ID_Cred = ct.ID_Cred AND ";
+			sql += "WHERE ( dc.Type = ct.Type ";
 
 			while (tm.find()) {
 				if (flag)
@@ -193,7 +182,8 @@ public class DBManager {
 			ArrayList<String> statList = new ArrayList<String>();
 			ArrayList<String> assignementList = new ArrayList<String>();
 			System.out.println(m.group());
-
+			
+			//TODO <FIX> no need groups here
 			/* group list matcher */
 			if (m.start(5) != -1) // check if the 5th group exists
 			{
@@ -210,6 +200,7 @@ public class DBManager {
 					statList.add((new GsaList(sm.group(), GeneralizerModel.getStatusTree())).getValue());
 				}
 			}
+			
 			/* assignement list matcher */
 			if (m.start(7) != -1) {
 				Matcher am = p.matcher(m.group(7));
@@ -218,12 +209,51 @@ public class DBManager {
 				}
 			}
 			/* format GSA list into sql request */
-			build(grpList, statList, assignementList);
-			
+			int i = 0;
+			if (assignementList.size() > 0) {
+				sql += " AND ( u.Affectation_Gen = " + "'" + assignementList.get(0) + "'";
+				for (i = 1; i < assignementList.size(); i++)
+					sql += " OR u.Affectation_Gen = " + "'" + assignementList.get(i) + "'";
+				sql += ")";
+			}
+			if (statList.size() > 0) {
+				sql += " AND ( u.Statut_Gen = " + "'" + statList.get(0) + "'";
+				for (i = 1; i < statList.size(); i++)
+					sql += " OR u.Statut_Gen = " + "'" + statList.get(i) + "'";
+				sql += ")";
+			}
+			buildPolicyUser(policy);
 		} /* ENDIF */
-
+	}
+	
+	public void buildPolicyUser(ArrayList<String> policy)
+	{	
+		if(policy.size() > 0)
+		{
+			sql += "AND ( dc.Type = Types.Type AND ( ";
+			for(int i = 0; i < policy.size(); i++)
+			{
+				sql += "ct.Cred_Auto_Ref = '" + policy.get(i) + "' ";
+				sql += (i == policy.size() - 1 ? "" : "OR ");
+			}
+			sql += ") )";
+		}
 	}
 
+	public void buildPolicyFrontal(ArrayList<String> policy)
+	{	
+		if(policy.size() > 0)
+		{
+			sql += "AND ( ";
+			for(int i = 0; i < policy.size(); i++)
+			{
+				sql += "ct.Cred_Auto_Ref = '" + policy.get(i) + "' ";
+				sql += (i == policy.size() - 1 ? "" : "OR ");
+			}
+			sql += ") ";
+		}
+	}
+	
 	public void build(ArrayList<String> groupList, ArrayList<String> statusList, ArrayList<String> assignementList) {
 		int i = 0;
 		if (assignementList.size() > 0) {
@@ -315,7 +345,7 @@ public class DBManager {
 	public static void setFormatted(boolean isFormatted) {
 		DBManager.isFormatted = isFormatted;
 	}
-	String[] header = this.data.split("/KEND/"); String sub = header[0]; 
+	 
 
 	public void setDB_INFO(String dB_INFO) {
 		this.DB_INFO = dB_INFO;
