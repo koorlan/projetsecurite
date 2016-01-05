@@ -36,7 +36,9 @@ public class RequestManager {
 	/**
 	 * Method called by : [FRONTAL] [USER'S LOCAL APP] 
 	 * Requirements : 
-	 * 	a DBManager which interprets the request formatted content 
+	 * 	a DBManager which interprets the request formatted content, 
+	 * 	extracts public keys, 
+	 * 	displays combination 
 	 * 	and ensures a database connection
 	 * 
 	 * @param request
@@ -50,17 +52,19 @@ public class RequestManager {
 		ArrayList<String> policy = this.core.getDataHeader().combines(request.getHeader());
 		this.core.getDB().build(request.getDu(), policy);
 		if (this.core.getDB().isFormatted()) {
-
+			// Sql request execution
 			results = this.core.getDB().search();
 			// TODO : clean this
 			System.out.println(results);
-
+			
+			//TODO : return (this.forgeResponse(results); 
 			// here forge POST to return...
 			this.forgeResponse(results);
+			
 			// this.core.getPacket().forge("POST", "ANSWER");
 			return null;
 		} else
-			this.core.getLog().err(this, "Non formatted content");
+			this.core.getLog().err(this, "Non formatted content, answer will not be sent at this point");
 		return null;
 	}
 
@@ -75,28 +79,44 @@ public class RequestManager {
 	 *            process (filter, trash, print, store...)
 	 * 
 	 */
-	public void processResponse(RequestModel response) throws ClassNotFoundException, SQLException {
+	public void processResponse(RequestModel response) throws ClassNotFoundException, SQLException 
+	{
 		ResponseModel responseM = new ResponseModel();
 		ResponseManager rManager = new ResponseManager(responseM, this.core);
-		if (rManager.isResponse(response.getDu())) {
-			if (rManager.isEmpty(response.getDu())) {
-				// TODO :
-				//IF EMPTY do stuf ???????????????
+		if( rManager.checkFormat(response.getDu()) == true )
+		{
+			this.core.getLog().warn(this, "New response accepted");
+			// Apply first filter on credentials 
+			ArrayList<String> tmpRes = 
+					this.core.getDataHeader().checkPolicy(response.getResult());
+			if (tmpRes == null)
+			{
+				this.core.getLog().warn(this, "First filter failed");
+				rManager.trash(response);
+				return;
+			}
+			int n = tmpRes.size() / 4;
+			for(int i = 0; i < n; i++)
+			{
+				this.core.getCryptoUtils().decipherKsec(tmpRes.get(i), tmpRes.get(i + 1));
+				
+			}
+		}
+		else
+		{
+			this.core.getLog().err(this, "Response received with unexpected format (could be empty)");
+			rManager.trash(response);
+			return;
+		}
+		
+			// TODO :
 				// Decipher E_Cred_Ksec with credential OR trash packet
 				// Use Ksec to decipher metadatas + value
 				// Use metadatas to filter packet (trash it, or keep it)
 				// Print results
 				System.out.println("Processing..(to be implemented in RequestManager ~line91");
 				System.out.println("DEBUG >> "+response.getDu().getData());
-			} else {
-				this.core.getLog().warn(this, "Empty response received");
-				rManager.trash(response);
-			}
-		} else {
-			this.core.getLog().err(this, "Response received with unexpected format");
-			rManager.trash(response);
-			return;
-		}
+		
 
 		// this.core.getFilter().model.setResponse(ArrayList<String> response);
 	}
@@ -233,8 +253,10 @@ public class RequestManager {
 	{
 		DataHeaderModel dHeaderM = new DataHeaderModel();
 		DataHeaderManager dHeader = new DataHeaderManager(dHeaderM, this.core);
+		// getting a list of public keys (true and false) 
 		if( dHeader.getKeysList() == 0 )
-		{
+		{	
+			// creating and set formatted header to request model 
 			request.setHeader(dHeaderM.getData());
 		}
 		else
@@ -260,11 +282,11 @@ public class RequestManager {
 			du.setContent("TRASH");
 		} else {
 			du.setContent("FULL");
-			du.setResults(results);
 		}
 		du.close();
 		RequestModel toSend = new RequestModel();
 		toSend.setDu(du);
+		toSend.setResult(results);
 		return toSend;
 	}
 }

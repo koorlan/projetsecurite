@@ -3,14 +3,21 @@ package anonymizer;
 import java.util.*;
 
 public class DataHeaderModel {
-
+	/**
+	 * @attributes 
+	 * 	data 
+	 * 		formatted subheader to send with packet
+	 * 	combination
+	 * 		current user's public keys list 
+	 * 	 
+	 */
 	private String data;
-	private List<String> keys;
+	private ArrayList<String> combination;
 	
 	public DataHeaderModel()
 	{
 		this.data = "";
-		this.keys = new ArrayList<String>();
+		this.combination = new ArrayList<String>();
 	}
 	public String getData() {
 		return data;
@@ -18,6 +25,12 @@ public class DataHeaderModel {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+	public ArrayList<String> getCombination() {
+		return combination;
+	}
+	public void setCombination(ArrayList<String> combination) {
+		this.combination = combination;
 	}
 	
 	

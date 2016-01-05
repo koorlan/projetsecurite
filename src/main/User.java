@@ -2,6 +2,8 @@ package main;
 
 import java.sql.SQLException;
 
+import crypto.CryptoUtilsManager;
+import crypto.CryptoUtilsModel;
 import dialog.DialogWindow;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
@@ -79,7 +81,12 @@ public class User {
 		 GeneralizerModel GeneralM = new GeneralizerModel();
 		 GeneralizerManager General = new GeneralizerManager(GeneralM, Core);
 		 Core.set(General);
-		
+		 
+		 CryptoUtilsModel CryptoM = new CryptoUtilsModel();
+		 CryptoUtilsManager	Crypto = new CryptoUtilsManager(CryptoM, Core);
+		 // TODO see later
+		 Core.set(Crypto);
+		 
 		 this.core = Core;
 		return;
 	}

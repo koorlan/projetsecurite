@@ -10,9 +10,11 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import anonymizer.DataHeaderManager;
+import crypto.CryptoUtilsManager;
 import filter.FilterManager;
 import generalizer.GeneralizerManager;
 import model.CoreModel;
+import response.ResponseManager;
 
 
 public class CoreManager{
@@ -56,6 +58,7 @@ public class CoreManager{
 		this.getTerminal().start();
 		switch (this.service){
 		case "user":
+			this.getCryptoUtils().setPrivateKeys();
 			break;
 		case "frontal":
 			this.getFrontal().getInternalserverManager().start();
@@ -283,7 +286,15 @@ public class CoreManager{
 		}
 		return null;
 	}
-
+	
+	public ResponseManager getResponse() {
+		for(Object o: this.modules){
+			if(o instanceof ResponseManager){
+				return (ResponseManager)o;
+			}		
+		}
+		return null;
+	}
 
 	public FilterManager getFilter() {
 		for(Object o: this.modules){
@@ -298,6 +309,15 @@ public class CoreManager{
 		for(Object o: this.modules){
 			if(o instanceof DataHeaderManager){
 				return (DataHeaderManager)o;
+			}		
+		}
+		return null;
+	}
+	
+	public CryptoUtilsManager getCryptoUtils() {
+		for(Object o: this.modules){
+			if(o instanceof CryptoUtilsManager){
+				return (CryptoUtilsManager)o;
 			}		
 		}
 		return null;

@@ -19,7 +19,14 @@ public class DataHeaderManager {
 		this.model = model;
 	}
 	/**
-	 * 
+	 * Requirements :
+	 * 	keys, a list of true and false keys 
+	 * 	a DBManager which : 
+	 * 		finds true keys
+	 * 		adds the combo in requestModel for filtering 
+	 * 		finds false keys
+	 * 		returns the entire keys list (not combined)
+	 *  
 	 * @return
 	 * 	-1 if public keys list cannot be created
 	 * 	0 in successful
@@ -27,27 +34,38 @@ public class DataHeaderManager {
 	 */
 	public int getKeysList() throws Exception
 	{
-		List<String> referencesOfKeys = new ArrayList<String>();
-		referencesOfKeys = this.core.getDB().buildKeysList();
-		return (referencesOfKeys != null ? setSubHeader(referencesOfKeys) : -1);
+		List<String> keys = new ArrayList<String>();
+		keys = this.core.getDB().buildKeysLists();
+		return (keys != null ? setSubHeader(keys) : -1);
 	}
 	/**
-	 * 
+	 * Sets subheader to send & stores owner's keys combination 
 	 * @param referencesOfKeys
-	 * 			the public keys list to add to the request 
+	 * 			public keys list to add to the request 
+	 * @return 
+	 * 		0 in successful
 	 */
-	public int setSubHeader(List<String> referencesOfKeys)
+	public int setSubHeader(List<String> keys)
 	{	
 		String subHeader = "/KEBG";
-		subHeader += referencesOfKeys.size(); 
-		ListIterator<String> li = referencesOfKeys.listIterator();
+		ListIterator<String> li = keys.listIterator();
 		while(li.hasNext()) 
+		{	
 			subHeader += ","+li.next();
+		}
 		subHeader += "/KEND/";
 		this.model.setData(subHeader);
 		return 0;
 	}
 
+	/**
+	 * Interprets subheader and combines
+	 *  public keys received
+	 * @param data
+	 * 			formatted subheader received
+	 * @return
+	 * 		localref, combination of all keys
+	 */
 	public ArrayList<String> combines(String data)
 	{
 		String[] header = data.split("/KEND/"); 
@@ -74,5 +92,50 @@ public class DataHeaderManager {
 
 		return localref;
 	}				
-
+	/**
+	 * Compares authorized credentials references 
+	 * 	with owners credentials combo list
+	 * @param response
+	 * 			host response to request 
+	 * @return	result 			
+	 * 	null if credentials list elements don't match 
+	 * 	a list of credentials combination which matches 
+	 */
+	public ArrayList<String> checkPolicy(ArrayList <String> response)
+	{
+		int n = response.size() / 4;
+		ArrayList<String> result = new ArrayList<String>();
+		if(n != 0)
+			return null; 
+		for(int i = 0; i < n; i++)
+		{
+			for(String str : this.model.getCombination() )
+			{
+				if(response.get(4 * i + 1).equals(str) )
+				{
+					result.add(response.get(4 * i));
+					result.add(response.get(4 * i + 1));
+					result.add(response.get(4 * i + 2));
+					result.add(response.get(4 * i + 3));
+				}
+			}
+		}
+		return result;  
+	}
+	
+	/**
+	 * Setting owner public keys combination list into model 
+	 * @param statusRef
+	 * 	current user's status pkey reference
+	 * @param assignementRef
+	 * 	current user's assignement key reference
+	 */
+	public void setCombination(String statusRef, String assignementRef)
+	{
+		ArrayList <String> combo = new ArrayList<String>();
+		combo.add(statusRef);
+		combo.add(assignementRef);
+		combo.add(statusRef + "," + assignementRef);
+		this.model.setCombination(combo);
+	}
 }

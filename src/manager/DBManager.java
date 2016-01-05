@@ -7,7 +7,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,12 +143,17 @@ public class DBManager {
 			}
 			/* format GSA list into sql request */
 			build(grpList, statList, assignementList);
-			buildPolicyFrontal(policy);
+			buildPolicy(policy);
 			
 		} /* ENDIF */
 
 	}
-
+	
+	/**
+	 * Requirements : Connection to NO SEC DB  
+	 * @param du
+	 * @param policy
+	 */
 	private void buildUser(DataUtil du, ArrayList<String> policy) {
 		//TODO : <FIX> No need groups group
 		Pattern p = Pattern.compile(
@@ -156,7 +163,7 @@ public class DBManager {
 		if (m.matches()) {
 			setFormatted(true);
 			sql += " ct.E_Cred_Ksec, ct.Cred_Auto_Ref, Types.Meta_Chiffrees, dc.Valeur_Chiffree "
-					+ "FROM Donnees_Chiffrees AS dc, Cles_Types AS ct, Utilisateur as u, Types ";
+					+ "FROM Donnees_Chiffrees AS dc, Cles_Types AS ct, Utilisateurs as u, Types ";
 			
 			p = Pattern.compile("([0-6]{1})");
 			
@@ -223,25 +230,11 @@ public class DBManager {
 					sql += " OR u.Statut_Gen = " + "'" + statList.get(i) + "'";
 				sql += ")";
 			}
-			buildPolicyUser(policy);
+			buildPolicy(policy);
 		} /* ENDIF */
 	}
 	
-	public void buildPolicyUser(ArrayList<String> policy)
-	{	
-		if(policy.size() > 0)
-		{
-			sql += "AND ( dc.Type = Types.Type AND ( ";
-			for(int i = 0; i < policy.size(); i++)
-			{
-				sql += "ct.Cred_Auto_Ref = '" + policy.get(i) + "' ";
-				sql += (i == policy.size() - 1 ? "" : "OR ");
-			}
-			sql += ") )";
-		}
-	}
-
-	public void buildPolicyFrontal(ArrayList<String> policy)
+	public void buildPolicy(ArrayList<String> policy)
 	{	
 		if(policy.size() > 0)
 		{
@@ -251,10 +244,11 @@ public class DBManager {
 				sql += "ct.Cred_Auto_Ref = '" + policy.get(i) + "' ";
 				sql += (i == policy.size() - 1 ? "" : "OR ");
 			}
-			sql += ") ";
+			sql += ") )";
 		}
 	}
 	
+	// TODO used ? 
 	public void build(ArrayList<String> groupList, ArrayList<String> statusList, ArrayList<String> assignementList) {
 		int i = 0;
 		if (assignementList.size() > 0) {
@@ -290,9 +284,38 @@ public class DBManager {
 		}
 	}
 
-	// TODO not implemented
+	// TODO Same as frontal
 	public ArrayList<String> searchUser() throws ClassNotFoundException, SQLException {
-		return null;
+		String url = DB_PATH + DB_DATA;
+
+		Statement st = null;
+		ArrayList<String> results = new ArrayList<String>();
+
+		// load driver
+		Class.forName(PLUGIN);
+
+		// get connection
+		java.sql.Connection cn = DriverManager.getConnection(url);
+		// create statement
+		st = cn.createStatement();
+
+		// execute "select" request
+		System.out.println(sql + ";");
+		ResultSet rs = st.executeQuery(sql);
+
+		// saving some interesting fields
+		while (rs.next()) {
+			results.add(rs.getString(1)); // E_Cred_Ksec
+			results.add(rs.getString(2)); // Cred_Auto_Ref
+			results.add(rs.getString(3)); // Metadonnees (chiffrees)
+			results.add(rs.getString(4)); // Valeur (chiffree)
+		}
+
+		sql = "";
+		cn.close();
+		st.close();
+
+		return results;
 	};
 
 	public ArrayList<String> searchFrontal() throws ClassNotFoundException, SQLException {
@@ -541,8 +564,15 @@ public class DBManager {
 		}
 		return null;
 	}
-	
-	public List<String> buildKeysList() throws Exception
+	/**
+	 * Requirements: 
+	 * 	a DataHeaderModel access to add true public keys list combo 	
+	 * 	access to current user SEC DB 
+	 * @return
+	 * 	a list of true and false public keys 
+	 * @throws Exception
+	 */
+	public List<String> buildKeysLists() throws Exception
 	{
 		List<String> result = new ArrayList<String>();
 		List<String> status = new ArrayList<String>();
@@ -573,9 +603,11 @@ public class DBManager {
 			statID = rs.getInt("Utilisateurs.ID_Statut");
 			assignID = rs.getInt("Utilisateurs.ID_Affectation");
 		}
+		// adding real keys to DataHeaderModel for filtering 
+		this.core.getDataHeader().setCombination(status.get(0), assignement.get(0));
+		// clean ResultSet
 		rs.close();
 		rs = null;
-		
 		// adding random credentials 
 		Random rand = new Random();
 		int n, m;
@@ -607,5 +639,30 @@ public class DBManager {
 		System.out.println(result);
 		
 		return result;
+	} 
+	
+	/**
+	 * Requirements :
+	 * 	an access to SEC db
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public void setKeys() throws ClassNotFoundException, SQLException
+	{
+		Class.forName(PLUGIN);
+		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
+		Statement st = cn.createStatement();
+		ResultSet rs = null;
+		rs = st.executeQuery("SELECT ID_Cle, kpriv FROM Cles WHERE kpriv IS NOT NULL");
+		Map<String, byte[]> keys = new HashMap<String, byte[]>();
+		
+		while(rs.next())
+		{
+			keys.put(rs.getString("ID_Cle"), rs.getString("kpriv").getBytes());
+		}
+		this.core.getCryptoUtils().setPrivateKeys(keys);
+		this.core.getLog().warn(this, "Private Keys map added");
+		rs.close();
+		st.close();
 	}
 }

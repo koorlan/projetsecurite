@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import dataFormatter.DataUtil;
 import generalizer.GsaList;
@@ -18,7 +19,7 @@ public class RequestModel  implements Serializable {
 	
 	private DataUtil du = null; 
 	private String header;
-
+	private ArrayList<String> result;
 
 	public void setManager(RequestManager manager){
 		this.manager = manager;
@@ -29,7 +30,7 @@ public class RequestModel  implements Serializable {
 	}
 
 	public void setDu(DataUtil du) {
-		this.du = du;
+		this.du = du; 
 	}
 
 	public String getHeader() {
@@ -38,6 +39,14 @@ public class RequestModel  implements Serializable {
 
 	public void setHeader(String header) {
 		this.header = header;
+	}
+
+	public ArrayList<String> getResult() {
+		return result;
+	}
+
+	public void setResult(ArrayList<String> result) {
+		this.result = result;
 	}
 
 }

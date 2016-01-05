@@ -25,6 +25,11 @@ public class ResponseManager {
 			this.model = model;
 		}
 		
+		public boolean checkFormat(DataUtil du)
+		{
+			return isResponse(du) && isFull(du);
+		}
+		
 		private boolean match(String data)
 		{
 			Pattern p = Pattern.compile(this.model.getRegex());
@@ -55,7 +60,7 @@ public class ResponseManager {
 			return false;
 		}
 		
-		public boolean isEmpty(DataUtil du)
+		public boolean isFull(DataUtil du)
 		{	
 			if(this.match(du.getData()))
 			{
