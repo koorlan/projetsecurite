@@ -41,11 +41,11 @@ public class DatabaseMain {
 
 			//Rajout des colonnes (en rouge dans le PPT)
 			RunQuery(stmt1, QUERIES[6]); //Rajoute le champ Ksec à la table Types_Utili
-			RunQuery(stmt1, QUERIES[7]); //Rajoute le champ E_Cred_Ksec à la table Types_Utili
 			RunQuery(stmt1, QUERIES[67]); //On cree la colonne Liste_Groupe dans la table Utilisateurs
 			RunQuery(stmt1, QUERIES[8]); //On cree la colonne Metadonnees dans la table Utilisateurs
 			RunQuery(stmt1, QUERIES[9]); //On cree la colonne Meta_Chiffrees dans la table Types_Utili
 			RunQuery(stmt1, QUERIES[10]); //On cree la colonne Valeur_Chiffree dans la table Donnees
+			
 			// TODO INSERER ICI LE CALCUL DU HASH DU PASSWORD (remplacer la valeur par son hash)
 
 			// 2 - DEDUCTION DE DONNEES DE BASE (GSA utilisateurs)
@@ -153,18 +153,20 @@ public class DatabaseMain {
 			// 8 - CALCUL DE E_Cred_KSec: CHIFFREMENT DE KSec avec les Kpub (CREDENTIALS) DANS LA TABLE Types_Utili
 			//-------------------------------------------------------------------------------------------------------
 
+			RunQuery(stmt1, QUERIES[7]);// Cree une version de Cles_Types avec KSec
 			rss = stmt1.executeQuery(QUERIES[23]);// recupere KSec et Cred_Auto_Ref
 			while (rss.next()==true){
 				String KsecString= rss.getString("Ksec");
 				byte[] Ksec = Base64.getDecoder().decode(KsecString);
 				String CAR = rss.getString("Cred_Auto_Ref");
 				byte[] cleSecChiffree = Ksec;
-
+				System.out.print("Ksec " + KsecString + " Cred_Auto_Ref " + CAR);
 				StringTokenizer creds = new StringTokenizer(CAR, ",");
 				while (creds.hasMoreTokens()) {
 					String cred = creds.nextToken();
 					ResultSet rss5= stmt9.executeQuery(QUERIES[24]+ cred +"'");//recupere les Kpub de la table Cle ou ID_Cle = Cred_Auto_Ref
 					String ss = rss5.getString("Kpub");
+					System.out.print(" cred " + cred + " Kpub " + ss);
 					byte[] Kpub = Base64.getDecoder().decode(ss);
 					MyRSA rsa = new MyRSA();
 					rsa.setPublicKey(Kpub);
@@ -172,9 +174,11 @@ public class DatabaseMain {
 					rss5.close();
 				}
 				String encodedEncryptedKsec = Base64.getEncoder().encodeToString(cleSecChiffree);
+				System.out.println(" Encrypted " + encodedEncryptedKsec);
 				PreparedStatement pstmt = con1.prepareStatement(QUERIES[25]);
 				pstmt.setString(1, encodedEncryptedKsec);
 				pstmt.setString(2, KsecString); 
+				pstmt.setString(3, CAR); 
 				pstmt.execute();
 			}
 
@@ -207,7 +211,7 @@ public class DatabaseMain {
 				RunQuery(stmt2, QUERIES[26]); //attache initDB
 				RunQuery(stmt2, QUERIES[31]); //Copie de la tables des cles
 				//Suppression des cles privees qui ne sont pas associees à l'utilisateur en gardant celles du chemin hierarchique
-				RunQuery(stmt2, QUERIES[34] + login +"' " + QUERIES[35] + login +"' " + QUERIES[36] + login +"' " + QUERIES[37] + login +"' " + QUERIES[38] + login +"' " + QUERIES[39] + login +"') "); 
+				RunQuery(stmt2, QUERIES[34] + login +"' " + QUERIES[36] + login +"' " + QUERIES[38] + login +"') "); 
 				RunQuery(stmt2, QUERIES[40]); //Copie de la tables des groupes
 				RunQuery(stmt2, QUERIES[41]); //Copie de la tables des statuts
 				RunQuery(stmt2, QUERIES[42]); //Copie de la tables des affectations
@@ -333,7 +337,7 @@ public class DatabaseMain {
 			"ALTER TABLE Cred_Autorise ADD COLUMN ID_Cred INTEGER",//4
 			"UPDATE Cred_Autorise set ID_Cred = random()",//5
 			"ALTER TABLE Types_Utili ADD COLUMN Ksec TEXT",//6
-			"ALTER TABLE Types_Utili ADD COLUMN E_Cred_Ksec TEXT",//7
+			"CREATE TABLE Cles_Types AS select Login, Type, Ksec, Cred_Auto_Ref, '' as E_Cred_Ksec FROM Types_Utili T, Cred_Autorise C where T.politique=C.politique",//7
 			"ALTER TABLE Utilisateurs ADD COLUMN Metadonnees TEXT",//8
 			"ALTER TABLE Types_Utili ADD COLUMN Meta_Chiffrees TEXT",//9
 			"ALTER TABLE Donnees ADD COLUMN Valeur_Chiffree TEXT",//10
@@ -351,9 +355,9 @@ public class DatabaseMain {
 			
 			"SELECT Metadonnees, Ksec FROM Utilisateurs U, Types_Utili T WHERE U.Login = T.Login",//21
 			"UPDATE Types_Utili SET Meta_Chiffrees = ? WHERE Ksec = ?",//22
-			"SELECT Ksec, Cred_Auto_Ref from Types_Utili T, Cred_Autorise C WHERE T.Politique = C.Politique",//23
+			"SELECT Ksec, Cred_Auto_Ref from Cles_Types",//23
 			"SELECT Kpub from Cles where Cles.ID_Cle = '",//24
-			"UPDATE Types_Utili SET E_Cred_Ksec = ? WHERE Ksec = ?",//25
+			"UPDATE Cles_Types SET E_Cred_Ksec = ? WHERE Ksec = ? and Cred_Auto_Ref = ?",//25
 			"ATTACH '"+ INIT_FILE + "' as 'BASE'",//26
 			"create table Utilisateurs as select * from BASE.Utilisateurs",//27
 			"create table Frontales as select * from BASE.Frontales",//28
@@ -364,11 +368,11 @@ public class DatabaseMain {
 			"DETACH 'BASE';",//32
 			"SELECT Login, Icone FROM Utilisateurs",//33
 			"Update Cles SET Kpriv = NULL WHERE ID_Cle not in (SELECT ID_Cle from BASE.Statuts S, BASE.Utilisateurs U where U.ID_Statut = S.ID_Statut and Login = '",//34
-			"UNION SELECT P.ID_Parent from BASE.Utilisateurs U, BASE.Statuts S, BASE.Predecesseurs_Cle P where U.ID_Statut = S.ID_Statut and S.ID_Cle = P.ID_Cle and Login = '",//35
+			"",
 			"UNION SELECT ID_Cle from BASE.Affectations A, BASE.Utilisateurs U where U.ID_Affectation = A.ID_Affectation and Login = '",//36
-			"UNION SELECT P.ID_Parent from BASE.Utilisateurs U, BASE.Affectations A, BASE.Predecesseurs_Cle P where U.ID_Affectation = A.ID_Affectation and A.ID_Cle = P.ID_Cle and Login = '",//37
+			"",
 			"UNION SELECT ID_Cle from BASE.Groupes G, BASE.Inscription I where I.ID_Groupe = G.ID_Groupe and Login = '",//38
-			"UNION SELECT P.ID_Parent from BASE.Inscription I, BASE.Groupes G, BASE.Predecesseurs_Cle P where I.ID_Groupe = G.ID_Groupe and G.ID_Cle = P.ID_Cle and Login = '",//39
+			"",
 			"create table Groupes as select * from BASE.Groupes",//40
 			
 			"create table Statuts as select * from BASE.Statuts",//41
@@ -383,7 +387,7 @@ public class DatabaseMain {
 			"create table Donnees_Chiffrees as select Type, Valeur_Chiffree from BASE.Donnees WHERE Login = '",//50
 			
 			
-			"CREATE TABLE Cles_Types AS select Type, Cred_Auto_Ref,E_Cred_Ksec FROM BASE.Types_Utili T, BASE.Cred_Autorise C where T.politique=C.politique and Login = '",//51
+			"CREATE TABLE Cles_Types AS select Type, Cred_Auto_Ref,E_Cred_Ksec FROM BASE.Cles_Types WHERE Login = '",//51
 			"create table Server as select * from BASE.Server",//52
 			"CREATE TABLE Frontale as SELECT * from BASE.Frontales WHERE Frontale = '",//53
 			"CREATE TABLE Frontales as SELECT * from BASE.Frontales WHERE Frontale != '",//54
@@ -392,8 +396,8 @@ public class DatabaseMain {
 			"CREATE TABLE Donnees_Chiffrees AS SELECT RefBD, D.Type, Statut_Gen, Affect_Gen, Valeur_Chiffree, Meta_Chiffrees FROM BASE.Utilisateurs U,"
 			+ " BASE.Donnees D, BASE.Statuts S, BASE.Affectations A, BASE.Types_Utili T WHERE T.Login = U.Login AND U.ID_Statut = S.ID_Statut "
 			+ "AND U.ID_Affectation = A.ID_Affectation AND U.Login= D.Login AND D.Type = T.Type and  Frontale = '",//56
-			"CREATE TABLE Cles_Types AS select distinct ID_Cred, Cred_Auto_Ref,E_Cred_Ksec FROM BASE.Types_Utili T, BASE.Cred_Autorise C, "
-			+ "BASE.Utilisateurs U where U.Login = T.Login AND T.politique=C.politique AND Frontale = '",//57
+			"CREATE TABLE Cles_Types AS select distinct ID_Cred, C.Cred_Auto_Ref,E_Cred_Ksec FROM BASE.Types_Utili T, BASE.Cred_Autorise C, BASE.Utilisateurs U, BASE.Cles_Types CT "
+			+ "where U.Login = T.Login AND T.politique=C.politique AND T.Ksec = CT.Ksec and C.Cred_Auto_Ref = CT.Cred_Auto_Ref AND Frontale = '",//57
 			"CREATE TABLE Liens AS SELECT RefBD, ID_Cred FROM BASE.Donnees D, BASE.Types_Utili T, BASE.Cred_Autorise C, BASE.Utilisateurs U"
 			+ " WHERE T.Login = U.Login AND T.Login = D.Login AND T.Type = D.Type AND T.Politique = C.Politique AND Frontale = '",//58
 			"CREATE TABLE Routage (ID_Req TEXT PRIMARY KEY  NOT NULL , IP_Emmeteur TEXT, Port_Emetteur TEXT, MSG TEXT(2000))",//59
@@ -410,6 +414,5 @@ public class DatabaseMain {
 			"UPDATE Utilisateurs SET Liste_Groupe = '",//68
 			"CREATE TABLE Utilisateurs AS SELECT U.Ip, U.Port, S.Statut_Gen, A.Affect_Gen FROM BASE.Utilisateurs U, BASE.Affectations A, BASE.Statuts S "
 			+ "WHERE U.ID_Statut = S.ID_Statut AND U.ID_Affectation = A.ID_Affectation AND Login = '",//69
-
 			""};
 }
