@@ -5,6 +5,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import anonymizer.DataHeaderModel;
 import anonymizer.DataHeaderManager;
 import dataFormatter.DataUtil;
+import dialog.DialogWindow;
 import filter.FilterManager;
 import filter.FilterModel;
 import generalizer.GeneralizerManager;
@@ -46,24 +48,21 @@ public class RequestManager {
 	 *            process
 	 * 
 	 */
-	public byte[] process(RequestModel request) throws ClassNotFoundException, SQLException {
-		
+	public RequestModel process(RequestModel request) throws ClassNotFoundException, SQLException {
+		this.core.getLog().log(this, "New request in request to process");
 		ArrayList<String> results = new ArrayList<String>();
 		ArrayList<String> policy = this.core.getDataHeader().combines(request.getHeader());
 		this.core.getDB().build(request.getDu(), policy);
-		if (this.core.getDB().isFormatted()) {
-			// Sql request execution
+		if (this.core.getDB().isFormatted()) 
+		{
 			results = this.core.getDB().search();
-			// TODO : clean this
+// TODO : clean this
 			System.out.println(results);
 			
-			//TODO : return (this.forgeResponse(results); 
-			// here forge POST to return...
-			this.forgeResponse(results);
-			
+			return this.forgeResponse(results);
 			// this.core.getPacket().forge("POST", "ANSWER");
-			return null;
-		} else
+		} 
+		else
 			this.core.getLog().err(this, "Non formatted content, answer will not be sent at this point");
 		return null;
 	}
@@ -85,28 +84,50 @@ public class RequestManager {
 		ResponseManager rManager = new ResponseManager(responseM, this.core);
 		if( rManager.checkFormat(response.getDu()) == true )
 		{
-			this.core.getLog().warn(this, "New response accepted");
+			this.core.getLog().log(this, "New response accepted");
 			// Apply first filter on credentials 
 			ArrayList<String> tmpRes = 
 					this.core.getDataHeader().checkPolicy(response.getResult());
 			if (tmpRes == null)
 			{
-				this.core.getLog().warn(this, "First filter failed");
+				this.core.getLog().log(this, "First filter failed");
 				rManager.trash(response);
 				return;
 			}
+			String plainK = null; 
+			String plainMeta = null; 
 			int n = tmpRes.size() / 4;
-			for(int i = 0; i < n; i++)
+			if(true)
 			{
-				this.core.getCryptoUtils().decipherKsec(tmpRes.get(i), tmpRes.get(i + 1));
-				
+				this.core.getLog().log(this, "Continue here... Results must be sent to CryptoUtilsManager");
+				return;
+			}
+			for(int i = 0; i < n; i++)
+			{	
+				// TODO wait for decipher function
+				plainK = this.core.getCryptoUtils()
+						.decipher(tmpRes.get(i), tmpRes.get(i + 1));
+				if(plainK != null)
+				{	
+					plainMeta = this.core.getCryptoUtils()
+							.decipher(tmpRes.get(i + 2), plainK);
+					// TODO : continue here 
+					// à ce stade on est sensés avoir une clé secrète dans plainK
+					// et les méta déchiffrées dans plain Meta
+					// filtrer les réponses sur ces métadonnées 
+				}
+				else 
+				{
+					this.core.getLog().err(this, "Public Key deciphering failed");
+				}
 			}
 		}
 		else
 		{
-			this.core.getLog().err(this, "Response received with unexpected format (could be empty)");
+			this.core.getLog().warn(this, "Response received with unexpected format (could be empty)");
 			rManager.trash(response);
 			return;
+			
 		}
 		
 			// TODO :
@@ -116,7 +137,11 @@ public class RequestManager {
 				// Print results
 				System.out.println("Processing..(to be implemented in RequestManager ~line91");
 				System.out.println("DEBUG >> "+response.getDu().getData());
-		
+				/**
+				 *  TODO : later
+				 *  this.core.getDialog().addResponse("nom", "type", "affectation", "statut", "groupe",response.getDu().getData()); 
+				 */
+				
 
 		// this.core.getFilter().model.setResponse(ArrayList<String> response);
 	}
@@ -134,16 +159,27 @@ public class RequestManager {
 	 * 
 	 */
 	private void send(RequestModel request) throws ClassNotFoundException, SQLException, IOException {
+		//TODO clean debug
+		System.out.println("Request forged " + request.getDu() + request.getHeader());
 		Socket socket;
 		socket = this.core.getPacket().sendPacket(this.core.getPacket().forge("GET", request),
 				this.core.getDB().getFrontalIP(), this.core.getDB().getFrontalPort());
+		if(socket == null)
+			return;
+		//Clear window
+		DialogWindow dialog = this.core.getDialog();
+		if(dialog != null){
+			dialog.refresh();
+		}
+		
+		socket.setSoTimeout(1000);
 		InputStream inputStream = socket.getInputStream();
 		DataInputStream dis = new DataInputStream(inputStream);
 
 		int len;
 
 		long startTime = System.currentTimeMillis(); // fetch starting time
-		while ((false || (System.currentTimeMillis() - startTime) < 10000)) {
+		while ((false || (System.currentTimeMillis() - startTime) < 3000)) {
 			try{
 			len = dis.readInt();
 			if (len > 0) {
@@ -156,6 +192,8 @@ public class RequestManager {
 				}
 			}catch (EOFException e){
 				//System.out.print("wait>");
+			}catch (SocketTimeoutException e){
+				continue;
 			}
 		}
 		System.out.println("Finished Waiting answer");
@@ -202,7 +240,6 @@ public class RequestManager {
 				&& assignement instanceof String)) {
 			this.core.getLog().err(this, "Wrong fields");
 		}
-
 		FilterModel filterM = new FilterModel();
 		FilterManager filter = new FilterManager(filterM, this.core);
 
@@ -218,11 +255,11 @@ public class RequestManager {
 		assignementList.add((String) assignement);
 
 		filterM.setGroupList(genManager.generalize(groupList, "group"));
-		filterM.getGroupList().printGsaList();
+		//filterM.getGroupList().printGsaList();
 		filterM.setStatusList(genManager.generalize(statusList, "status"));
-		filterM.getStatusList().printGsaList();
+		//filterM.getStatusList().printGsaList();
 		filterM.setAssignementList(genManager.generalize(assignementList, "assignement"));
-		filterM.getAssignementList().printGsaList();
+		//filterM.getAssignementList().printGsaList();
 
 		DataUtil du = new DataUtil();
 		du.setAction("QUERY");
@@ -233,8 +270,8 @@ public class RequestManager {
 		du.setGSA(filterM.getAssignementList().getMainKeyList());
 		du.close();
 		// TODO : <DEBUG> clean that later
-		System.out.println(du);
-
+		System.out.println("Data Util forged : " + du);
+		
 		RequestModel tosend = new RequestModel();
 		tosend.setDu(du);
 		this.addHeader(tosend);
@@ -251,18 +288,18 @@ public class RequestManager {
 	 */
 	public void addHeader(RequestModel request) throws Exception	
 	{
-		DataHeaderModel dHeaderM = new DataHeaderModel();
-		DataHeaderManager dHeader = new DataHeaderManager(dHeaderM, this.core);
+		this.core.getLog().warn(this, "Building subheader");
+		
 		// getting a list of public keys (true and false) 
-		if( dHeader.getKeysList() == 0 )
+		if( this.core.getDataHeader().getKeysList() == 0 )
 		{	
 			// creating and set formatted header to request model 
-			request.setHeader(dHeaderM.getData());
+			request.setHeader(this.core.getDataHeader().getDataM());
 		}
 		else
 			this.core.getLog().err(this, "Public keys list builder failed");
 		//TODO : clean
-		System.out.println(request.getHeader());
+		System.out.println("Header forged :" + request.getHeader());
 		this.send(request);
 	}
 
@@ -276,17 +313,24 @@ public class RequestManager {
 	 * 
 	 */
 	public RequestModel forgeResponse(ArrayList<String> results) throws ClassNotFoundException, SQLException {
+		System.out.println("Forging response");
 		DataUtil du = new DataUtil();
 		du.setAction("ANSWER");
-		if (results.isEmpty()) {
+		if (results.isEmpty()) 
+		{
 			du.setContent("TRASH");
-		} else {
+		} 
+		else 
+		{
 			du.setContent("FULL");
 		}
 		du.close();
 		RequestModel toSend = new RequestModel();
 		toSend.setDu(du);
 		toSend.setResult(results);
+		System.out.println("du sended: "+ toSend.getDu());
+		// OK 
+		//System.out.println("result sended: "+ toSend.getResult());
 		return toSend;
 	}
 }

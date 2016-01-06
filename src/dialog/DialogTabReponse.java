@@ -12,13 +12,12 @@ public class DialogTabReponse extends AbstractTableModel {
 			"Type",
 			"Affectation",
 			"Statut", 
-			"Groupe"
+			"Groupe",
+			"Data"
 		};
 	
 	public DialogTabReponse(){
 		super();
-		int i; 
-		
 	}
 	
 	public String getColumnName(int columnIndex) {
@@ -45,6 +44,8 @@ public class DialogTabReponse extends AbstractTableModel {
 	            return reponses.get(rowIndex).getStatut();
 	        case 4:
 	            return reponses.get(rowIndex).getGroupe();
+	        case 5:
+	        	 return reponses.get(rowIndex).getData();
 	        default:
 	            return null;
 	    }
@@ -52,6 +53,11 @@ public class DialogTabReponse extends AbstractTableModel {
 	
 	public void addReponse(DialogDataReponse elt) {
 		reponses.add(elt);
+		fireTableRowsInserted(reponses.size() - 1, reponses.size() - 1);
+	}
+	
+	public void refresh(){
+		reponses.clear();
 		fireTableRowsInserted(reponses.size() - 1, reponses.size() - 1);
 	}
 }

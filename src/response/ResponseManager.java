@@ -27,6 +27,7 @@ public class ResponseManager {
 		
 		public boolean checkFormat(DataUtil du)
 		{
+			System.out.println(du);
 			return isResponse(du) && isFull(du);
 		}
 		

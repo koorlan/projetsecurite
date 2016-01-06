@@ -7,8 +7,9 @@ public class DialogDataReponse {
 	private String affectation; 
 	private String statut; 
 	private String groupe;
+	private String data;
 	
-	public DialogDataReponse(String nom, String type, String affectation, String statut, String groupe){
+	public DialogDataReponse(String nom, String type, String affectation, String statut, String groupe, String data){
 		super(); 
 		
 		this.nom = nom; 
@@ -16,6 +17,7 @@ public class DialogDataReponse {
 		this.affectation = affectation; 
 		this.statut = statut; 
 		this.groupe = groupe;
+		this.data = data;
 	}
 	
 	public String getNom() {
@@ -37,4 +39,9 @@ public class DialogDataReponse {
 	public String getGroupe() {
 		return groupe;
 	}
+
+	public String getData() {
+		return data;
+	}
+	
 }

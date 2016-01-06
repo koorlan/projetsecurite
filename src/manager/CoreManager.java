@@ -11,6 +11,7 @@ import java.util.function.Function;
 
 import anonymizer.DataHeaderManager;
 import crypto.CryptoUtilsManager;
+import dialog.DialogWindow;
 import filter.FilterManager;
 import generalizer.GeneralizerManager;
 import model.CoreModel;
@@ -58,7 +59,7 @@ public class CoreManager{
 		this.getTerminal().start();
 		switch (this.service){
 		case "user":
-			this.getCryptoUtils().setPrivateKeys();
+			this.getDB().setKeys();
 			break;
 		case "frontal":
 			this.getFrontal().getInternalserverManager().start();
@@ -233,10 +234,10 @@ public class CoreManager{
 		return null;
 	}
 
-	public DialogQueryManager getDialog() {
+	public DialogWindow getDialog() {
 		for(Object o: this.modules){
-			if(o instanceof DialogQueryManager){
-				return (DialogQueryManager)o;
+			if(o instanceof DialogWindow){
+				return (DialogWindow)o;
 			}		
 		}
 		return null;

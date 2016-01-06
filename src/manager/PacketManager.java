@@ -54,20 +54,24 @@ public class PacketManager {
 					this.core.getPacket().sendPacket(packet, ip, port);
 				}
 
-				// TODO Look DB and answer if results..
-				results = new ArrayList<String>();
+				//results = new ArrayList<String>();
+				
 				request = (RequestModel) SerializationUtils.deserialize(packet.getContent());
-				this.core.getDB().build(request.getDu());
-				if (this.core.getDB().isFormatted()) {
-					results = this.core.getDB().search();
-					//TODO ... if many results -> do a for to send X responses
-					RequestModel response = this.core.getRequest().forgeResponse(results);
+				
+				//this.core.getDB().build(request.getDu()); 
+				//	if (this.core.getDB().isFormatted()) {
+				//	results = this.core.getDB().search();
+				//	RequestModel response = this.core.getRequest().forgeResponse(results);
+					
+				RequestModel response = this.core.getRequest().process(request);
+				if(response != null)
+				{
+					this.core.getLog().log(this, "New external response forged");
 					DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 					PacketModel toSendP = this.forge("POST", response);
 					toSendP.setId(packet.getId());
 					toSendP.setSenderFamilly(packet.getSenderFamilly());
 					//byte[] toSend = SerializationUtils.serialize(toSendP);
-					
 					//Send my results to frontal familly
 					ArrayList<Frontal> frontalList = this.core.getFrontal().getFrontalFamillyMap()
 							.get(packet.getSenderFamilly());
@@ -76,7 +80,8 @@ public class PacketManager {
 								frontal.getCore().getFrontal().getExternalserverManager().getModel().getPort());
 					
 					return null;
-				} else
+				} 
+				else
 					this.core.getLog().err(this, "Non formatted content");
 				
 				break;
@@ -92,27 +97,28 @@ public class PacketManager {
 				byte[] id = this.core.getSecurity().sha1(this.core.getFrontal().getName() + random);
 				packet.setId(id);
 				this.core.getPacket().sendPacket(packet, this.core.getDB().getCentralIP(),this.core.getDB().getCentralPort());
-				results = new ArrayList<String>();
+				
 				request = (RequestModel) SerializationUtils.deserialize(packet.getContent());
-				this.core.getDB().build(request.getDu());
-				if (this.core.getDB().isFormatted()) {
-					results = this.core.getDB().search();
+				RequestModel intResponse = this.core.getRequest().process(request);
+				if (intResponse != null) 
+				{	
+					this.core.getLog().log(this, "New internal response forged");
+					//results = this.core.getDB().search();
 					//TODO ... if many results -> do a for to send X responses
-					RequestModel response = this.core.getRequest().forgeResponse(results);
+					//RequestModel intResponse = this.core.getRequest().forgeResponse(results);
+					
 					DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-					byte[] toSend = SerializationUtils.serialize(this.forge("POST", response));
+					byte[] toSend = SerializationUtils.serialize(this.forge("POST", intResponse));
 					dos.writeInt(toSend.length);
 					dos.write(toSend);
+					ArrayList<Frontal> frontalList = this.core.getFrontal().getFrontalFamillyMap()
+							.get(packet.getSenderFamilly());
+					for (Frontal frontal : frontalList)
+						this.sendPacket(packet, frontal.getCore().getFrontal().getExternalserverManager().getModel().getIpDest(),
+								frontal.getCore().getFrontal().getExternalserverManager().getModel().getPort());
 					return null;
 				} else
-					this.core.getLog().err(this, "Non formatted content");
-
-				ArrayList<Frontal> frontalList = this.core.getFrontal().getFrontalFamillyMap()
-						.get(packet.getSenderFamilly());
-				for (Frontal frontal : frontalList)
-					this.sendPacket(packet, frontal.getCore().getFrontal().getExternalserverManager().getModel().getIpDest(),
-							frontal.getCore().getFrontal().getExternalserverManager().getModel().getPort());
-				
+					this.core.getLog().err(this, "Non formatted content");				
 				break;
 			default:
 				break;
@@ -167,8 +173,9 @@ public class PacketManager {
 			case GET:
 				try {
 					this.core.getLog().log(this, "Pass to RequestManager");
+					//TODO : check this 
 					return this.core.getRequest()
-							.process((RequestModel) SerializationUtils.deserialize(packet.getContent()));
+							.process((RequestModel) SerializationUtils.deserialize(packet.getContent())).toString().getBytes();
 				} catch (SerializationException e) {
 					this.core.getLog().err(this, "Not a SerializedRequestModel type.");
 				}

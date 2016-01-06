@@ -10,10 +10,10 @@ import manager.CoreManager;
 
 public class DataHeaderManager {
 
-	CoreManager core;
-	DataHeaderModel model;
+	private CoreManager core;
+	private DataHeaderModel model;
 
-	public DataHeaderManager(DataHeaderModel model, CoreManager manager)
+	public DataHeaderManager(DataHeaderModel model, CoreManager core)
 	{
 		this.core = core;
 		this.model = model;
@@ -47,13 +47,12 @@ public class DataHeaderManager {
 	 */
 	public int setSubHeader(List<String> keys)
 	{	
-		String subHeader = "/KEBG";
-		ListIterator<String> li = keys.listIterator();
-		while(li.hasNext()) 
+		String subHeader = "/KBEG/";
+		for(int i = 0 ; i < keys.size() ; i++ )
 		{	
-			subHeader += ","+li.next();
+			subHeader += keys.get(i) 
+					+ (i == keys.size() - 1 ? "/KEND/" : ",");		
 		}
-		subHeader += "/KEND/";
 		this.model.setData(subHeader);
 		return 0;
 	}
@@ -68,14 +67,16 @@ public class DataHeaderManager {
 	 */
 	public ArrayList<String> combines(String data)
 	{
+		// TODO clean 
+		System.out.println("header received : " + data);
 		String[] header = data.split("/KEND/"); 
 		String toDel="/KBEG/";                          
 		header[0] = header[0].replace(toDel, "");  
 		String[] values = header[0].split(",");
 		ArrayList<String> localref = new ArrayList<String>() ;
-		for (int n = 0 ; n <  Integer.parseInt(values[0]) ; ++n ) 
+		for (int i = 0 ; i <  values.length ; i++ ) 
 		{ 
-			localref.add( values[n+1] ) ;		 
+			localref.add( values[i] ) ;		 
 		}	
 		// display and store combinations 
 		localref.add(localref.get(0) + "," + localref.get(1));
@@ -89,7 +90,8 @@ public class DataHeaderManager {
 		localref.add(localref.get(0) + "," + localref.get(2) + "," + localref.get(3));
 		localref.add(localref.get(1) + "," + localref.get(2) + "," + localref.get(3));
 		localref.add(localref.get(0) + "," + localref.get(1) + "," + localref.get(2) + "," + localref.get(3));
-
+		// TODO clean 
+		System.out.println(localref);
 		return localref;
 	}				
 	/**
@@ -104,8 +106,9 @@ public class DataHeaderManager {
 	public ArrayList<String> checkPolicy(ArrayList <String> response)
 	{
 		int n = response.size() / 4;
+		System.out.println("response size : " + response.size());
 		ArrayList<String> result = new ArrayList<String>();
-		if(n != 0)
+		if(n == 0)
 			return null; 
 		for(int i = 0; i < n; i++)
 		{
@@ -120,7 +123,9 @@ public class DataHeaderManager {
 				}
 			}
 		}
-		return result;  
+		
+		System.out.println(result);
+		return result.isEmpty() ? null : result;  
 	}
 	
 	/**
@@ -137,5 +142,10 @@ public class DataHeaderManager {
 		combo.add(assignementRef);
 		combo.add(statusRef + "," + assignementRef);
 		this.model.setCombination(combo);
+	}
+	
+	public String getDataM()
+	{
+		return this.model.getData();
 	}
 }

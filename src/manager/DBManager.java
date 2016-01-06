@@ -68,6 +68,7 @@ public class DBManager {
 
 	private void buildFrontal(DataUtil du, ArrayList<String> policy) {
 		// TODO : <FIX> no need group here clear goups group in pattern
+		sql = "";
 		Pattern p = Pattern.compile(
 				"(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
 		Matcher m = p.matcher(du.getData());
@@ -108,7 +109,7 @@ public class DBManager {
 
 				}
 			}
-			sql += " ) ";
+			//sql += " ) ";
 
 			p = Pattern.compile("([A-Z]{1}[1-9]{1,})");
 			ArrayList<String> grpList = new ArrayList<String>();
@@ -155,6 +156,7 @@ public class DBManager {
 	 * @param policy
 	 */
 	private void buildUser(DataUtil du, ArrayList<String> policy) {
+		sql = "";
 		//TODO : <FIX> No need groups group
 		Pattern p = Pattern.compile(
 				"(/BEG/{1})([0-1]{1})::([0-6]+?)::([0-1]{1})::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::([[A-Z][1-9]{1,}]{1,})?::(/END/{1})");
@@ -183,7 +185,7 @@ public class DBManager {
 
 				}
 			}
-			sql += " ) ";
+			//sql += " ) ";
 
 			p = Pattern.compile("([A-Z]{1}[1-9]{1,})");
 			ArrayList<String> grpList = new ArrayList<String>();
@@ -252,7 +254,7 @@ public class DBManager {
 	public void build(ArrayList<String> groupList, ArrayList<String> statusList, ArrayList<String> assignementList) {
 		int i = 0;
 		if (assignementList.size() > 0) {
-			sql += " AND ( dc.Affect_Gen = " + "'" + assignementList.get(0) + "'";
+			sql += " ( dc.Affect_Gen = " + "'" + assignementList.get(0) + "'";
 			for (i = 1; i < assignementList.size(); i++)
 				sql += " OR dc.Affect_Gen = " + "'" + assignementList.get(i) + "'";
 			sql += ")";
@@ -298,7 +300,7 @@ public class DBManager {
 		java.sql.Connection cn = DriverManager.getConnection(url);
 		// create statement
 		st = cn.createStatement();
-
+// TODO clean 
 		// execute "select" request
 		System.out.println(sql + ";");
 		ResultSet rs = st.executeQuery(sql);
@@ -331,10 +333,10 @@ public class DBManager {
 		java.sql.Connection cn = DriverManager.getConnection(url);
 		// create statement
 		st = cn.createStatement();
-
+// TODO clean 
 		// execute "select" request
 		System.out.println(sql + ";");
-		ResultSet rs = st.executeQuery(sql);
+		ResultSet rs = st.executeQuery(sql.toString());
 
 		// saving some interesting fields
 		while (rs.next()) {
@@ -424,6 +426,7 @@ public class DBManager {
 			break;
 
 		}
+		st.close();
 	}
 
 	public String getFrontalIP() throws ClassNotFoundException, SQLException {
@@ -437,12 +440,16 @@ public class DBManager {
 			cn = DriverManager.getConnection(DB_PATH + DB_INFO);
 			st = cn.createStatement();
 			rs = st.executeQuery("SELECT * FROM Frontale");
-			return rs.getString("IP");
+			String res = rs.getString("IP");
+			st.close();
+			return res;
 		case "user":
 			cn = DriverManager.getConnection(DB_PATH + DB_INFO);
 			st = cn.createStatement();
 			rs = st.executeQuery("SELECT * FROM Frontales");
-			return rs.getString("IP");
+			String resU = rs.getString("IP");
+			st.close();
+			return resU;
 		default:
 			break;
 		}
@@ -460,7 +467,9 @@ public class DBManager {
 			cn = DriverManager.getConnection(DB_PATH + DB_INFO);
 			st = cn.createStatement();
 			rs = st.executeQuery("SELECT * FROM Frontales");
-			return rs.getInt("internalPort");
+			int res  = rs.getInt("internalPort");
+			st.close();
+			return res;
 		default:
 			break;
 		}
@@ -487,10 +496,12 @@ public class DBManager {
 				user.getCore().getUser().setAssignement(rs.getString("Affect_Gen"));
 				users.add(user);
 			}
+			st.close();
 			return users;
 		default:
 			break;
 		}
+		st.close();
 		return null;
 	}
 
@@ -505,10 +516,13 @@ public class DBManager {
 		switch (this.core.getService()) {
 		case "frontal":
 			rs = st.executeQuery("SELECT * FROM Server");
-			return rs.getString("IP");
+			String res = rs.getString("IP"); 
+			st.close();
+			return res;
 		default:
 			break;
 		}
+		st.close();
 		return null;
 	}
 
@@ -523,10 +537,13 @@ public class DBManager {
 		switch (this.core.getService()) {
 		case "frontal":
 			rs = st.executeQuery("SELECT * FROM Server");
-			return rs.getInt("Port");
+			int res = rs.getInt("Port");
+			st.close();
+			return res;
 		default:
 			break;
 		}
+		st.close();
 		return -1;
 	}
 
@@ -557,11 +574,13 @@ public class DBManager {
 				
 				frontals.add(frontal);
 			}
+			st.close();
 			return frontals;
 			
 		default:
 			break;
 		}
+		st.close();
 		return null;
 	}
 	/**
@@ -596,15 +615,18 @@ public class DBManager {
 				+ "FROM Statuts, Affectations, Utilisateurs "
 				+ "WHERE Utilisateurs.ID_Statut = Statuts.ID_Statut "
 				+ "AND Utilisateurs.ID_Affectation = Affectations.ID_Affectation");
+		
 		while(rs.next())
 		{
-			status.add(rs.getString("Statuts.ID_Cle"));
-			assignement.add(rs.getString("Affectations.ID_Cle"));
-			statID = rs.getInt("Utilisateurs.ID_Statut");
-			assignID = rs.getInt("Utilisateurs.ID_Affectation");
+			status.add(rs.getString(1));
+			assignement.add(rs.getString(3));
+			statID = rs.getInt(2);
+			assignID = rs.getInt(4);
 		}
+
 		// adding real keys to DataHeaderModel for filtering 
-		this.core.getDataHeader().setCombination(status.get(0), assignement.get(0));
+		if( ! ( status.isEmpty() || assignement.isEmpty() ) ) 
+				this.core.getDataHeader().setCombination(status.get(0), assignement.get(0));
 		// clean ResultSet
 		rs.close();
 		rs = null;
@@ -624,8 +646,8 @@ public class DBManager {
 				+ " AND Affectations.ID_Affectation = " + m);
 		while(rs.next())
 		{
-			status.add(rs.getString("Statuts.ID_Cle"));
-			assignement.add(rs.getString("Affectation.ID_Cle"));
+			status.add(rs.getString(1));
+			assignement.add(rs.getString(2));
 		}
 		rs.close();
 		st.close();
@@ -654,14 +676,19 @@ public class DBManager {
 		Statement st = cn.createStatement();
 		ResultSet rs = null;
 		rs = st.executeQuery("SELECT ID_Cle, kpriv FROM Cles WHERE kpriv IS NOT NULL");
-		Map<String, byte[]> keys = new HashMap<String, byte[]>();
 		
+		Map<String, String> keys = new HashMap<String, String>();
+		String kpriv; 
+		String id; 
 		while(rs.next())
 		{
-			keys.put(rs.getString("ID_Cle"), rs.getString("kpriv").getBytes());
+			kpriv = rs.getString(2);
+			id = rs.getString(1);
+			if( ! kpriv.isEmpty() )
+				keys.put(id, kpriv);
 		}
 		this.core.getCryptoUtils().setPrivateKeys(keys);
-		this.core.getLog().warn(this, "Private Keys map added");
+		this.core.getLog().log(this, "Private Keys map added");
 		rs.close();
 		st.close();
 	}

@@ -35,7 +35,7 @@ public class GeneralizerModel {
 		listJeuxSociete.add(new Leaf("D1131", "Echecs"));
 
 		List<Node> listTravail = new ArrayList<Node>();
-		listTravail.add(new InternalNode("C131", "Projet_secu", listProjetSecu));
+		listTravail.add(new InternalNode("C131", "Projet_Secu", listProjetSecu));
 		
 		List<Node> listLoisirs = new LinkedList<Node>();
 		listLoisirs.add(new InternalNode("C111", "Sports", listSports));

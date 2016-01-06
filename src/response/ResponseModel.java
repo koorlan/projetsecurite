@@ -13,7 +13,7 @@ public class ResponseModel {
 	
 	private boolean isFormatted;
 	private final String regex = 
-		"(/BEG/{1})(1{1})::([0-1]{1})(/END/{1})";
+		"(/BEG/{1})(1{1})::([0-1]{1})::(/END/{1})";
 	
 	public ResponseModel()
 	{

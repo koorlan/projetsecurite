@@ -4,6 +4,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import anonymizer.DataHeaderManager;
+import anonymizer.DataHeaderModel;
+import crypto.CryptoUtilsManager;
+import crypto.CryptoUtilsModel;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 import manager.CoreManager;
@@ -48,7 +52,12 @@ public class Frontal {
 	DBManager DB = new DBManager(Core);
 	GeneralizerModel GeneralM = new GeneralizerModel();
 	GeneralizerManager General = new GeneralizerManager(GeneralM, Core);
-
+	
+	CryptoUtilsModel CryptoM = new CryptoUtilsModel();
+	CryptoUtilsManager	Crypto = new CryptoUtilsManager(CryptoM, Core);
+	DataHeaderModel DataHeaderM = new DataHeaderModel();
+	DataHeaderManager DataHeader = new DataHeaderManager(DataHeaderM, Core);
+	
 	public Frontal() throws Exception {
 		super();
 		this.initialize();
@@ -82,6 +91,11 @@ public class Frontal {
 
 		Core.set(Request);
 		RequestM.setManager(Request);
+
+// ADD
+		Core.set(Crypto);
+		Core.set(DataHeader);
+// ENDOF 
 
 		Core.set(DB);
 

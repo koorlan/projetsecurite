@@ -2,6 +2,8 @@ package main;
 
 import java.sql.SQLException;
 
+import anonymizer.DataHeaderManager;
+import anonymizer.DataHeaderModel;
 import crypto.CryptoUtilsManager;
 import crypto.CryptoUtilsModel;
 import dialog.DialogWindow;
@@ -87,6 +89,10 @@ public class User {
 		 // TODO see later
 		 Core.set(Crypto);
 		 
+		 DataHeaderModel DataHeaderM = new DataHeaderModel();
+		 DataHeaderManager DataHeader = new DataHeaderManager(DataHeaderM, Core);
+		 Core.set(DataHeader);
+				 
 		 this.core = Core;
 		return;
 	}

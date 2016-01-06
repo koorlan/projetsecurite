@@ -137,16 +137,16 @@ public class MyRSA {
 		    }
 		    return result;
 		  }
-/**
-* @param args
-*/
+		
 public static void main(String[] args) {
 	 String plaintext = "154E6";
 
 	    System.out.println("plaintext = " + plaintext);
 	    MyRSA rsa = new MyRSA();
 	    rsa.generateKeyPair();
+	    // not used ? 
 	    String encodedKey = Base64.getEncoder().encodeToString(rsa.privateKey.getEncoded());
+	    
 	    byte[] publicKey = rsa.getPublicKeyInBytes();
 	    byte[] privateKey = rsa.getPrivateKeyInBytes();
 	    byte[] ciphertext = rsa.crypt(plaintext);   
