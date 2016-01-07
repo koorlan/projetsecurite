@@ -79,7 +79,9 @@ public class DatabaseMain {
 				KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 				keyGen.init(256); // for example
 				SecretKey secretKey = keyGen.generateKey();
-				String encodedSecreteKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+				//String encodedSecreteKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+				String encodedSecreteKey = TestCipher.generateAES_KEY();
+				System.out.println(encodedSecreteKey);
 				PreparedStatement pstmt = con1.prepareStatement(QUERIES[14]);
 				pstmt.setString(1, encodedSecreteKey);
 				pstmt.setString(2, ID);
