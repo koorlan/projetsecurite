@@ -25,6 +25,7 @@ import javax.swing.text.html.HTMLDocument.Iterator;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import anonymizer.DataHeaderModel;
 import anonymizer.DataHeaderManager;
@@ -144,7 +145,16 @@ public class RequestManager {
 						if(this.core.getFilter().isSuitable()){
 							String plainData = new String(TestCipher.decryptWithAes(response.getResultCipher().get(i*3+2),myKey) );
 							//this.core.getDialog().addResponse("nom", "type","affectation", "statut", "groupe",response.getDu().getData())
-							this.core.getDialog().addResponse(responseFilter.get(0), "type","affectation", "statut", "groupe",plainData);
+					
+							ArrayList<String> meta = new ArrayList<String>();
+							meta.add(responseFilter.get(0));
+							meta.add(responseFilter.get(responseFilter.size()-1));
+							meta.add(responseFilter.get(responseFilter.size()-2));
+							ArrayList<String> groupsList = new ArrayList<String>(responseFilter);
+							groupsList.removeAll(meta);
+							String groups= StringUtils.join(groupsList,",");
+							this.core.getDialog().addResponse(responseFilter.get(0), this.core.getFilter().getModel().getType(),responseFilter
+									.get(responseFilter.size()-1),responseFilter.get(responseFilter.size()-2),groups ,plainData);
 						}		
 					// TODO : continue here
 					// à ce stade on est sensés avoir une clé secrète dans
@@ -162,20 +172,6 @@ public class RequestManager {
 			return;
 
 		}
-
-		// TODO :
-		// Decipher E_Cred_Ksec with credential OR trash packet
-		// Use Ksec to decipher metadatas + value
-		// Use metadatas to filter packet (trash it, or keep it)
-		// Print results
-		System.out.println("Processing..(to be implemented in RequestManager ~line91");
-		System.out.println("DEBUG >> " + response.getDu().getData());
-		/**
-		 * TODO : later this.core.getDialog().addResponse("nom", "type",
-		 * "affectation", "statut", "groupe",response.getDu().getData());
-		 */
-
-		// this.core.getFilter().model.setResponse(ArrayList<String> response);
 	}
 
 	/**
@@ -293,6 +289,7 @@ public class RequestManager {
 		// filterM.getStatusList().printGsaList();
 		this.core.getFilter().getModel().setAssignementList(genManager.generalize(assignementList, "assignement"));
 		// filterM.getAssignementList().printGsaList();
+		this.core.getFilter().getModel().setType((String)type);
 
 		DataUtil du = new DataUtil();
 		du.setAction("QUERY");

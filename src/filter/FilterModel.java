@@ -9,6 +9,9 @@ public class FilterModel {
 	private GsaList groupList; 
 	private GsaList statusList; 
 	private GsaList assignementList; 
+
+	private String type;
+	
 	
 	private ArrayList<String> response;
 	public boolean isReady = false;
@@ -44,6 +47,14 @@ public class FilterModel {
 	public void setResponse(ArrayList<String> response) {
 		this.response = response;
 		this.isReady = (this.response.isEmpty() == true) ? false : true;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 }
