@@ -11,11 +11,18 @@ import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.SerializationException;
@@ -165,7 +172,7 @@ public class PacketManager {
 		return null;
 	};
 
-	public synchronized byte[] processUser(byte[] bPacket) throws ClassNotFoundException, SQLException {
+	public synchronized byte[] processUser(byte[] bPacket) throws ClassNotFoundException, SQLException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 		PacketModel packet = new PacketModel();
 		packet = (PacketModel) SerializationUtils.deserialize(bPacket);
 		if (packet != null) {

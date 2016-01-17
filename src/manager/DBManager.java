@@ -275,7 +275,7 @@ public class DBManager {
 		return id;
 	}
 
-	public ArrayList<String> search() throws ClassNotFoundException, SQLException {
+	public HashMap<String, byte[][]>  search() throws ClassNotFoundException, SQLException {
 		switch (this.core.getService()) {
 		case "frontal":
 			return this.searchFrontal();
@@ -287,11 +287,11 @@ public class DBManager {
 	}
 
 	// TODO Same as frontal
-	public ArrayList<String> searchUser() throws ClassNotFoundException, SQLException {
+	public HashMap<String, byte[][]>  searchUser() throws ClassNotFoundException, SQLException {
 		String url = DB_PATH + DB_DATA;
 
 		Statement st = null;
-		ArrayList<String> results = new ArrayList<String>();
+		HashMap<String, byte[][]>  results = new HashMap<String, byte[][]>(); 
 
 		// load driver
 		Class.forName(PLUGIN);
@@ -307,10 +307,12 @@ public class DBManager {
 
 		// saving some interesting fields
 		while (rs.next()) {
-			results.add(rs.getString(1)); // E_Cred_Ksec 2
-			results.add(rs.getString(2)); // Cred_Auto_Ref 1
-			results.add(rs.getString(3)); // Metadonnees (chiffrees) 2 
-			results.add(rs.getString(4)); // Valeur (chiffree) 2
+			byte[][] data = new byte[3][];
+			data[0] = rs.getBytes(1);// E_Cred_Ksec
+			data[1] = rs.getBytes(3);	// Metadonnees (chiffrees)
+			data[2] = rs.getBytes(4);	// Valeur (chiffree)
+			results.put(rs.getString(2), data); //Cred autoref
+
 		}
 
 		sql = "";
@@ -320,11 +322,12 @@ public class DBManager {
 		return results;
 	};
 
-	public ArrayList<String> searchFrontal() throws ClassNotFoundException, SQLException {
+	public HashMap<String, byte[][]>  searchFrontal() throws ClassNotFoundException, SQLException {
 		String url = DB_PATH + DB_INFO;
 
 		Statement st = null;
-		ArrayList<String> results = new ArrayList<String>();
+		HashMap<String, byte[][]>  results = new HashMap<String, byte[][]>(); 
+		
 
 		// load driver
 		Class.forName(PLUGIN);
@@ -340,10 +343,11 @@ public class DBManager {
 
 		// saving some interesting fields
 		while (rs.next()) {
-			results.add(rs.getString(1)); // E_Cred_Ksec
-			results.add(rs.getString(2)); // Cred_Auto_Ref
-			results.add(rs.getString(3)); // Metadonnees (chiffrees)
-			results.add(rs.getString(4)); // Valeur (chiffree)
+			byte[][] data = new byte[3][];
+			data[0] = rs.getBytes(1);// E_Cred_Ksec
+			data[1] = rs.getBytes(3);	// Metadonnees (chiffrees)
+			data[2] = rs.getBytes(4);	// Valeur (chiffree)
+			results.put(rs.getString(2), data); //Cred autoref
 		}
 
 		sql = "";
@@ -705,15 +709,16 @@ public class DBManager {
 		ResultSet rs = null;
 		rs = st.executeQuery("SELECT ID_Cle, kpriv FROM Cles WHERE kpriv IS NOT NULL");
 		
-		Map<String, String> keys = new HashMap<String, String>();
-		String kpriv; 
+		Map<String, byte[]> keys = new HashMap<String, byte[]>();
+		byte[] kpriv; 
 		String id; 
 		while(rs.next())
 		{
-			kpriv = rs.getString(2);
+			kpriv = rs.getBytes(2);
 			id = rs.getString(1);
-			if( ! kpriv.isEmpty() )
+			if(kpriv.length != 0 )
 				keys.put(id, kpriv);
+			this.core.getLog().log(this, "Private Keys map added " + id + " >>> " + new String(kpriv));
 		}
 		this.core.getCryptoUtils().setPrivateKeys(keys);
 		this.core.getLog().log(this, "Private Keys map added");

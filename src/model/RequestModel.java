@@ -17,9 +17,11 @@ public class RequestModel  implements Serializable {
 	private RequestManager manager = null;
 
 	
-	private DataUtil du = null; 
+
 	private String header;
-	private ArrayList<String> result;
+	private DataUtil du = null; 
+	private ArrayList<String> resultRef;
+	private ArrayList<byte[]> resultCipher;
 
 	public void setManager(RequestManager manager){
 		this.manager = manager;
@@ -41,12 +43,21 @@ public class RequestModel  implements Serializable {
 		this.header = header;
 	}
 
-	public ArrayList<String> getResult() {
-		return result;
+	public ArrayList<String> getResultRef() {
+		return resultRef;
 	}
 
-	public void setResult(ArrayList<String> result) {
-		this.result = result;
+	public void setResultRef(ArrayList<String> resultRef) {
+		this.resultRef = resultRef;
 	}
+
+	public ArrayList<byte[]> getResultCipher() {
+		return resultCipher;
+	}
+
+	public void setResultCipher(ArrayList<byte[]> resultCipher) {
+		this.resultCipher = resultCipher;
+	}
+
 
 }

@@ -1,4 +1,4 @@
-package crypto;
+package initialisation_BD;
 
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -10,15 +10,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -27,87 +19,41 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import initialisation_BD.TestCipher;
-import manager.CoreManager;
-
-public class CryptoUtilsManager {
+public class TestCipher {
 	
-	CoreManager core; 
-	CryptoUtilsModel model;
-	
-	public CryptoUtilsManager(CryptoUtilsModel model, CoreManager core)
-	{
-		this.core = core;
-		this.model = model; 
-	}
-	
-	public void setPrivateKeys(Map<String, byte[]> keys) throws ClassNotFoundException, SQLException
-	{
-		this.model.setKeysMap(keys);
-		this.model.setInitialized(true); 
-	}
-	
-	public Set<String> getKeySet()
-	{
-		return this.model.getKeysList();
-	}
-	
-
-	public byte[] decipher(byte[] cipher, String keysRef) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException
-
-	{
-		if( !this.model.isInitialized() )
-		{	
-			this.core.getLog().err(this, "Crypto model is still uninitialized");
-			return null; 
-		}
-		this.core.getLog().log(this, "Deciphering");
-
-		byte[] currentPrivK;
-		byte[] plain = null;
-
-		if(keysRef.contains(","))
-		{
-			this.core.getLog().log(this, "Multiple keys required");
-			String[] hMapKeys = keysRef.split(",");
-			String hMapK;
-			
-			for(int i = 0; i < hMapKeys.length; i ++)
-			{
-				hMapK = hMapKeys[i];
-
-				// TODO : encode this in B64 ? mb cipher too... 
-				currentPrivK = this.model.getKeysMap().get(hMapK);
-				System.out.println(currentPrivK);
-				if(i == hMapKeys.length - 1)
-					plain = TestCipher.decryptWithRSA(cipher, TestCipher.decodeRSA_KEYS(null, currentPrivK).getPrivate());
-				else{
-					
-					//plain =new String(test);
-				}
-
-			}
-		}
-		else 
-		{
-			this.core.getLog().log(this, "Unique key required");
-			System.out.println("hmap key passed : " + keysRef);
-			System.out.println("Check Hmap content : " + this.model.getKeysMap().containsKey(keysRef));
-
-			// TODO : idem  
-			currentPrivK = this.model.getKeysMap().get(keysRef);
-			System.out.println("privK used : " + new String(currentPrivK));		
-			plain = TestCipher.decryptWithRSApadding(cipher, TestCipher.decodeRSA_KEYS(null, currentPrivK).getPrivate());	
+	public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, InvalidKeySpecException {
+		String clair = "iezjfoizeuhiofioze";
 		
-			
-
-			
-		}
-		System.out.println("Plain sec key is <<" + plain + ">>");
-		return plain;
+		//gen AES key
+		byte[] aes = TestCipher.generateAES_KEY();
+		//gen Rsa keys
+		byte[][] key1 = TestCipher.generateRSA_KEYS();
+		byte[][] key2 = TestCipher.generateRSA_KEYS();
+		byte[][] key3 = TestCipher.generateRSA_KEYS();
+		
+		byte[] chiffre = TestCipher.cryptWithAes(clair.getBytes(), TestCipher.decodeAES_KEY(aes));
+		//basicTest
+		System.out.println("Test simple >> " + new String(TestCipher.decryptWithAes(chiffre,TestCipher.decodeAES_KEY(aes))));
+	
+		//avec k1
+		///Padding
+		byte[] aesK1 = TestCipher.cryptWithRSApadding(aes, TestCipher.decodeRSA_KEYS(key1[0], null).getPublic());
+		//loop with non-padded
+		byte[] aesK2 =  TestCipher.cryptWithRSA(aesK1, TestCipher.decodeRSA_KEYS(key2[0], null).getPublic());
+		byte[] aesK3 =  TestCipher.cryptWithRSA(aesK2, TestCipher.decodeRSA_KEYS(key3[0], null).getPublic());
+		
+		//String hardtest = Base64.getEncoder().encodeToString(aesK3);
+		//Decrypt aesk
+		///non padding
+		byte[] test3 = TestCipher.decryptWithRSA(aesK3, TestCipher.decodeRSA_KEYS(null, key3[1]).getPrivate());
+		byte[] test2  = TestCipher.decryptWithRSA(test3, TestCipher.decodeRSA_KEYS(null, key2[1]).getPrivate());
+		byte[] test  = TestCipher.decryptWithRSApadding(test2, TestCipher.decodeRSA_KEYS(null, key1[1]).getPrivate());
+		
+		System.out.println("Test un poil moins simple >> " + new String(TestCipher.decryptWithAes(chiffre,TestCipher.decodeAES_KEY(test))));
+		
 	}
 	
-
+	
 	public static byte[] generateAES_KEY() throws NoSuchAlgorithmException{
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(128);
@@ -197,5 +143,4 @@ public class CryptoUtilsManager {
            byte[] toReturn = cipher.doFinal(data);
            return toReturn;
       }
-	
 }

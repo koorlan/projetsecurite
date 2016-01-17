@@ -14,7 +14,7 @@ public class CryptoUtilsModel {
 	 * 	assignementKey
 	 */
 	
-	private Map<String, String> keysMap; 
+	private Map<String, byte[]> keysMap; 
 	private boolean isInitialized; 
 	
 	public boolean isInitialized() {
@@ -23,10 +23,10 @@ public class CryptoUtilsModel {
 	public void setInitialized(boolean isInitialized) {
 		this.isInitialized = isInitialized;
 	}
-	public Map<String, String> getKeysMap() {
+	public Map<String, byte[]> getKeysMap() {
 		return keysMap;
 	}
-	public void setKeysMap(Map<String, String> keysMap) {
+	public void setKeysMap(Map<String, byte[]> keysMap) {
 		this.keysMap = keysMap;
 	}
 	public Set<String> getKeysList()
