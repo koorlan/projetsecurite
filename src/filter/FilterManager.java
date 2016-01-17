@@ -31,19 +31,35 @@ public class FilterManager{
 		}
 		else
 		{
-			if(this.model.getAssignementList().getInitialDataList().contains(this.model.getResponse().get(1)) == false)
+			if(this.model.getAssignementList().getInitialDataList().contains(this.model.getResponse().get(this.model.getResponse().size()-1)) == false)
 			{
-				this.core.getLog().warn(this, "<Due to generalization> Non suitable response detected");
+				this.core.getLog().warn(this, "<Due to generalization> Non suitable response detected (Assignements)");
 				return false;
 			}
-			else if(this.model.getStatusList().getInitialDataList().contains(this.model.getResponse().get(2)) == false)
+			else if(this.model.getStatusList().getInitialDataList().contains(this.model.getResponse().get(this.model.getResponse().size()-2)) == false)
 			{
-				this.core.getLog().warn(this, "<Due to generalization> Non suitable response detected");
+				this.core.getLog().warn(this, "<Due to generalization> Non suitable response detected (Status)");
 				return false; 
 			}
+			//Calculate how many groups.
+			int nbGroups = this.model.getResponse().size() -3 ; //name+status+assignement
+			boolean oneFounded = false;
+			for (int i=0; i < nbGroups ; i++){
+				if(this.model.getGroupList().getInitialDataList().contains(this.model.getResponse().get(1+i)) == true)
+					oneFounded = true;
+			}
+			if(!oneFounded){
+				this.core.getLog().warn(this, "<Due to generalization> Non suitable response detected (Groups)");
+				return false; 
+			}
+			
 			return true; 
 		}
 	
+	}
+	
+	public FilterModel getModel(){
+		return this.model;
 	}
 	/**
 	 * TODO : <CLEAN> building a fake response atm 

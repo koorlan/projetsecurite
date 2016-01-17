@@ -86,13 +86,13 @@ public class GeneralizerModel {
 		listEleves.add(new Leaf("C124", "Doctorant"));
 		
 		List<Node> listPersonnel = new LinkedList<Node>();
-		listPersonnel.add(new InternalNode("C111", "Enseignant", listEnseignants));
-		listPersonnel.add(new InternalNode("C112", "Service administratif", listServices));
+		listPersonnel.add(new InternalNode("C111", "Enseignants", listEnseignants));
+		listPersonnel.add(new InternalNode("C112", "Service administratifs", listServices));
 		listPersonnel.add(new Leaf("C113", "Directeur"));
 		
 		List<Node> listGlobalStatus = new LinkedList<Node>();
 		listGlobalStatus.add(new InternalNode("B11", "Personnel", listPersonnel));
-		listGlobalStatus.add(new InternalNode("B12", "Eleve", listEleves));
+		listGlobalStatus.add(new InternalNode("B12", "Eleves", listEleves));
 		Node status = new InternalNode("A1", "Statut Global", listGlobalStatus);
 		statusTree = new Tree(status);
 	}

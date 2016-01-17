@@ -7,6 +7,8 @@ import anonymizer.DataHeaderModel;
 import crypto.CryptoUtilsManager;
 import crypto.CryptoUtilsModel;
 import dialog.DialogWindow;
+import filter.FilterManager;
+import filter.FilterModel;
 import generalizer.GeneralizerManager;
 import generalizer.GeneralizerModel;
 import manager.CoreManager;
@@ -92,7 +94,11 @@ public class User {
 		 DataHeaderModel DataHeaderM = new DataHeaderModel();
 		 DataHeaderManager DataHeader = new DataHeaderManager(DataHeaderM, Core);
 		 Core.set(DataHeader);
-				 
+		
+		 FilterModel FilterM = new FilterModel();
+		 FilterManager Filter = new FilterManager(FilterM,Core);
+		 Core.set(Filter);
+		 
 		 this.core = Core;
 		return;
 	}

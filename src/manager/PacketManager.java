@@ -144,7 +144,7 @@ public class PacketManager {
 						byte[] toSend = SerializationUtils.serialize(packet);
 						dos.writeInt(toSend.length);
 						dos.write(toSend);
-						s.close();
+						//s.close();
 						break;
 					}
 				}
@@ -181,8 +181,8 @@ public class PacketManager {
 				try {
 					this.core.getLog().log(this, "Pass to RequestManager");
 					//TODO : check this 
-					return this.core.getRequest()
-							.process((RequestModel) SerializationUtils.deserialize(packet.getContent())).toString().getBytes();
+					packet.setContent(SerializationUtils.serialize(this.core.getRequest().process((RequestModel) SerializationUtils.deserialize(packet.getContent()))));
+					return SerializationUtils.serialize(packet);
 				} catch (SerializationException e) {
 					this.core.getLog().err(this, "Not a SerializedRequestModel type.");
 				}

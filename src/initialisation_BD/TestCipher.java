@@ -1,5 +1,6 @@
 package initialisation_BD;
 
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -7,8 +8,11 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import javax.crypto.BadPaddingException;
@@ -61,19 +65,51 @@ public class TestCipher {
         byte[] aeskb = key.getEncoded();
         return aeskb;
     }
+	
+	  public static BigInteger getCoprime(BigInteger m, SecureRandom random) {
+	        int length = m.bitLength()-1;
+	        BigInteger e = BigInteger.probablePrime(length,random);
+	        while (! (m.gcd(e)).equals(BigInteger.ONE) ) {
+	            e = BigInteger.probablePrime(length,random);
+	        }
+	        return e;
+	    }
     
     public static byte[][] generateRSA_KEYS() throws NoSuchAlgorithmException{
-         KeyPairGenerator KeyGen = KeyPairGenerator.getInstance("RSA");
-         KeyGen.initialize(1024);
-         KeyPair pair = KeyGen.generateKeyPair();
          
-         //PrivateKey kpriv =  KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec());
-         //PublicKey kpub =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec());
-         byte[][] pairs = new byte[2][];
-         pairs[0] = pair.getPublic().getEncoded();
-         pairs[1] = pair.getPrivate().getEncoded();
-         
-         return pairs;
+
+         int keySize = 512;  
+         SecureRandom random = new SecureRandom();
+
+         BigInteger p = BigInteger.probablePrime(keySize/2,random);
+         BigInteger q = BigInteger.probablePrime(keySize/2,random);
+
+         BigInteger modulus = p.multiply(q);
+
+         BigInteger m = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+         BigInteger publicExponent = getCoprime(m,random);
+
+         BigInteger privateExponent = publicExponent.modInverse(m);
+
+
+         try {                    
+             RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, publicExponent);
+             RSAPrivateKeySpec privateSpec = new RSAPrivateKeySpec(modulus, privateExponent);
+
+             KeyFactory factory = KeyFactory.getInstance("RSA");
+
+             PublicKey pub = factory.generatePublic(spec);
+             PrivateKey priv = factory.generatePrivate(privateSpec); 
+             byte[][] pairs = new byte[2][];
+             pairs[0] = pub.getEncoded();
+             pairs[1] = priv.getEncoded();
+             return pairs;
+
+         }                        
+         catch( Exception e ) {   
+             System.out.println(e.toString());       
+         }                        
+         return null;
     }
     
     public static SecretKey decodeAES_KEY(byte[] aeskb){
