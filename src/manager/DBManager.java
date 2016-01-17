@@ -96,7 +96,7 @@ public class DBManager {
 			boolean flag = false;
 
 			/* Data (enum) */
-			sql += "WHERE ( l.RefBD = dc.RefBD AND l.ID_Cred = ct.ID_Cred AND ";
+			sql += "WHERE l.RefBD = dc.RefBD AND l.ID_Cred = ct.ID_Cred AND ";
 
 			while (tm.find()) {
 				if (flag)
@@ -109,8 +109,7 @@ public class DBManager {
 
 				}
 			}
-			//sql += " ) ";
-
+			
 			p = Pattern.compile("([A-Z]{1}[1-9]{1,})");
 			ArrayList<String> grpList = new ArrayList<String>();
 			ArrayList<String> statList = new ArrayList<String>();
@@ -164,7 +163,7 @@ public class DBManager {
 		/* Starting match */
 		if (m.matches()) {
 			setFormatted(true);
-			sql += " ct.E_Cred_Ksec, ct.Cred_Auto_Ref, Types.Meta_Chiffrees, dc.Valeur_Chiffree "
+			sql += "SELECT ct.E_Cred_Ksec, ct.Cred_Auto_Ref, Types.Meta_Chiffrees, dc.Valeur_Chiffree "
 					+ "FROM Donnees_Chiffrees AS dc, Cles_Types AS ct, Utilisateurs as u, Types ";
 			
 			p = Pattern.compile("([0-6]{1})");
@@ -172,7 +171,7 @@ public class DBManager {
 			Matcher tm = p.matcher(m.group(3));
 			boolean flag = false;
 
-			sql += "WHERE ( dc.Type = ct.Type ";
+			sql += "WHERE dc.Type = ct.Type AND ";
 
 			while (tm.find()) {
 				if (flag)
@@ -185,7 +184,7 @@ public class DBManager {
 
 				}
 			}
-			//sql += " ) ";
+//			sql += " ) ";
 
 			p = Pattern.compile("([A-Z]{1}[1-9]{1,})");
 			ArrayList<String> grpList = new ArrayList<String>();
@@ -197,7 +196,7 @@ public class DBManager {
 			/* group list matcher */
 			if (m.start(5) != -1) // check if the 5th group exists
 			{
-				sql += "AND ";
+				//sql += "AND ";
 				Matcher gm = p.matcher(m.group(5));
 				while (gm.find()) {
 					grpList.add((new GsaList(gm.group(), GeneralizerModel.getGroupTree())).getValue());
@@ -221,9 +220,9 @@ public class DBManager {
 			/* format GSA list into sql request */
 			int i = 0;
 			if (assignementList.size() > 0) {
-				sql += " AND ( u.Affectation_Gen = " + "'" + assignementList.get(0) + "'";
+				sql += " AND ( u.Affect_Gen = " + "'" + assignementList.get(0) + "'";
 				for (i = 1; i < assignementList.size(); i++)
-					sql += " OR u.Affectation_Gen = " + "'" + assignementList.get(i) + "'";
+					sql += " OR u.Affect_Gen = " + "'" + assignementList.get(i) + "'";
 				sql += ")";
 			}
 			if (statList.size() > 0) {
@@ -246,7 +245,7 @@ public class DBManager {
 				sql += "ct.Cred_Auto_Ref = '" + policy.get(i) + "' ";
 				sql += (i == policy.size() - 1 ? "" : "OR ");
 			}
-			sql += ") )";
+			sql += ")";
 		}
 	}
 	
@@ -718,7 +717,6 @@ public class DBManager {
 			id = rs.getString(1);
 			if(kpriv.length != 0 )
 				keys.put(id, kpriv);
-			this.core.getLog().log(this, "Private Keys map added " + id + " >>> " + new String(kpriv));
 		}
 		this.core.getCryptoUtils().setPrivateKeys(keys);
 		this.core.getLog().log(this, "Private Keys map added");

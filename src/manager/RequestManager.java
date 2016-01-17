@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.crypto.BadPaddingException;
@@ -24,6 +25,7 @@ import javax.swing.text.html.HTMLDocument.Iterator;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
+
 import anonymizer.DataHeaderModel;
 import anonymizer.DataHeaderManager;
 import dataFormatter.DataUtil;
@@ -118,9 +120,6 @@ public class RequestManager {
 
 			byte[] plainK = null;
 			String plainMeta = null;
-			System.out.println(Arrays.toString(tmpResRef));
-			System.out.println(response.getResultRef());
-			System.out.println(new String(response.getResultCipher().get(0)));
 			//System.out.println(response.getResultCipher());
 			for (int i = 0; i < tmpResRef.length; i++) {
 				if (!tmpResRef[i])
@@ -132,12 +131,20 @@ public class RequestManager {
 					// plainMeta = this.core.getCryptoUtils()
 					// .decipher(tmpRes.get(i + 2), plainK);
 
-					System.out.println("PlainK : '" + new String(plainK) + "'");
 					SecretKey myKey = TestCipher.decodeAES_KEY(plainK);
 
 					// System.out.println(myKey.getEncoded().length);
 					 plainMeta =new String(TestCipher.decryptWithAes(response.getResultCipher().get(i*3+1),myKey) );
-					System.out.println(plainMeta);
+					 System.out.println(plainMeta);
+						List<String> responseList = Arrays.asList(plainMeta.split(","));
+						ArrayList<String> responseFilter = new ArrayList<String>();
+						responseFilter.addAll(responseList); 
+					
+						this.core.getFilter().getModel().setResponse(responseFilter);
+						if(this.core.getFilter().isSuitable()){
+							String plainData = new String(TestCipher.decryptWithAes(response.getResultCipher().get(i*3+2),myKey) );
+							System.out.println(plainData);
+						}		
 					// TODO : continue here
 					// à ce stade on est sensés avoir une clé secrète dans
 					// plainK
@@ -210,7 +217,7 @@ public class RequestManager {
 		int len;
 
 		long startTime = System.currentTimeMillis(); // fetch starting time
-		while ((false || (System.currentTimeMillis() - startTime) < 3000)) {
+		while ((false || (System.currentTimeMillis() - startTime) < 10000)) {
 			try {
 				len = dis.readInt();
 				if (len > 0) {
@@ -281,20 +288,20 @@ public class RequestManager {
 		statusList.add((String) status);
 		assignementList.add((String) assignement);
 
-		filterM.setGroupList(genManager.generalize(groupList, "group"));
+		this.core.getFilter().getModel().setGroupList(genManager.generalize(groupList, "group"));
 		// filterM.getGroupList().printGsaList();
-		filterM.setStatusList(genManager.generalize(statusList, "status"));
+		this.core.getFilter().getModel().setStatusList(genManager.generalize(statusList, "status"));
 		// filterM.getStatusList().printGsaList();
-		filterM.setAssignementList(genManager.generalize(assignementList, "assignement"));
+		this.core.getFilter().getModel().setAssignementList(genManager.generalize(assignementList, "assignement"));
 		// filterM.getAssignementList().printGsaList();
 
 		DataUtil du = new DataUtil();
 		du.setAction("QUERY");
 		du.setType((String) type);
 		du.setTable("FRONT_TABLE");
-		du.setGSA(filterM.getGroupList().getMainKeyList());
-		du.setGSA(filterM.getStatusList().getMainKeyList());
-		du.setGSA(filterM.getAssignementList().getMainKeyList());
+		du.setGSA(this.core.getFilter().getModel().getGroupList().getMainKeyList());
+		du.setGSA(this.core.getFilter().getModel().getStatusList().getMainKeyList());
+		du.setGSA(this.core.getFilter().getModel().getAssignementList().getMainKeyList());
 		du.close();
 		// TODO : <DEBUG> clean that later
 		System.out.println("Data Util forged : " + du);

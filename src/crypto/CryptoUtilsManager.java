@@ -72,38 +72,32 @@ public class CryptoUtilsManager {
 			String[] hMapKeys = keysRef.split(",");
 			String hMapK;
 			
-			for(int i = 0; i < hMapKeys.length; i ++)
+			//Save data
+			byte[] tmpPlain; 
+			for(int i = hMapKeys.length-1 ; i >= 0; i--)
 			{
 				hMapK = hMapKeys[i];
-
-				// TODO : encode this in B64 ? mb cipher too... 
 				currentPrivK = this.model.getKeysMap().get(hMapK);
-				System.out.println(currentPrivK);
-				if(i == hMapKeys.length - 1)
-					plain = TestCipher.decryptWithRSA(cipher, TestCipher.decodeRSA_KEYS(null, currentPrivK).getPrivate());
-				else{
-					
-					//plain =new String(test);
+				
+				if(i == 0){
+					//last decrypt
+					tmpPlain = TestCipher.decryptWithRSApadding(cipher, TestCipher.decodeRSA_KEYS(null, currentPrivK).getPrivate());	
+				}else{
+					//other decrypt
+					tmpPlain = TestCipher.decryptWithRSA(cipher, TestCipher.decodeRSA_KEYS(null, currentPrivK).getPrivate());	
 				}
-
+				cipher = tmpPlain;
 			}
+			plain = cipher;
 		}
 		else 
 		{
 			this.core.getLog().log(this, "Unique key required");
-			System.out.println("hmap key passed : " + keysRef);
-			System.out.println("Check Hmap content : " + this.model.getKeysMap().containsKey(keysRef));
-
 			// TODO : idem  
 			currentPrivK = this.model.getKeysMap().get(keysRef);
-			System.out.println("privK used : " + new String(currentPrivK));		
 			plain = TestCipher.decryptWithRSApadding(cipher, TestCipher.decodeRSA_KEYS(null, currentPrivK).getPrivate());	
 		
-			
-
-			
 		}
-		System.out.println("Plain sec key is <<" + plain + ">>");
 		return plain;
 	}
 	

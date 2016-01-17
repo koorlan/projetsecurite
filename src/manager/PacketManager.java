@@ -144,7 +144,7 @@ public class PacketManager {
 						byte[] toSend = SerializationUtils.serialize(packet);
 						dos.writeInt(toSend.length);
 						dos.write(toSend);
-						s.close();
+						//s.close();
 						break;
 					}
 				}
