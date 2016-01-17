@@ -143,7 +143,8 @@ public class RequestManager {
 						this.core.getFilter().getModel().setResponse(responseFilter);
 						if(this.core.getFilter().isSuitable()){
 							String plainData = new String(TestCipher.decryptWithAes(response.getResultCipher().get(i*3+2),myKey) );
-							System.out.println(plainData);
+							//this.core.getDialog().addResponse("nom", "type","affectation", "statut", "groupe",response.getDu().getData())
+							this.core.getDialog().addResponse(responseFilter.get(0), "type","affectation", "statut", "groupe",plainData);
 						}		
 					// TODO : continue here
 					// à ce stade on est sensés avoir une clé secrète dans
@@ -274,8 +275,6 @@ public class RequestManager {
 				&& assignement instanceof String)) {
 			this.core.getLog().err(this, "Wrong fields");
 		}
-		FilterModel filterM = new FilterModel();
-		FilterManager filter = new FilterManager(filterM, this.core);
 
 		GeneralizerModel genM = new GeneralizerModel();
 		GeneralizerManager genManager = new GeneralizerManager(genM, this.core);
