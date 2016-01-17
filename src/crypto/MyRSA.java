@@ -138,6 +138,7 @@ public class MyRSA {
 		    return result;
 		  }
 		
+
 		  public byte[] dechiffrementRSAInByte(String key, String ciphertext)
 		  {
 				 byte[] keyInByte = Base64.getDecoder().decode(key);
@@ -157,3 +158,4 @@ public class MyRSA {
 				 return rsa.decryptInString(ciphertextInByte);	
 			}
 }
+
