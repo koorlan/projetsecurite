@@ -142,19 +142,33 @@ public static void main(String[] args) {
 	 String plaintext = "154E6";
 
 	    System.out.println("plaintext = " + plaintext);
-	    MyRSA rsa = new MyRSA();
-	    rsa.generateKeyPair();
-	    // not used ? 
-	    String encodedKey = Base64.getEncoder().encodeToString(rsa.privateKey.getEncoded());
+	    MyRSA rsa1 = new MyRSA();
+	    rsa1.generateKeyPair();
+	    MyRSA rsa2 = new MyRSA();
+	    rsa2.generateKeyPair();
+	   
+	  //  String publicKey1 = Base64.getEncoder().encodeToString(rsa1.getPublicKeyInBytes());
+	  //  String privateKey1 = Base64.getEncoder().encodeToString( rsa1.getPrivateKeyInBytes());
 	    
-	    byte[] publicKey = rsa.getPublicKeyInBytes();
-	    byte[] privateKey = rsa.getPrivateKeyInBytes();
-	    byte[] ciphertext = rsa.crypt(plaintext);   
-	    System.out.println("ciphertext = " + new BigInteger(ciphertext));
-
-	    rsa.setPublicKey(publicKey);
-	    rsa.setPrivateKey(privateKey);    
-	    String plaintext2 = rsa.decryptInString(ciphertext);
+	 //   String publicKey2 = Base64.getEncoder().encodeToString(rsa2.getPublicKeyInBytes());
+	//    String privateKey2 = Base64.getEncoder().encodeToString( rsa2.getPrivateKeyInBytes());
+	    
+	    byte[] buffer11 = rsa1.crypt(plaintext);
+	    byte[] buffer12 = rsa2.crypt(buffer11);
+	    //String ciphertext = Base64.getEncoder().encodeToString(buffer12);  
+	    //System.out.println("ciphertext = " + ciphertext);
+	    
+	   // rsa1.setPublicKey(Base64.getDecoder().decode(publicKey1));
+	   // rsa1.setPrivateKey(Base64.getDecoder().decode(privateKey1));    
+	    
+	  //  rsa2.setPublicKey(Base64.getDecoder().decode(publicKey2));
+	  //  rsa2.setPrivateKey(Base64.getDecoder().decode(privateKey2));   
+	    
+	    
+	    //byte[] buffer21 = Base64.getDecoder().decode(ciphertext);
+	   // if (!buffer21.equals(buffer12)) System.out.println("Base64 a tout cassé");
+	    byte[] buffer22 = rsa2.decryptInBytes(buffer12);     
+	    String plaintext2 = rsa1.decryptInString(buffer22);
 	    System.out.println("plaintext2 = " + plaintext2);
 	    if (!plaintext2.equals(plaintext)) System.out.println("Error: plaintext2 != plaintext");
 	// TODO Auto-generated method stub
