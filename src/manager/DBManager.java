@@ -307,10 +307,10 @@ public class DBManager {
 
 		// saving some interesting fields
 		while (rs.next()) {
-			results.add(rs.getString(1)); // E_Cred_Ksec
-			results.add(rs.getString(2)); // Cred_Auto_Ref
-			results.add(rs.getString(3)); // Metadonnees (chiffrees)
-			results.add(rs.getString(4)); // Valeur (chiffree)
+			results.add(rs.getString(1)); // E_Cred_Ksec 2
+			results.add(rs.getString(2)); // Cred_Auto_Ref 1
+			results.add(rs.getString(3)); // Metadonnees (chiffrees) 2 
+			results.add(rs.getString(4)); // Valeur (chiffree) 2
 		}
 
 		sql = "";
@@ -591,14 +591,18 @@ public class DBManager {
 	 * 	a list of true and false public keys 
 	 * @throws Exception
 	 */
-	public List<String> buildKeysLists() throws Exception
+	public List<String> buildKeysList(List<String> keys) throws Exception
 	{
+
 		List<String> result = new ArrayList<String>();
 		List<String> status = new ArrayList<String>();
 		List<String> assignement = new ArrayList<String>();
+		List<String> group = new ArrayList<String>();
+		
 		int statID = -1;
 		int assignID = -1;
-
+		List<Integer> groupID = new ArrayList<Integer>();
+		
 		Class.forName(PLUGIN);
 		java.sql.Connection cn = DriverManager.getConnection(DB_PATH + DB_INFO);
 		Statement st = cn.createStatement();
@@ -610,55 +614,79 @@ public class DBManager {
 			return result;
 		}
 		
-		rs = st.executeQuery("SELECT Statuts.ID_Cle, Utilisateurs.ID_Statut, "
-				+ "Affectations.ID_Cle, Utilisateurs.ID_Affectation "
-				+ "FROM Statuts, Affectations, Utilisateurs "
-				+ "WHERE Utilisateurs.ID_Statut = Statuts.ID_Statut "
-				+ "AND Utilisateurs.ID_Affectation = Affectations.ID_Affectation");
+		assignement.add(keys.get(0));
+		status.add(keys.get(keys.size() - 1));
+		String groupStx = "";
+		for(int i = 1; i < keys.size() - 1; i++)
+		{
+			group.add(keys.get(i));
+			groupStx += "Groupes.ID_Cle = '" + group.get(i - 1) + "'";
+			groupStx += i == keys.size() - 2 ? " )" : " OR "; 
+		}
 		
+		rs = st.executeQuery("SELECT Statuts.ID_Statut, "
+				+ "Affectations.ID_Affectation, "
+				+ "Groupes.ID_Groupe "
+				+ "FROM Statuts, Affectations, Groupes, Utilisateurs "
+				+ "WHERE Statuts.ID_Cle = '" + status.get(0) + "' "
+				+ "AND Affectations.ID_Cle = '" + assignement.get(0) + "' "
+				+ "AND ( " 
+				+ groupStx);
+		
+		boolean flag = true; 
 		while(rs.next())
 		{
-			status.add(rs.getString(1));
-			assignement.add(rs.getString(3));
-			statID = rs.getInt(2);
-			assignID = rs.getInt(4);
+			if(flag)
+			{
+				assignID = rs.getInt(2);
+				statID = rs.getInt(1);
+				flag = false; 
+			}
+			groupID.add(rs.getInt("ID_Groupe"));
 		}
 
 		// adding real keys to DataHeaderModel for filtering 
 		if( ! ( status.isEmpty() || assignement.isEmpty() ) ) 
-				this.core.getDataHeader().setCombination(status.get(0), assignement.get(0));
+				this.core.getDataHeader().setCombination(status.get(0), assignement.get(0), group);
 		// clean ResultSet
 		rs.close();
 		rs = null;
+		
 		// adding random credentials 
 		Random rand = new Random();
-		int n, m;
+		int n, m, l;
 		do{
 			n = rand.nextInt(17 - 1 + 1) + 1;
 		}while(n == statID);
 		do{
 			m = rand.nextInt(8 - 1 + 1) + 1;
 		}while(m == assignID);
+		do{
+			l = rand.nextInt(15 - 1 + 1) + 1;
+		}while(groupID.contains(l));
 		
-		rs = st.executeQuery("SELECT Statuts.ID_Cle, Affectations.ID_Cle "
-				+ "FROM Statuts, Affectations "
+		rs = st.executeQuery("SELECT Statuts.ID_Cle, Affectations.ID_Cle, Groupes.ID_Cle "
+				+ "FROM Statuts, Affectations, Groupes "
 				+ "WHERE Statuts.ID_Statut = " +  n
-				+ " AND Affectations.ID_Affectation = " + m);
+				+ " AND Affectations.ID_Affectation = " + m
+				+ " AND Groupes.ID_Groupe = " + l);
 		while(rs.next())
 		{
 			status.add(rs.getString(1));
 			assignement.add(rs.getString(2));
+			group.add(rs.getString(3));
 		}
 		rs.close();
 		st.close();
 		
 		Collections.sort(status);
 		Collections.sort(assignement);
-		result.addAll(status);
-		result.addAll(2,assignement);
-		
+		Collections.sort(group);
+		result.addAll(0, assignement);
+		result.addAll(0, status);
+		result.addAll(0, group);
 		// TODO : <DEBUG> clean this soon
-		System.out.println(result);
+		System.out.println("generalized credentials : " + result);
 		
 		return result;
 	} 

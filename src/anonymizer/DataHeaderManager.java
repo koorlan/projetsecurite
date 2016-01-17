@@ -1,6 +1,8 @@
 package anonymizer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,8 +36,13 @@ public class DataHeaderManager {
 	 */
 	public int getKeysList() throws Exception
 	{
+		List<String> tmpK = new ArrayList<String>(this.core.getCryptoUtils().getKeySet());
+		Collections.sort(tmpK);
+		
+		// TODO debug clean this later
+		System.out.println(tmpK);
 		List<String> keys = new ArrayList<String>();
-		keys = this.core.getDB().buildKeysLists();
+		keys = this.core.getDB().buildKeysList(tmpK);
 		return (keys != null ? setSubHeader(keys) : -1);
 	}
 	/**
@@ -79,21 +86,17 @@ public class DataHeaderManager {
 			localref.add( values[i] ) ;		 
 		}	
 		// display and store combinations 
-		localref.add(localref.get(0) + "," + localref.get(1));
-		localref.add(localref.get(0) + "," + localref.get(2));
-		localref.add(localref.get(0) + "," + localref.get(3));
-		localref.add(localref.get(1) + "," + localref.get(2));
-		localref.add(localref.get(1) + "," + localref.get(3));
-		localref.add(localref.get(2) + "," + localref.get(3));		
-		localref.add(localref.get(0) + "," + localref.get(1) + "," + localref.get(2));
-		localref.add(localref.get(0) + "," + localref.get(1) + "," + localref.get(3));
-		localref.add(localref.get(0) + "," + localref.get(2) + "," + localref.get(3));
-		localref.add(localref.get(1) + "," + localref.get(2) + "," + localref.get(3));
-		localref.add(localref.get(0) + "," + localref.get(1) + "," + localref.get(2) + "," + localref.get(3));
-		// TODO clean 
-		System.out.println(localref);
-		return localref;
-	}				
+		String statusRef = localref.get(localref.size() - 1);
+		localref.remove(localref.size() - 1);
+		
+		String assignementRef = localref.get(localref.size() - 1);
+		localref.remove(localref.size() - 1);
+		
+		List<String> groupList = localref;
+		
+		return displayCombination(statusRef, assignementRef, groupList);
+	}	
+	
 	/**
 	 * Compares authorized credentials references 
 	 * 	with owners credentials combo list
@@ -112,7 +115,7 @@ public class DataHeaderManager {
 			return null; 
 		for(int i = 0; i < n; i++)
 		{
-			for(String str : this.model.getCombination() )
+			for(String str : this.model.getCombination())
 			{
 				if(response.get(4 * i + 1).equals(str) )
 				{
@@ -127,7 +130,7 @@ public class DataHeaderManager {
 		System.out.println(result);
 		return result.isEmpty() ? null : result;  
 	}
-	
+    
 	/**
 	 * Setting owner public keys combination list into model 
 	 * @param statusRef
@@ -135,14 +138,34 @@ public class DataHeaderManager {
 	 * @param assignementRef
 	 * 	current user's assignement key reference
 	 */
-	public void setCombination(String statusRef, String assignementRef)
+	public void setCombination(String statusRef, String assignementRef, List<String> group)
 	{
-		ArrayList <String> combo = new ArrayList<String>();
-		combo.add(statusRef);
-		combo.add(assignementRef);
-		combo.add(statusRef + "," + assignementRef);
-		this.model.setCombination(combo);
+	    Combination cb = new Combination();
+		ArrayList<String> list = new ArrayList<String>();
+	    List<List<String>> powerSet = new LinkedList<List<String>>();
+		list.addAll(group);
+	    list.add(statusRef);
+		list.add(assignementRef);
+		for (int i = 1; i < list.size(); i++)
+	    	powerSet.addAll(Combination.combination(list, i));
+	    this.model.setCombination(cb.formatMyList(powerSet));
+	    this.core.getLog().log(this, "Combination added" + this.model.getCombination());
 	}
+
+	
+	public ArrayList<String> displayCombination(String statusRef, String assignementRef, List<String> group)
+	{
+	    Combination cb = new Combination();
+		ArrayList<String> list = new ArrayList<String>();
+	    List<List<String>> powerSet = new LinkedList<List<String>>();
+		list.addAll(group);
+	    list.add(statusRef);
+		list.add(assignementRef);
+		for (int i = 1; i < list.size(); i++)
+	    	powerSet.addAll(Combination.combination(list, i)); 
+	    return cb.formatMyList(powerSet);
+	}
+
 	
 	public String getDataM()
 	{

@@ -43,6 +43,8 @@ public class SecurityManager {
 			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 			keyGenerator.init(128);
 			SecretKey key = keyGenerator.generateKey();
+			byte[] aeskb = key.getEncoded();
+			
 			byte[] bKey = this.EncryptSecretKey(key);
 
 			//now Encrypt the message with the non-encrypted ticket stored in bytesTicket

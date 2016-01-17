@@ -1,5 +1,7 @@
 package crypto;
 
+import java.util.Base64;
+
 public class AESWord128 {
 	
 	int byte1,byte2,byte3,byte4;
@@ -27,4 +29,7 @@ public class AESWord128 {
 		AESWord128 out = new AESWord128(this.byte1 ^ w.byte1,this.byte2 ^ w.byte2,this.byte3 ^ w.byte3,this.byte4 ^ w.byte4);
 		return out;
 	}
-}
+	
+	
+}	
+

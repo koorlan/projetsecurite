@@ -1,11 +1,29 @@
 package crypto;
 
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import manager.CoreManager;
 
@@ -26,7 +44,12 @@ public class CryptoUtilsManager {
 		this.model.setInitialized(true); 
 	}
 	
-	public String decipher(String cipher, String keysRef)
+	public Set<String> getKeySet()
+	{
+		return this.model.getKeysList();
+	}
+	
+	public String decipherSecK(String cipher, String keysRef)
 	{
 		if( !this.model.isInitialized() )
 		{	
@@ -34,8 +57,8 @@ public class CryptoUtilsManager {
 			return null; 
 		}
 		this.core.getLog().log(this, "Deciphering");
-		byte[] currentPrivK;
-		byte[] bCipher = cipher.getBytes();
+		String currentPrivK;
+		//String bCipher = cipher.getBytes();
 		String plain = null;
 		MyRSA rsa = new MyRSA();
 		if(keysRef.contains(","))
@@ -47,14 +70,12 @@ public class CryptoUtilsManager {
 			for(int i = 0; i < hMapKeys.length; i ++)
 			{
 				hMapK = hMapKeys[i];
-				// TODO : encode this in B64 ? mb cipher too... 
-				currentPrivK = Base64.getEncoder().encode(this.model.getKeysMap().get(hMapK).getBytes());
-				System.out.println(currentPrivK);
-				rsa.setPrivateKey(currentPrivK);
+				currentPrivK = this.model.getKeysMap().get(hMapK);
+				System.out.println("Current Hmap privK used0 : " + currentPrivK);
 				if(i == hMapKeys.length - 1)
-					plain = rsa.decryptInString(bCipher);
-				else
-					bCipher = rsa.decryptInBytes(bCipher);
+					plain = rsa.dechiffrementRSAInString(currentPrivK, cipher);
+				else 
+					cipher = rsa.dechiffrementRSAInString(currentPrivK, cipher);
 			}
 		}
 		else 
@@ -62,12 +83,28 @@ public class CryptoUtilsManager {
 			this.core.getLog().log(this, "Unique key required");
 			System.out.println("hmap key passed : " + keysRef);
 			System.out.println("Check Hmap content : " + this.model.getKeysMap().containsKey(keysRef));
-			// TODO : idem  
-			currentPrivK = Base64.getEncoder().encode(this.model.getKeysMap().get(keysRef).getBytes());
+			currentPrivK = this.model.getKeysMap().get(keysRef);
 			System.out.println("privK used : " + currentPrivK);
-			rsa.setPrivateKey(currentPrivK);
-			plain = rsa.decryptInString(bCipher);
+			System.out.println("cipher text used : " + cipher);
+			plain = rsa.dechiffrementRSAInString(currentPrivK, cipher);
+			
 		}
+		System.out.println("Plain sec key is <<" + plain + ">>");
 		return plain;
 	}
+	
+	public String decipher(String cipher, String kSec)
+	{
+		//AES aes = new AES(null);
+		//return aes.dechiffrementAESInByte(kSec, cipher).toString();
+		byte[] keyInByte = Base64.getDecoder().decode(kSec);
+		byte[] ciphertextInByte = Base64.getDecoder().decode(cipher);
+		AES aes;
+		aes = new AES(keyInByte);
+		return aes.dechiffrerMess(ciphertextInByte).toString();
+		// System.out.println(new String(aes.dechiffrerMess(ciphertextInByte))+"valeur en clair ");
+		 
+	}
+	
+
 }

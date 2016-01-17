@@ -1,5 +1,7 @@
 package crypto;
 
+import java.util.Base64;
+
 public class AES {
 	
 	final int Nb = 4;	//Nombre de colonne (toujours 4 pour AES)
@@ -594,4 +596,6 @@ public class AES {
 				(b[2] & 0xFF) << 8 |
 				(b[3] & 0xFF);
 	}
+	
+
 }

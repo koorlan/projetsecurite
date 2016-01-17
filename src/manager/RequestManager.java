@@ -52,6 +52,7 @@ public class RequestManager {
 		this.core.getLog().log(this, "New request in request to process");
 		ArrayList<String> results = new ArrayList<String>();
 		ArrayList<String> policy = this.core.getDataHeader().combines(request.getHeader());
+		System.out.println("process combined list " + policy);
 		this.core.getDB().build(request.getDu(), policy);
 		if (this.core.getDB().isFormatted()) 
 		{
@@ -97,20 +98,18 @@ public class RequestManager {
 			String plainK = null; 
 			String plainMeta = null; 
 			int n = tmpRes.size() / 4;
-			if(true)
-			{
-				this.core.getLog().log(this, "Continue here... Results must be sent to CryptoUtilsManager");
-				return;
-			}
 			for(int i = 0; i < n; i++)
 			{	
 				// TODO wait for decipher function
 				plainK = this.core.getCryptoUtils()
-						.decipher(tmpRes.get(i), tmpRes.get(i + 1));
+						.decipherSecK(tmpRes.get(i), tmpRes.get(i + 1));
 				if(plainK != null)
 				{	
+					this.core.getLog().log(this, "New plain Ksec detected");
 					plainMeta = this.core.getCryptoUtils()
 							.decipher(tmpRes.get(i + 2), plainK);
+					System.out.println(plainMeta);
+					return; 
 					// TODO : continue here 
 					// à ce stade on est sensés avoir une clé secrète dans plainK
 					// et les méta déchiffrées dans plain Meta

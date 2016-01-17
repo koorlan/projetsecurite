@@ -29,9 +29,11 @@ public class DataHeaderModel {
 	public ArrayList<String> getCombination() {
 		return combination;
 	}
-	public void setCombination(ArrayList<String> combination) {
-		this.combination = combination;
+	public void setCombination(ArrayList<String> cb) {
+		this.combination = cb;
 	}
 	
 	
 }
+
+

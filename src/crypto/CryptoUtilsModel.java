@@ -1,6 +1,9 @@
 package crypto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class CryptoUtilsModel {
 
@@ -25,6 +28,10 @@ public class CryptoUtilsModel {
 	}
 	public void setKeysMap(Map<String, String> keysMap) {
 		this.keysMap = keysMap;
+	}
+	public Set<String> getKeysList()
+	{
+		return keysMap.keySet();
 	}
 	
 	

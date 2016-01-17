@@ -138,25 +138,22 @@ public class MyRSA {
 		    return result;
 		  }
 		
-public static void main(String[] args) {
-	 String plaintext = "154E6";
-
-	    System.out.println("plaintext = " + plaintext);
-	    MyRSA rsa = new MyRSA();
-	    rsa.generateKeyPair();
-	    // not used ? 
-	    String encodedKey = Base64.getEncoder().encodeToString(rsa.privateKey.getEncoded());
-	    
-	    byte[] publicKey = rsa.getPublicKeyInBytes();
-	    byte[] privateKey = rsa.getPrivateKeyInBytes();
-	    byte[] ciphertext = rsa.crypt(plaintext);   
-	    System.out.println("ciphertext = " + new BigInteger(ciphertext));
-
-	    rsa.setPublicKey(publicKey);
-	    rsa.setPrivateKey(privateKey);    
-	    String plaintext2 = rsa.decryptInString(ciphertext);
-	    System.out.println("plaintext2 = " + plaintext2);
-	    if (!plaintext2.equals(plaintext)) System.out.println("Error: plaintext2 != plaintext");
-	// TODO Auto-generated method stub
-
-}}
+		  public byte[] dechiffrementRSAInByte(String key, String ciphertext)
+		  {
+				 byte[] keyInByte = Base64.getDecoder().decode(key);
+				 byte[] ciphertextInByte = Base64.getDecoder().decode(ciphertext);
+				 MyRSA rsa = new MyRSA();
+				 rsa.setPrivateKey(keyInByte);
+				 return rsa.decryptInBytes(ciphertextInByte);	
+				// System.out.println(new String(rsa.decryptInBytes(ciphertextInByte))+"valeur en clair ");
+		  }
+		  
+		  public String dechiffrementRSAInString(String key, String ciphertext)
+		  {
+				 byte[] keyInByte = Base64.getDecoder().decode(key);
+				 byte[] ciphertextInByte = Base64.getDecoder().decode(ciphertext);
+				 MyRSA rsa = new MyRSA();
+				 rsa.setPrivateKey(keyInByte);
+				 return rsa.decryptInString(ciphertextInByte);	
+			}
+}
