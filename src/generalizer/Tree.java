@@ -66,5 +66,21 @@ public class Tree {
 		return ret;
 	}
 	
+	public ArrayList<String> addSuccessors(String currentResearch)
+	{	
+		ArrayList<String> ret = new ArrayList<String>();
+		if(!this.contains(currentResearch))
+			return null;
+		
+//		int variation = 0;
+//		if(currentResearch.compareTo("A1")!=0)
+//		{		
+//			variation = this.getNode(currentResearch).getHeight() - 66;
+//		}
+//		String newData = new StringBuffer().append((char)(currentResearch.codePointAt(0) - variation)).append(currentResearch.substring(1, currentResearch.length() - variation)).toString().intern();		
+		this.getNode(currentResearch.intern()).ordonize(ret);
+		return ret;
+	}
+	
 	
 }

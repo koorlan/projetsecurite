@@ -29,15 +29,27 @@ public class GsaList{
 	
 	public GsaList(ArrayList<String> inList, Tree currentTree)
 	{	
-		initialKeyList= new ArrayList<String>();
-		initialDataList= new ArrayList<String>();
+		initialKeyList = new ArrayList<String>();
+		initialDataList = new ArrayList<String>();
+		ArrayList<String> TMPinitialDataList = new ArrayList<String>();
 		for(String str : inList)
 		{	
 			if(currentTree.containsData(str.toString().intern()))
-				initialDataList.add(str.toString().intern());
+				TMPinitialDataList.add(str.toString().intern());
 		}
 		
-		initialKeyList = matchDataToKey(initialDataList, currentTree);
+		ArrayList<String> TMPinitialKeyList = matchDataToKey(TMPinitialDataList, currentTree);
+		
+		initialKeyList = currentTree.addSuccessors(TMPinitialKeyList.get(0));
+		initialDataList = matchKeyToData(initialKeyList, currentTree);
+
+		
+/*		DEBUG 
+		System.out.println("Initial Key list before adding successors " + TMPinitialKeyList );
+		System.out.println("Initial key list " + initialKeyList);
+		System.out.println("Initial Data list before adding successors " + TMPinitialDataList );
+		System.out.println("Initial Data list " + initialDataList);
+*/
 		
 		mainKeyList = new ArrayList<String>();
 		for (String s : initialKeyList) 
