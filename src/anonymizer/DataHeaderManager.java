@@ -105,7 +105,7 @@ public class DataHeaderManager {
 			return null;
 		boolean[] result = new boolean[response.size()]; // Au max..
 		for (int i = 0; i < response.size(); i++) {
-				result[i] = this.model.getCombination().contains(response.get(i))?true:false;
+				result[i] = this.model.getCombination().contains(response.get(i)) ? true : false;
 
 		}
 		System.out.println(result);
