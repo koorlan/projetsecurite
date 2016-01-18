@@ -446,8 +446,7 @@ public class DatabaseMain {
 			"CREATE TABLE Donnees_Chiffrees AS SELECT RefBD, D.Type, Statut_Gen, Affect_Gen, Valeur_Chiffree, Meta_Chiffrees FROM BASE.Utilisateurs U,"
 			+ " BASE.Donnees D, BASE.Statuts S, BASE.Affectations A, BASE.Types_Utili T WHERE T.Login = U.Login AND U.ID_Statut = S.ID_Statut "
 			+ "AND U.ID_Affectation = A.ID_Affectation AND U.Login= D.Login AND D.Type = T.Type and  Frontale = '",//56
-			"CREATE TABLE Cles_Types AS select distinct ID_Cred, C.Cred_Auto_Ref AS Cred_Auto_Ref, E_Cred_Ksec FROM BASE.Types_Utili T, BASE.Cred_Autorise C, BASE.Utilisateurs U, BASE.Cles_Types CT "
-
+			"CREATE TABLE Cles_Types AS select distinct ID_Cred, C.Cred_Auto_Ref AS Cred_Auto_Ref ,E_Cred_Ksec FROM BASE.Types_Utili T, BASE.Cred_Autorise C, BASE.Utilisateurs U, BASE.Cles_Types CT "
 			+ "where U.Login = T.Login AND T.politique=C.politique AND T.Ksec = CT.Ksec and C.Cred_Auto_Ref = CT.Cred_Auto_Ref AND Frontale = '",//57
 			"CREATE TABLE Liens AS SELECT RefBD, ID_Cred FROM BASE.Donnees D, BASE.Utilisateurs U, BASE.Cles_Types C"
 			+ " WHERE D.Login = U.Login AND C.Login = D.Login AND C.Type = D.Type AND Frontale = '",//58
