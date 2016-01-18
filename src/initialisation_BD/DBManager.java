@@ -10,6 +10,12 @@ public class DBManager {
 	private static Connection con = null; 
 	private static Statement stmt =null;
 	
+	
+	
+	public static Connection getCon() {
+		return con;
+	}
+
 	public static Connection OpenCreateDB(String db){
 		System.out.println("Ouverture/création de la base de données " + db); 
 		try 
