@@ -30,26 +30,37 @@ public class DialogWindow extends JFrame {
 	private WindowAdapter l;
 	private String port;
 	private JSplitPane window;
-	private JPanel cGauche;
-    private JPanel cDroit;
-    private JTextField nom; 
-    private JComboBox<String> type;
-    private JComboBox<String> affectation;
-	private JComboBox<String> statut;
-	private JComboBox<String> groupe;
-	private JButton bouton; 
+	private JPanel cGauche; // Partie de gauche
+    private JPanel cDroit; // Partie de droite
+    private JTextField nom; // Champ nom 
+    private JComboBox<String> type; // Liste déroulante contenant le type
+    private JComboBox<String> affectation; // Liste déroulante contenant les affectations
+	private JComboBox<String> statut; // Liste déroulante contenant les statuts possibles
+	private JComboBox<String> groupe; // Liste déroulante contenant les groupes possibles
+	private JButton bouton;  // Bouton d'envoi
+	private DialogTabReponse modele = new DialogTabReponse(); // le tableau à afficher
+    private JTable tableau; // tableau
     
+	/**
+	 * Initialisation de la nouvelle fenêtre
+	 * @param core
+	 * @throws SQLException
+	 */
 	public DialogWindow(CoreManager core) throws SQLException{
-		// We give a name for the interface
+		// Nous donnons un nom à l'interface
 		super("Interface utilisateur");		
 		this.core = core;
 	}
-	
+	/**
+	 * Cette fonction construit la fenêtre
+	 * @throws SQLException
+	 */
 	public void start() throws SQLException {
 		if(l != null){
 			this.setVisible(true);
 			return;
 		}
+		// Nous écoutons les actions effectuées sur la fenêtre
 		l = new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
 				//System.exit(0);
@@ -57,14 +68,19 @@ public class DialogWindow extends JFrame {
 			}
 		};
 		
-		this.buildComponent();
-		this.divide();
+		this.buildComponent(); // définition des éléments de la fenêtre
+		this.divide(); // création de la division en deux sous-fenêtre
 		
-		this.addWindowListener(l);
-		this.setSize(900,120);
+		this.addWindowListener(l); 
+		this.setSize(900,120); // Taille de la fenêtre, par défaut
 		pack();
 		this.setVisible(true);
 	}
+	
+	/**
+	 * Initialisation de la fenêtre
+	 * @throws SQLException
+	 */
 	
 	private void buildComponent() throws SQLException{
 	    type = new JComboBox<String>();
@@ -84,14 +100,19 @@ public class DialogWindow extends JFrame {
 		this.buildReponses();
 	}
     
-    private DialogTabReponse modele = new DialogTabReponse();
-    private JTable tableau;
+    /**
+     * Construction du tableau d'affichage des réponses
+     */
 	
 	private void buildReponses(){
 		this.tableau = new JTable(modele);
 		this.cDroit.add(new JScrollPane(tableau), BorderLayout.CENTER);
 	}
 	
+	/**
+	 * Construction du formulaire d'envoi d'une requête
+	 * @throws SQLException
+	 */
 	private void buildForm() throws SQLException{
 		this.formNom();
 		this.formChampDB(this.type, "Types", "Type");
@@ -101,6 +122,9 @@ public class DialogWindow extends JFrame {
 		this.formBouton(); 
 	}
 	
+	/**
+	 * Ajout d'un champ nom 
+	 */
 	private void formNom(){
 		
 		this.cGauche.add(new JLabel("Nom :"));
@@ -111,6 +135,15 @@ public class DialogWindow extends JFrame {
 		nom.setMaximumSize(new Dimension(Integer.MAX_VALUE, nom.getPreferredSize().height));
 		this.cGauche.add(nom);
 	}
+	
+	/**
+	 * Récupération depuis la base de données des valeurs légitimes 
+	 * pour une requête par un utilisateur
+	 * @param champ
+	 * @param dbTable
+	 * @param dbChamp
+	 * @throws SQLException
+	 */
 	
 	private void formChampDB(JComboBox<String> champ, String dbTable, String dbChamp) throws SQLException{
 		this.cGauche.add(new JLabel(dbChamp + " :"));
@@ -146,7 +179,9 @@ public class DialogWindow extends JFrame {
 	
 		this.cGauche.add(champ);
 	}
-	
+	/**
+	 * Division de la fenêtre en deux éléments
+	 */
 	private void divide(){
 		this.window = new JSplitPane(
 				JSplitPane.HORIZONTAL_SPLIT,
@@ -158,6 +193,9 @@ public class DialogWindow extends JFrame {
 		this.add(this.window);
 	}
 	
+	/**
+	 * Ajout du bouton et gestion des interractions
+	 */
 	private void formBouton(){
 		bouton = new JButton("Envoyer"); 
 		this.cGauche.add(bouton);
@@ -176,9 +214,21 @@ public class DialogWindow extends JFrame {
 			} 
 		});
 	}
+	/**
+	 * Ajout d'une nouvelle réponse au tableau
+	 * @param nom
+	 * @param type
+	 * @param affectation
+	 * @param statut
+	 * @param groupe
+	 * @param data
+	 */
 	public void addResponse(String nom, String type, String affectation, String statut, String groupe, String data){
 		this.modele.addReponse(new DialogDataReponse(nom,type,affectation,statut,groupe,data));
 	}
+	/**
+	 * Rafraichissement
+	 */
 	public void refresh(){
 		this.modele.refresh();
 	}
