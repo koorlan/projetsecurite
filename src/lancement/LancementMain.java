@@ -32,29 +32,20 @@ public class LancementMain {
 			while (rs.next()==true ) {
 				login = rs.getString("Login");
 			    if (rs.getInt("Icone") == 0) 
-			    	ecrivain.println("xterm -fg green -bg black -e 'java -jar user.jar " + login + "' &");
+			    	ecrivain.println("xterm -fg green -bg black -e 'java -jar App.jar user " + login +"_SEC.sqlite "  + login +".sqlite' &");
 			    else
-			    	ecrivain.println("xterm -iconic -fg green -bg black -e 'java -jar user.jar " + login + "' &");
+			    	ecrivain.println("xterm -iconic -fg green -bg black -e 'java -jar App.jar user " + login +"_SEC.sqlite "  + login +".sqlite' &");
 			}
-			rs = stmt.executeQuery(initialisation_BD.DatabaseMain.QUERIES[63]); // Recupere les frontales
+			rs = stmt.executeQuery(initialisation_BD.DatabaseMain.QUERIES[39]); // Recupere les frontales
 			String frontale =null;
 			while (rs.next()==true ) {
 				frontale = rs.getString("Frontale");
 			    if (rs.getInt("Icone") == 0) 
-					ecrivain.println("xterm -fg blue -bg black -e 'java -jar frontale.jar " + frontale + "' &");
+					ecrivain.println("xterm -fg white -bg black -e 'java -jar App.jar frontal " + frontale +".sqlite' &");
 				else
-					ecrivain.println("xterm -iconic -fg blue -bg black -e 'java -jar frontale.jar " + frontale + "' &");
+					ecrivain.println("xterm -iconic -fg white -bg black -e 'java -jar App.jar frontal " + frontale +".sqlite' &");
 			}
-			rs = stmt.executeQuery(initialisation_BD.DatabaseMain.QUERIES[62]); // Recupere les NoeudsTOR
-			String noeud =null;
-			while (rs.next()==true ) {
-				noeud = rs.getString("NoeudTOR");
-			    if (rs.getInt("Icone") == 0) 
-					ecrivain.println("xterm -fg yellow -bg black -e 'java -jar noeud.jar " + noeud + "' &");
-				else
-					ecrivain.println("xterm -iconic -fg yellow -bg black -e 'java -jar noeud.jar " + noeud + "' &");
-			}
-		    ecrivain.println("xterm -fg red -bg black -e 'java -jar server.jar Server' &");
+		    ecrivain.println("xterm -fg red -bg black -e 'java -jar App.jar server server.sqlite' &");
 			ecrivain.close();
 			Runtime.getRuntime().exec("sh lancement.sh");
 		}
